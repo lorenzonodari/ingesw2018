@@ -5,6 +5,8 @@ package it.unibs.ingesw.dpn.model;
  * Un campo è caratterizzato da un nome, da una descrizione, dall'essere o meno obbligatorio e dal tipo di valore
  * atteso. 
  * 
+ * Nota: ogni attributo viene presentato come "final" poichè non vi è mai la necessità che il suo valore cambi runtime.
+ * 
  * @author Michele Dusi, Lorenzo Nodari, Emanuele Poggi
  * 
  */
@@ -16,9 +18,9 @@ public class Field {
 			+ "Obbligatorietà: %s\n"
 			+ "Tipo:           %s\n";
 
-	private String name;
-	private String description;
-	private boolean mandatory;
+	private final String name;
+	private final String description;
+	private final boolean mandatory;
 	private Class<?> type = Object.class;
 	
 	public Field(String name, String description, boolean mandatory, Class<?> type) {
