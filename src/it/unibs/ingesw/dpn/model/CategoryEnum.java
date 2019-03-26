@@ -1,10 +1,137 @@
 package it.unibs.ingesw.dpn.model;
 
+/**
+ * Enumerator che contiene tutti i dati delle categorie attualmente presenti nel progetto.
+ * 
+ * @author Michele Dusi, Emanuele Poggi, Lorenzo Nodari
+ *
+ */
 public enum CategoryEnum {
 	
-	PARTITA_DI_CALCIO;
+	PARTITA_DI_CALCIO(
+			// Titolo
+			"Partita di calcio",
+			// Descrizione
+			"Evento sportivo che prevede una partita di calcio fra due squadre di giocatori",
+			
+			// Campo "genere"
+			new Field(
+					"Genere",
+					"Il genere dei giocatori che partecipano alla partita",
+					true,
+					it.unibs.ingesw.dpn.model.fieldtypes.GenderEnum.class
+					),
+			
+			// Campo "fascia d'età"
+			new Field(
+					"Fascia di età",
+					"L'intervallo in cui sono comprese le età accettate dei giocatori",
+					true,
+					it.unibs.ingesw.dpn.model.fieldtypes.IntegerInterval.class)
+			);
+	
+	
 	// Altre eventuali categorie da aggiungere qui.
+	
+	private String name;
+	private String description;
+	private Field [] exclusiveFields;
 	
 	public static final int CATEGORIES_NUMBER = CategoryEnum.values().length;
 
+	static final Field [] COMMON_FIELDS = {
+			
+			// Campo "titolo"
+			new Field(
+					"Titolo",
+					"Nome di fantasia attribuito all'evento",
+					false,
+					String.class
+					),
+			
+			// Campo "numero di partecipanti"
+			new Field(
+					"Numero di partecipanti",
+					"Numero di persone da coinvolgere nell'evento",
+					true,
+					Integer.class
+					),
+			
+			// Campo "termine ultimo di iscrizione"
+			new Field(
+					"Termine ultimo di iscrizione",
+					"Ultimo giorno utile per iscriversi all'evento",
+					true,
+					java.util.Date.class
+					),
+			
+			// Campo "luogo"
+			new Field(
+					"Luogo",
+					"Il luogo di svolgimento o di ritrovo dell'evento",
+					true,
+					String.class
+					),
+
+			// Campo "data"
+			new Field(
+					"Data",
+					"Il giorno in cui si svolgerà o avrà inizio l'evento",
+					true,
+					java.util.Date.class
+					),
+
+			// Campo "ora"
+			new Field(
+					"Ora",
+					"L'orario in cui si svolgerà o avrà inizio l'evento",
+					true,
+					java.util.Date.class
+					),
+			
+			/*
+			// Campo "Durata"
+			new Field(
+					"Durata",
+					"La durata approssimata, in ore, dell'evento",
+					false,
+					Integer.class
+					),
+			*/
+	};
+	
+	/**
+	 * Costruttore privato di una categoria.
+	 * 
+	 * @param name Il nome di una categoria
+	 * @param description La descrizione di una categoria
+	 * @param exclusiveFields I campi esclusivi e caratterizzanti di una categoria
+	 */
+	private CategoryEnum(String name, String description, Field ... exclusiveFields) {
+		this.name = name;
+		this.description = description;
+		this.exclusiveFields = exclusiveFields;
+	}
+
+	/**
+	 * @return Il nome della categoria
+	 */
+	String getName() {
+		return this.name;
+	}
+
+	/**
+	 * @return La descrizione della categoria
+	 */
+	String getDescription() {
+		return this.description;
+	}
+	
+	/**
+	 * @return I campi esclusivi della categoria
+	 */
+	Field [] getExclusiveFields() {
+		return this.exclusiveFields;
+	}
+	
 }
