@@ -7,6 +7,6 @@ package it.unibs.ingesw.dpn.ui;
  */
 public interface MenuAction {
 
-	void doAction(Menu parentMenu);
+	void execute(Menu parentMenu);
 
 }

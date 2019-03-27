@@ -14,16 +14,23 @@ public class TextRenderer implements UIRenderer {
 	@Override
 	public void renderMenu(Menu menu) {
 		
+		System.out.println();
 		System.out.println(menu.getTitle());
 		System.out.println(menu.getDescription());
 		System.out.println();
 		
 		List<MenuEntry> entries = menu.getEntries();
-		for (int i = 1; i <= entries.size(); i++) {
+		for (int i = entries.size(); i > 0; i--) {
+			System.out.print(" ");
 			System.out.print(i);
 			System.out.print(ENTRY_NUM_SEPARATOR);
 			renderMenuEntry(entries.get(i - 1));
 		}
+		
+		System.out.print(" ");
+		System.out.print("0");
+		System.out.print(ENTRY_NUM_SEPARATOR);
+		renderMenuEntry(menu.getQuitEntry());
 		
 		System.out.println();
 		
