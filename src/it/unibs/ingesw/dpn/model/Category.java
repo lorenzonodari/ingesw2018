@@ -39,6 +39,8 @@ public class Category {
 	/**
 	 * Aggiunge un campo alla categoria.
 	 * 
+	 * Nota: questo metodo può essere utilizzato solamente all'interno di questo package.
+	 * 
 	 * Precondizione: il campo da aggiungere non deve avere lo stesso nome 
 	 * di un altro campo all'interno di questa stessa categoria. Per fare ciò, 
 	 * viene effettuato un controllo sull'appartenenza del nuovo campo alla 
@@ -54,6 +56,15 @@ public class Category {
 			String exceptionMessage = String.format(EXCEPTION_FIELD_ALREADY_PRESENT, newField.getName(), this.name);
 			throw new IllegalArgumentException(exceptionMessage);
 		}
+	}
+	
+	/**
+	 * Restituisce l'array con tutti i campi della categoria.
+	 * 
+	 * @return i campi della categoria
+	 */
+	public Field [] getFieldsArray() {
+		return (Field []) this.fields.toArray();
 	}
 	
 	/**
