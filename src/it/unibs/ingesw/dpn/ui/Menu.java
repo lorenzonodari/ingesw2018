@@ -14,24 +14,31 @@ public class Menu {
 	private String title;
 	private String description;
 	private LinkedList<MenuEntry> entries;
+	private MenuEntry quitEntry;
 	
 	/**
 	 * Crea un nuovo menu vuoto. Il titolo e la descrizione del menu non possono essere vuoti.
+	 * Ogni menu deve inoltre essere obbligatoriamente accompagnato da una voce che permetta all'utente
+	 * di uscire dal menu.
 	 * 
 	 * Precondizione: title != null
+	 * Precondizione: description != null
+	 * Precondizione: quitEntry != null
 	 * 
 	 * @param title Il titolo del menu
 	 * @param description La descrizione del menu
+	 * @param quitAction L'opzione di uscita dal menu
 	 */
-	public Menu(String title, String description) {
+	public Menu(String title, String description, MenuEntry quitEntry) {
 		
-		// Verifica della precondizione
-		if (title == null || description == null) {
+		// Verifica delle precondizioni
+		if (title == null || description == null || quitEntry == null) {
 			throw new NullPointerException();
 		}
 		
 		this.title = title;
 		this.description = description;
+		this.quitEntry = quitEntry;
 		this.entries = new LinkedList<MenuEntry>();
 	}
 	
@@ -63,6 +70,10 @@ public class Menu {
 	
 	public String getDescription() {
 		return this.description;
+	}
+	
+	public MenuEntry getQuitEntry() {
+		return this.quitEntry;
 	}
 	
 	/**
