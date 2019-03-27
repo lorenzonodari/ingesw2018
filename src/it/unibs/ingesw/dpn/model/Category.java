@@ -5,8 +5,8 @@ import java.util.List;
 
 public class Category {
 	
-	public static final String EXCEPTION_FIELD_ALREADY_PRESENT = "Il campo \"%s\" è già presente all'interno della categoria \"%s\".";
-	public static final String TO_STRING = "-- Caratteristiche della categoria --\n\n"
+	private static final String EXCEPTION_FIELD_ALREADY_PRESENT = "Il campo \"%s\" è già presente all'interno della categoria \"%s\".";
+	private static final String TO_STRING = "-- Caratteristiche della categoria --\n\n"
 			+ "Nome:        %s\n"
 			+ "Descrizione: %s\n"
 			+ "\n"

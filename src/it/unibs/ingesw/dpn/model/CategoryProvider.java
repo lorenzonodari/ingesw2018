@@ -31,7 +31,7 @@ public final class CategoryProvider {
 	 * 
 	 * @return l'unica istanza di CategoryProvider
 	 */
-	public CategoryProvider getProvider() {
+	public static CategoryProvider getProvider() {
 		return CategoryProvider.singletonProvider;
 	}
 

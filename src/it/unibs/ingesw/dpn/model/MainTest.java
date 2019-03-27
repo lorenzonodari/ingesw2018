@@ -1,10 +1,9 @@
 package it.unibs.ingesw.dpn.model;
 
-import java.sql.Date;
-
 public class MainTest {
 
 	public static void main(String[] args) {
+		/*
 		Category cat1 = new Category("Concerto", "Evento musicale pubblico con esibizione di un cantante, di una band o di un gruppo musicale");
 		Category cat2 = new Category("Partita di calcetto", "Evento sportivo amatoriale");
 
@@ -24,6 +23,14 @@ public class MainTest {
 
 		System.out.println(cat1.toString());
 		System.out.println(cat2.toString());
+		*/
+		
+		CategoryProvider provider = CategoryProvider.getProvider();
+		Category [] allTheCategories = provider.getAllCategories();
+		
+		for (Category cat : allTheCategories) {
+			System.out.println(cat.toString());
+		}
 	}
 
 }

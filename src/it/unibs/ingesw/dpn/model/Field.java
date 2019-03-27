@@ -12,11 +12,14 @@ package it.unibs.ingesw.dpn.model;
  */
 public class Field {
 	
-	public static final String TO_STRING =
+	private static final String TO_STRING =
 			  "Nome:           %s\n"
 			+ "Descrizione:    %s\n"
-			+ "Obbligatorietà: %s\n"
+			+ "%s\n"
 			+ "Tipo:           %s\n";
+	
+	private static final String MANDATORY_TAG = "Obbligatorio";
+	private static final String OPTIONAL_TAG = "Facoltativo";
 
 	private final String name;
 	private final String description;
@@ -108,8 +111,11 @@ public class Field {
 		String str = String.format(TO_STRING, 
 				this.name,
 				this.description,
-				this.mandatory,
-				this.type.getName());
+				this.mandatory ? 
+						MANDATORY_TAG :
+						OPTIONAL_TAG,
+				this.type.getSimpleName()
+				);
 		return str;
 	}
 }

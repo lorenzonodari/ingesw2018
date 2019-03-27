@@ -89,15 +89,53 @@ public enum CategoryEnum {
 					java.util.Date.class
 					),
 			
-			/*
-			// Campo "Durata"
+			// Campo "durata"
 			new Field(
 					"Durata",
-					"La durata approssimata, in ore, dell'evento",
+					"La durata approssimata, in ore e minuti o in giorni, dell'evento",
 					false,
 					Integer.class
 					),
-			*/
+
+			// Campo "quota individuale"
+			new Field(
+					"Quota individuale",
+					"La spesa che ogni partecipante dovrà sostenere per l'evento",
+					true,
+					Float.class
+					),
+
+			// Campo "compreso nella quota"
+			new Field(
+					"Compreso nella quota",
+					"Lista delle voci di spesa comprese nella quota di partecipazione",
+					false,
+					String.class
+					),
+
+			// Campo "data conclusiva"
+			new Field(
+					"Data conclusiva",
+					"Il giorno di conclusione dell'evento",
+					false,
+					java.util.Date.class
+					),
+			
+			// Campo "ora conclusiva"
+			new Field(
+					"Ora conclusiva",
+					"L'orario di conclusione dell'evento",
+					false,
+					java.util.Date.class
+					),
+
+			// Campo "note"
+			new Field(
+					"Note",
+					"Note aggiuntive sull'evento",
+					false,
+					String.class
+					),
 	};
 	
 	/**
