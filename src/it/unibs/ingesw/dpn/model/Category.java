@@ -3,6 +3,15 @@ package it.unibs.ingesw.dpn.model;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Classe che rappresenta una categoria di eventi all'interno del programma.
+ * Una categoria è caratterizzata da un nome, una descrizione e una lista di campi.
+ * Per la creazione di una categoria è necessario utilizzare la classe {@link CategoryProvider}.
+ * In quanto categoria astratta e concettuale, non contiene alcun riferimento alla classe {@link Event}.
+ * 
+ * @author Michele Dusi, Emanuele Poggi, Lorenzo Nodari
+ *
+ */
 public class Category {
 	
 	private static final String EXCEPTION_FIELD_ALREADY_PRESENT = "Il campo \"%s\" è già presente all'interno della categoria \"%s\".";
@@ -16,21 +25,29 @@ public class Category {
 	private String description;
 	private List<Field> fields;
 	
-	public Category(String name, String description) {
+	/**
+	 * Costruttore con modificatore "friendly" della classe Category.
+	 * L'unica classe adibita alla creazione di un'istanza di {@link Category}
+	 * è la classe {@link CategoryProvider}.
+	 * 
+	 * @param name Il nome della categoria
+	 * @param description La descrizione della categoria
+	 */
+	Category(String name, String description) {
 		this.name = name;
 		this.description = description;
 		this.fields = new ArrayList<>();
 	}
 
 	/**
-	 * @return the name
+	 * @return the name Il nome della categoria
 	 */
 	public String getName() {
 		return name;
 	}
 
 	/**
-	 * @return the description
+	 * @return the description La descrizione della categoria
 	 */
 	public String getDescription() {
 		return description;

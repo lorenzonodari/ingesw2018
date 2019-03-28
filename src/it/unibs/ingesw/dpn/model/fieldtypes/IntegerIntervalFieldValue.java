@@ -8,7 +8,7 @@ package it.unibs.ingesw.dpn.model.fieldtypes;
  * @author Michele Dusi, Lorenzo Nodari, Emanuele Poggi
  *
  */
-public class IntegerInterval {
+public class IntegerIntervalFieldValue {
 
 	private static final String INCLUDE_MIN_STRING = "[";
 	private static final String EXCLUDE_MIN_STRING = "]";
@@ -21,11 +21,11 @@ public class IntegerInterval {
 	private int min, max;
 	private boolean includeMin, includeMax;
 
-	public IntegerInterval(int min, int max) {
+	public IntegerIntervalFieldValue(int min, int max) {
 		this(min, DEFAULT_MIN_INCLUSION, max, DEFAULT_MAX_INCLUSION);
 	}
 	
-	public IntegerInterval(int min, boolean includeMin, int max, boolean includeMax) {
+	public IntegerIntervalFieldValue(int min, boolean includeMin, int max, boolean includeMax) {
 		if (min > max) {
 			throw new IllegalArgumentException("Impossibile creare un intervallo con estremo inferiore maggiore dell'estremo superiore.");
 		}

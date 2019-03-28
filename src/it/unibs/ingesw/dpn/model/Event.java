@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * Classe astratta che rappresenta in maniera concettuale un evento generico gestito dal programma.
  * Questa classe viene poi specificata in differenti classi a seconda delle categorie previste.
- * (Si veda, ad esempio, la classe {@link SoccerMatch}.)
+ * (Si veda, ad esempio, la classe {@link SoccerMatchEvent}.)
  * 
  * Nota: Le classi figlie non contengono direttamente i dati, bensì è la classe padre che mantiene in memoria 
  * tutti i valori dei campi. Le classi figlie, tuttavia, sono necessarie per l'implementazione dei differenti
@@ -34,8 +34,9 @@ public abstract class Event {
 	
 	/**
 	 * Crea un nuovo evento con la relativa categoria.
-	 * Tale costruttore verrà comunque chiamato da una classe apposita, 
-	 * la cui responsabilità principale sarà creare gli eventi nella maniera prevista dal programma.
+	 * Tale costruttore (o meglio, i costruttori delle classi figlie che fanno affidamento su
+	 * questo costruttore di Event) dovrà essere chiamato da una classe apposita, la cui responsabilità 
+	 * principale sarà creare gli eventi nella maniera prevista dal programma.
 	 * 
 	 * Precondizione: la categoria a cui si vuole associare l'evento deve essere già stata
 	 * istanziata completamente. Deve cioè contenere tutti i campi previsti. Ogni altra aggiunta di nuovi campi runtime
@@ -48,7 +49,7 @@ public abstract class Event {
 	 * @param category la categoria prescelta
 	 * @param fieldValues i valori dei campi della categoria dell'evento
 	 */
-	public Event(CategoryEnum category, Object [] fieldValues) {
+	protected Event(CategoryEnum category, Object [] fieldValues) {
 		this.category = category;
 		this.valuesMap = new HashMap<>();
 		

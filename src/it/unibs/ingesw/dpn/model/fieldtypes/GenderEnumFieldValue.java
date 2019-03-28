@@ -1,6 +1,6 @@
 package it.unibs.ingesw.dpn.model.fieldtypes;
 
-public enum GenderEnum {
+public enum GenderEnumFieldValue {
 	
 	MALE,
 	FEMALE,

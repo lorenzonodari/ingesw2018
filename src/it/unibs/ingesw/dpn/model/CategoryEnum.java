@@ -19,7 +19,7 @@ public enum CategoryEnum {
 					"Genere",
 					"Il genere dei giocatori che partecipano alla partita",
 					true,
-					it.unibs.ingesw.dpn.model.fieldtypes.GenderEnum.class
+					it.unibs.ingesw.dpn.model.fieldtypes.GenderEnumFieldValue.class
 					),
 			
 			// Campo "fascia d'età"
@@ -27,7 +27,7 @@ public enum CategoryEnum {
 					"Fascia di età",
 					"L'intervallo in cui sono comprese le età accettate dei giocatori",
 					true,
-					it.unibs.ingesw.dpn.model.fieldtypes.IntegerInterval.class)
+					it.unibs.ingesw.dpn.model.fieldtypes.IntegerIntervalFieldValue.class)
 			);
 	
 	

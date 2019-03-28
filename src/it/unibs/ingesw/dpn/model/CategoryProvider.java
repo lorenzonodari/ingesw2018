@@ -8,7 +8,7 @@ package it.unibs.ingesw.dpn.model;
  * l'istanza desiderata di {@link Category} su richiesta, passando come parametro un riferimento generico 
  * di tipo {@link CategoryEnum}.
  * 
- * @author Michele Dusi
+ * @author Michele Dusi, Lorenzo Nodari, Emanuele Poggi
  *
  */
 public final class CategoryProvider {
