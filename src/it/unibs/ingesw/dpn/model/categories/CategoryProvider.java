@@ -1,4 +1,4 @@
-package it.unibs.ingesw.dpn.model;
+package it.unibs.ingesw.dpn.model.categories;
 
 /**
  * Classe che fornisce le implementazioni corrette degli oggetti {@link Category}
@@ -15,15 +15,15 @@ public final class CategoryProvider {
 	
 	private static final CategoryProvider singletonProvider = new CategoryProvider();
 	
-	private final Category [] categories = new Category[CategoryEnum.CATEGORIES_NUMBER];
+	private Category [] categories;
 	
 	/**
 	 * Costruttore privato.
 	 */
 	private CategoryProvider() {
-		for (CategoryEnum cat : CategoryEnum.values()) {
-			categories[cat.ordinal()] = createCategory(cat);
-		}
+		// Creo un'istanza di Initializer
+		ICategoryInitializer initializer = ICategoryInitializer.getInstance();
+		this.categories = initializer.initCategories();
 	}
 	
 	/**
@@ -55,28 +55,6 @@ public final class CategoryProvider {
 	 */
 	public Category [] getAllCategories() {
 		return this.categories;
-	}
-	
-	/**
-	 * Crea una categoria come istanza di {@link Category}.
-	 * 
-	 * @param catEnum La categoria richiesta
-	 * @return l'oggetto {@link Category} corrispondente
-	 */
-	private Category createCategory(CategoryEnum catEnum) {
-		// Creo la nuova istanza di Category
-		Category c = new Category(catEnum.getName(), catEnum.getDescription());
-		// Aggiungo i campi comuni
-		for (Field cf : CategoryEnum.COMMON_FIELDS) {
-			c.addField(cf);
-		}
-		// Aggiungo i campi esclusivi
-		for (Field ef : catEnum.getExclusiveFields()) {
-			c.addField(ef);
-		}
-		// Restituisco la categoria inizializzata con tutti i campi richiesti.
-		return c;
-	}
-	
+	}	
 	
 }

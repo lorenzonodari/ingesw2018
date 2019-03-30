@@ -1,7 +1,10 @@
-package it.unibs.ingesw.dpn.model;
+package it.unibs.ingesw.dpn.model.categories;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import it.unibs.ingesw.dpn.model.events.Event;
+import it.unibs.ingesw.dpn.model.fields.Field;
 
 /**
  * Classe che rappresenta una categoria di eventi all'interno del programma.
@@ -72,6 +75,23 @@ public class Category {
 		} else {
 			String exceptionMessage = String.format(EXCEPTION_FIELD_ALREADY_PRESENT, newField.getName(), this.name);
 			throw new IllegalArgumentException(exceptionMessage);
+		}
+	}
+
+	/**
+	 * Aggiunge un'intera lista di campi alla categoria.
+	 * 
+	 * Nota: questo metodo può essere utilizzato solamente all'interno di questo package.
+	 * 
+	 * Precondizione: non devono esserci campi con lo stesso nome o con nomi già presenti
+	 * all'interno della categoria. Questo metodo non fa altro che richiamare il metodo 
+	 * di questa classe "addField" su tutti i campi passati come parametro.
+	 * 
+	 * @param newFields i nuovi campi da aggiungere.
+	 */
+	void addAllFields(Field ... newFields) {
+		for (Field f : newFields) {
+			this.addField(f);
 		}
 	}
 	
