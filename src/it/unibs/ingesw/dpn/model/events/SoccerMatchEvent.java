@@ -1,4 +1,6 @@
-package it.unibs.ingesw.dpn.model;
+package it.unibs.ingesw.dpn.model.events;
+
+import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
 
 /**
  * Classe che rappresenta concettualmente il tipo di categoria "Partita di calcio".

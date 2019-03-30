@@ -1,10 +1,9 @@
-package it.unibs.ingesw.dpn.model.fieldtypes;
+package it.unibs.ingesw.dpn.model.fields;
 
 public enum GenderEnumFieldValue {
 	
 	MALE,
 	FEMALE,
-	MIXED,
 	OTHER;
 
 }

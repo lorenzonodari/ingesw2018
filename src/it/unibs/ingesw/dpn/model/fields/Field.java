@@ -1,4 +1,6 @@
-package it.unibs.ingesw.dpn.model;
+package it.unibs.ingesw.dpn.model.fields;
+
+import it.unibs.ingesw.dpn.model.categories.Category;
 
 /**
  * La classe "Field" rappresenta un campo di una categoria all'interno del modello concettuale del progetto.

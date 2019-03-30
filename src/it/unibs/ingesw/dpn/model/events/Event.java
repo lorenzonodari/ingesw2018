@@ -1,7 +1,12 @@
-package it.unibs.ingesw.dpn.model;
+package it.unibs.ingesw.dpn.model.events;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import it.unibs.ingesw.dpn.model.categories.Category;
+import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
+import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
+import it.unibs.ingesw.dpn.model.fields.Field;
 
 /**
  * Classe astratta che rappresenta in maniera concettuale un evento generico gestito dal programma.

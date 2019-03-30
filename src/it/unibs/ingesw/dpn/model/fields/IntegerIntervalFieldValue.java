@@ -1,4 +1,4 @@
-package it.unibs.ingesw.dpn.model.fieldtypes;
+package it.unibs.ingesw.dpn.model.fields;
 
 /**
  * Classe che rappresenta un intervallo di valori compreso fra due interi.

@@ -1,5 +1,8 @@
 package it.unibs.ingesw.dpn.model;
 
+import it.unibs.ingesw.dpn.model.categories.Category;
+import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
+
 public class MainTest {
 
 	public static void main(String[] args) {
