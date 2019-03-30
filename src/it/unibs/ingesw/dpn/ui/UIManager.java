@@ -1,8 +1,9 @@
 package it.unibs.ingesw.dpn.ui;
 
 import java.util.List;
-import it.unibs.ingesw.dpn.model.Category;
+
 import it.unibs.ingesw.dpn.model.ModelManager;
+import it.unibs.ingesw.dpn.model.categories.Category;
 
 /**
  * Classe adibita alla gestione dell'interfaccia utente. In particolare, alle istanze
@@ -171,7 +172,7 @@ public class UIManager {
 		Menu categoriesMenu = new Menu("Menu categorie", "Categorie di eventi disponibili:", backEntry);
 		
 		// Categorie
-		for (Category c : model.getCategories()) {
+		for (Category c : model.getAllCategories()) {
 			
 			MenuAction categoryAction = (parent) -> {this.categoryMenu(c);};
 			MenuEntry categoryEntry = new MenuEntry(c.getName(), categoryAction);
