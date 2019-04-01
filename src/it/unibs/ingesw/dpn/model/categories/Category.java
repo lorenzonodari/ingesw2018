@@ -29,7 +29,7 @@ public class Category {
 	private List<Field> fields;
 	
 	/**
-	 * Costruttore con modificatore "friendly" della classe Category.
+	 * Costruttore con modificatore di accesso "friendly" della classe Category.
 	 * L'unica classe adibita alla creazione di un'istanza di {@link Category}
 	 * è la classe {@link CategoryProvider}.
 	 * 
@@ -43,14 +43,14 @@ public class Category {
 	}
 
 	/**
-	 * @return the name Il nome della categoria
+	 * @return Il nome della categoria
 	 */
 	public String getName() {
 		return name;
 	}
 
 	/**
-	 * @return the description La descrizione della categoria
+	 * @return La descrizione della categoria
 	 */
 	public String getDescription() {
 		return description;

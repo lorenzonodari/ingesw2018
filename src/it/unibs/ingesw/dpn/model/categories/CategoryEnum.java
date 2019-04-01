@@ -3,7 +3,7 @@ package it.unibs.ingesw.dpn.model.categories;
 import it.unibs.ingesw.dpn.model.events.Event;
 
 /**
- * Enumerator che contiene un elenco breve e leggero delle categorie attualmente previste dal progetto.
+ * Enumerazione che contiene un elenco breve e leggero delle categorie attualmente previste dal progetto.
  * Viene utilizzato dalla classe {@link Event} per avere un riferimento veloce alla categoria di appartenenza.
  * In qualunque momento, è sempre possibile accedere all'oggetto complesso di tipo {@link Category} relativo,
  * che contiene tutti i dati e i metodi di utilità, tramite la classe {@link CategoryProvider}.

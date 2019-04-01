@@ -62,14 +62,17 @@ public abstract class Event {
 		CategoryProvider catProv = CategoryProvider.getProvider();
 		Category chosenCategory = catProv.getCategory(category);
 		Field [] categoryFields = chosenCategory.getFieldsArray();
+		
 		// Controllo che i due array abbiano la stessa dimensione
 		if (categoryFields.length != fieldValues.length) {
 			throw new IllegalArgumentException(ARRAY_SIZE_MISMATCH_EXCEPTION);
 		} else {
 			this.fieldsNumber = categoryFields.length;
 		}
+		
 		// Controllo che i valori dei campi corrispondano ai campi previsiti
 		for (int i = 0; i < this.fieldsNumber; i++) {
+			
 			// Verifico che il valore sia del tipo previsto
 			if (categoryFields[i].getType().isInstance(fieldValues[i])) {
 				// Se è dello stesso tipo, aggiungo la coppia (campo, valore) all'hashmap dell'evento
@@ -81,6 +84,7 @@ public abstract class Event {
 						categoryFields[i].getName(),
 						fieldValues[i].toString()));
 			}
+			
 		}
 	}
 	

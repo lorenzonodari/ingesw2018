@@ -29,9 +29,6 @@ public interface ICategoryInitializer {
 	 * Metodo che inizializza e restituisce la lista di Categorie,
 	 * come oggetti {@link Category}.
 	 * 
-	 * Nota: poiché l'unica classe a chiamare un'istanza di ICategoryInitializer sarà
-	 * {@link CategoryProvider}, il modificatore del metodo non è "public", bensì "friendly".
-	 * 
 	 * @return la lista di categorie
 	 */
 	Category [] initCategories();

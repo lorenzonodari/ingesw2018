@@ -36,10 +36,12 @@ public class SimpleCategoryInitializer implements ICategoryInitializer {
 	 * @return L'istanza unica di SimpleCategoryInitializer.
 	 */
 	static ICategoryInitializer getInstance() {
+		
 		// Verifico che il singleton sia già stato istanziato
 		if (SimpleCategoryInitializer.singleton == null) {
 			SimpleCategoryInitializer.singleton = new SimpleCategoryInitializer();
 		}
+		
 		// Restituisco l'istanza unica della classe
 		return SimpleCategoryInitializer.singleton;
 	}
@@ -54,8 +56,10 @@ public class SimpleCategoryInitializer implements ICategoryInitializer {
 	 */
 	@Override
 	public Category [] initCategories() {
+		
 		// Creo e inizializzo l'array di campi comuni (una sola volta per tutte le categorie)
 		Field [] commonFields = getCommonFields();
+		
 		// Creo l'array delle categorie
 		Category [] categories = new Category[CategoryEnum.CATEGORIES_NUMBER];
 		
@@ -83,8 +87,10 @@ public class SimpleCategoryInitializer implements ICategoryInitializer {
 				categories[c] = new Category(
 						"Partita di calcio",
 						"Evento sportivo che prevede una partita di calcio fra due squadre di giocatori");
+				
 				// Aggiungo i campi comuni
 				categories[c].addAllFields(commonFields);
+				
 				// Aggiungo i campi esclusivi
 				categories[c].addAllFields(						
 					// Campo "genere"

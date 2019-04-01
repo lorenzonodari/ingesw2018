@@ -21,6 +21,7 @@ public final class CategoryProvider {
 	 * Costruttore privato.
 	 */
 	private CategoryProvider() {
+		
 		// Creo un'istanza di Initializer
 		ICategoryInitializer initializer = ICategoryInitializer.getInstance();
 		this.categories = initializer.initCategories();
