@@ -22,7 +22,7 @@ public interface ICategoryInitializer {
 	 * @return L'istanza unica di ICategoryInitializer.
 	 */
 	static ICategoryInitializer getInstance() {
-		return SimpleCategoryInitializer.getInstance();
+		return FromFileCategoryInitializer.getInstance();
 	}
 	
 	/**
