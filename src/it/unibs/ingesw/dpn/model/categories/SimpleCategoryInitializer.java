@@ -155,18 +155,10 @@ public class SimpleCategoryInitializer implements ICategoryInitializer {
 						String.class
 						),
 
-				// Campo "data"
+				// Campo "data e ora"
 				new Field(
-						"Data",
-						"Il giorno in cui si svolgerà o avrà inizio l'evento",
-						true,
-						java.util.Date.class
-						),
-
-				// Campo "ora"
-				new Field(
-						"Ora",
-						"L'orario in cui si svolgerà o avrà inizio l'evento",
+						"Data e ora",
+						"Il giorno e l'orario in cui si svolgerà o avrà inizio l'evento",
 						true,
 						java.util.Date.class
 						),
@@ -195,18 +187,10 @@ public class SimpleCategoryInitializer implements ICategoryInitializer {
 						String.class
 						),
 
-				// Campo "data conclusiva"
+				// Campo "data e ora conclusive"
 				new Field(
-						"Data conclusiva",
-						"Il giorno di conclusione dell'evento",
-						false,
-						java.util.Date.class
-						),
-				
-				// Campo "ora conclusiva"
-				new Field(
-						"Ora conclusiva",
-						"L'orario di conclusione dell'evento",
+						"Data e ora conclusive",
+						"Il giorno e l'orario di conclusione dell'evento",
 						false,
 						java.util.Date.class
 						),

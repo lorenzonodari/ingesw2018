@@ -55,6 +55,23 @@ public class Category {
 	public String getDescription() {
 		return description;
 	}
+
+	/**
+	 * Restituisce un campo della categoria con il nome corrispondente.
+	 * Se assente, restituisce "null".
+	 * Ovviamente viene dato per scontato che esista al più un campo con un dato nome all'interno della categoria.
+	 * 
+	 * @return Il campo col nome richiesto, come oggetto {@link Field}
+	 */
+	public Field getFieldByName(String fieldName) {
+		// Scorro attraverso tutti i campi
+		for (Field f : fields) {
+			if (f.getName().equals(fieldName)) {
+				return f;
+			}
+		}
+		return null;
+	}
 	
 	/**
 	 * Restituisce l'array con tutti i campi della categoria.
