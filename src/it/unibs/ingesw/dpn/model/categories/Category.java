@@ -55,6 +55,15 @@ public class Category {
 	public String getDescription() {
 		return description;
 	}
+	
+	/**
+	 * Restituisce l'array con tutti i campi della categoria.
+	 * 
+	 * @return i campi della categoria
+	 */
+	public Field [] getFieldsArray() {
+		return (Field []) this.fields.toArray();
+	}
 
 	/**
 	 * Aggiunge un campo alla categoria.
@@ -93,15 +102,6 @@ public class Category {
 		for (Field f : newFields) {
 			this.addField(f);
 		}
-	}
-	
-	/**
-	 * Restituisce l'array con tutti i campi della categoria.
-	 * 
-	 * @return i campi della categoria
-	 */
-	public Field [] getFieldsArray() {
-		return (Field []) this.fields.toArray();
 	}
 	
 	/**
