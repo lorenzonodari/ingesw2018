@@ -5,7 +5,7 @@ import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
 
 /**
  * Classe che centralizza l'accesso ai dati di dominio. Tramite questa classe
- * e' quindi possibile accedere alla lista delle categorie, la lista degli eventi registrati, etc...
+ * e' quindi possibile accedere alla lista delle categorie, agli eventi registrati, etc...
  * 
  * @author Michele Dusi, Emanuele Poggi, Lorenzo Nodari
  */
