@@ -5,17 +5,17 @@ import it.unibs.ingesw.dpn.model.fields.Field;
 /**
  * Classe che si occupa di inizializzare la lista di categorie all'avvio del programma
  * in maniera semplice, eseguendo il codice sorgente contenuto all'interno di questa classe.
- * E' un'implementazione dell'interfaccia {@link ICategoryInitializer}, che permette 
+ * E' un'implementazione dell'interfaccia {@link CategoryInitializer}, che permette 
  * di seguire il pattern "Strategy" per risolvere il problema dell'inizializzazione.
  * In futuro potranno essere implementate nuove metodologie di inizializzazione semplicemente
- * creando nuove implementazioni di {@link ICategoryInitializer} che seguano logiche diverse.
+ * creando nuove implementazioni di {@link CategoryInitializer} che seguano logiche diverse.
  * 
- * Nota: ogni implementazione di {@link ICategoryInitializer} segue anche il pattern "Singleton".
+ * Nota: ogni implementazione di {@link CategoryInitializer} segue anche il pattern "Singleton".
  * 
  * @author Michele Dusi, Lorenzo Nodari, Emanuele Poggi
  *
  */
-public class SimpleCategoryInitializer implements ICategoryInitializer {
+public class SimpleCategoryInitializer implements CategoryInitializer {
 	
 	/**
 	 * Istanza unica della classe, secondo il pattern Singleton.
@@ -35,7 +35,7 @@ public class SimpleCategoryInitializer implements ICategoryInitializer {
 	 * 
 	 * @return L'istanza unica di SimpleCategoryInitializer.
 	 */
-	static ICategoryInitializer getInstance() {
+	static CategoryInitializer getInstance() {
 		
 		// Verifico che il singleton sia già stato istanziato
 		if (SimpleCategoryInitializer.singleton == null) {

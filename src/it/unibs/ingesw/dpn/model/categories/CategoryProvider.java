@@ -23,7 +23,7 @@ public final class CategoryProvider {
 	private CategoryProvider() {
 		
 		// Creo un'istanza di Initializer
-		ICategoryInitializer initializer = ICategoryInitializer.getInstance();
+		CategoryInitializer initializer = CategoryInitializer.getInstance();
 		this.categories = initializer.initCategories();
 	}
 	
