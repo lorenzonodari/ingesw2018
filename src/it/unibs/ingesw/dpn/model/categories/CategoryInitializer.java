@@ -11,7 +11,7 @@ package it.unibs.ingesw.dpn.model.categories;
  * @author Michele Dusi, Emanuele Poggi, Lorenzo Nodari
  *
  */
-public interface ICategoryInitializer {
+public interface CategoryInitializer {
 	
 	/**
 	 * Restituisce una nuova istanza di ICategoryInitializer.
@@ -21,7 +21,7 @@ public interface ICategoryInitializer {
 	 * 
 	 * @return L'istanza unica di ICategoryInitializer.
 	 */
-	static ICategoryInitializer getInstance() {
+	static CategoryInitializer getInstance() {
 		return FromFileCategoryInitializer.getInstance();
 	}
 	
