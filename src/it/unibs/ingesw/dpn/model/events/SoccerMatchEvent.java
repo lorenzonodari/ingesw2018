@@ -1,6 +1,9 @@
 package it.unibs.ingesw.dpn.model.events;
 
+import java.util.Map;
+
 import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
+import it.unibs.ingesw.dpn.model.fields.Field;
 
 /**
  * Classe che rappresenta concettualmente il tipo di categoria "Partita di calcio".
@@ -19,7 +22,7 @@ public class SoccerMatchEvent extends Event {
 	 * 
 	 * @param fieldValues i valori dei campi dell'evento di tipo "Partita di calcio"
 	 */
-	SoccerMatchEvent(Object [] fieldValues) {
+	SoccerMatchEvent(Map<Field, Object> fieldValues) {
 		super(CategoryEnum.PARTITA_DI_CALCIO, fieldValues);
 	}
 	

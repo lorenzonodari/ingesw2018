@@ -1,6 +1,5 @@
 package it.unibs.ingesw.dpn.model.events;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import it.unibs.ingesw.dpn.model.categories.Category;
@@ -29,14 +28,12 @@ import it.unibs.ingesw.dpn.model.fields.Field;
  */
 public abstract class Event {
 	
-	private static final String ARRAY_SIZE_MISMATCH_EXCEPTION = "L'array di valori dei campi dell'evento non corrisponde all'array dei campi previsti.";
-	private static final String FIELD_TYPE_MISMATCH_EXCEPTION= "Impossibile creare l'evento associando al campo %s il valore dell'oggetto %s poiché quest'ultimo non è del tipo previsto.";
+	private static final String NULL_ARGUMENT_EXCEPTION = "Impossibile creare un evento con parametri nulli";
 	private static final String FIELD_NOT_PRESENT_EXCEPTION = "Il campo %s non appartiene alla categoria prevista dall'evento";
 	private static final String STATE_CHANGE_LOG = "L'evento \"%s\" ha cambiato il suo stato in: %s";
 	
 	private final CategoryEnum category;
 	private final Map<Field, Object> valuesMap;
-	private final int fieldsNumber;
 	
 	private EventState state;
 	
@@ -48,49 +45,23 @@ public abstract class Event {
 	 * questo costruttore di Event) dovrà essere chiamato da una classe apposita, la cui responsabilità 
 	 * principale sarà creare gli eventi nella maniera prevista dal programma.
 	 * 
-	 * Precondizione: la categoria a cui si vuole associare l'evento deve essere già stata
-	 * istanziata completamente. Deve cioè contenere tutti i campi previsti. Ogni altra aggiunta di nuovi campi runtime
-	 * alla categoria non comporterà l'aggiunta di tali campi agli eventi di quella categoria già esistenti.
-	 * Tuttavia questo non genera alcuna problematica, poiché le categorie non sono modificabili runtime.
+	 * Precondizione: la lista di coppie (campo, valore) devono essere istanziate correttamente e devono 
+	 * rispettare i campi previsti dalla categoria. L'unica classe abilitata a fare ciò è la classe {@link EventFactory}.
 	 * 
 	 * Precondizione: i valori dei campi devono essere uguali come numero e come tipo ai campi
 	 * previsti dalla categoria. Questo viene garantito dalla classe adibita alla creazione degli eventi.
 	 * 
 	 * @param category la categoria prescelta
-	 * @param fieldValues i valori dei campi della categoria dell'evento
+	 * @param fieldValues le coppie (campo-valore) dell'evento
 	 */
-	protected Event(CategoryEnum category, Object [] fieldValues) {
+	protected Event(CategoryEnum category, Map<Field, Object> fieldValues) {
+		if (category == null || fieldValues == null) {
+			throw new IllegalArgumentException(NULL_ARGUMENT_EXCEPTION);
+		}
+		
+		// Inizializzo gli attributi della classe
 		this.category = category;
-		this.valuesMap = new HashMap<>();
-		
-		// Recupero la categoria e tutti i campi relativi
-		CategoryProvider catProv = CategoryProvider.getProvider();
-		Category chosenCategory = catProv.getCategory(category);
-		Field [] categoryFields = chosenCategory.getFieldsArray();
-		
-		// Controllo che i due array abbiano la stessa dimensione
-		if (categoryFields.length != fieldValues.length) {
-			throw new IllegalArgumentException(ARRAY_SIZE_MISMATCH_EXCEPTION);
-		} else {
-			this.fieldsNumber = categoryFields.length;
-		}
-		
-		// Controllo che i valori dei campi corrispondano ai campi previsiti
-		for (int i = 0; i < this.fieldsNumber; i++) {
-			
-			// Verifico che il valore sia del tipo previsto
-			if (categoryFields[i].getType().isInstance(fieldValues[i])) {
-				// Se è dello stesso tipo, aggiungo la coppia (campo, valore) all'hashmap dell'evento
-				this.valuesMap.put(categoryFields[i], fieldValues[i]);
-			} else {
-				// In caso contrario genero un'eccezione
-				throw new IllegalArgumentException(String.format(
-						FIELD_TYPE_MISMATCH_EXCEPTION,
-						categoryFields[i].getName(),
-						fieldValues[i].toString()));
-			}
-			
-		}
+		this.valuesMap = fieldValues;
 		
 		// A questo punto posso settare lo stato come "valido".
 		this.setState(new ValidState());

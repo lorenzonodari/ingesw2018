@@ -26,6 +26,7 @@ public class EventHistory {
 	 */
 	private class Log {
 		
+		private static final String NULL_MESSAGE_EXCEPTION = "Impossibile creare un Log con un messaggio null";
 		private static final String LOG_FORMAT = "%s - %s";
 		
 		private String message;
@@ -34,11 +35,11 @@ public class EventHistory {
 		/**
 		 * Costruttore.
 		 * 
-		 * @param message Il messsaggio da associare al log
+		 * @param message Il messaggio da associare al log
 		 */
 		public Log(String message) {
 			if (message == null) {
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException(NULL_MESSAGE_EXCEPTION);
 			} else {
 				this.message = message;
 				this.timestamp = new Date();
