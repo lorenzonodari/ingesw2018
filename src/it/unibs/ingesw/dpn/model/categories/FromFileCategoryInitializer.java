@@ -15,6 +15,7 @@ import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
 import it.unibs.ingesw.dpn.model.fields.Field;
+import it.unibs.ingesw.dpn.model.fields.FieldValue;
 
 /**
  * Classe che si occupa di inizializzare la lista di categorie all'avvio del programma leggendo i dati
@@ -306,10 +307,11 @@ public class FromFileCategoryInitializer implements CategoryInitializer {
 	 * @param field_start_element L'evento "Field" incontrato dal parser XML
 	 * @return L'oggetto {@link Field} creato secondo i dati letti
 	 */
+	@SuppressWarnings("unchecked")
 	private Field parseXMLField(StartElement field_start_element) {
 		String name = null, description = null;
 		boolean mandatory = true;
-		Class<?> type = null;
+		Class<? extends FieldValue> type = null;
 		
 		// Creo un array di boolean di controllo
 		boolean [] setup_flags = {false, false, false, false};
@@ -342,7 +344,14 @@ public class FromFileCategoryInitializer implements CategoryInitializer {
 			// Il tipo del valore del campo	
 			case ATTRIBUTE_TYPE :
 				try {
-					type = Class.forName(attribute.getValue().trim());
+					// Verifico che la classe implementi l'interfaccia richiesta.
+					Class<?> temp = Class.forName(attribute.getValue().trim());
+					for (Class<?> interf : temp.getInterfaces()) {
+						if (interf.equals(FieldValue.class)) {
+							type = (Class<? extends FieldValue>) temp;
+							break;
+						}
+					}
 					setup_flags[3] = true;
 				} catch (ClassNotFoundException e) {
 					e.printStackTrace();

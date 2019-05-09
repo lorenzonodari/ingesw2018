@@ -4,11 +4,12 @@ package it.unibs.ingesw.dpn.model.fields;
  * Classe che rappresenta un intervallo di valori compreso fra due interi.
  * I due estremi possono essere inclusi o esclusi a piacere.
  * Di default, l'estremo iniziale è incluso e quello finale è escluso.
+ * Implementa l'interfaccia {@link FieldValue}.
  * 
  * @author Michele Dusi, Lorenzo Nodari, Emanuele Poggi
  *
  */
-public class IntegerIntervalFieldValue {
+public class IntegerIntervalFieldValue implements FieldValue {
 
 	private static final String INCLUDE_MIN_STRING = "[";
 	private static final String EXCLUDE_MIN_STRING = "]";
@@ -78,4 +79,5 @@ public class IntegerIntervalFieldValue {
 						INCLUDE_MAX_STRING :
 						EXCLUDE_MAX_STRING);
 	}
+
 }

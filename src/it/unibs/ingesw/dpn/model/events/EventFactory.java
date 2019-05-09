@@ -16,7 +16,12 @@ public class EventFactory {
 	private EventFactory() {
 				
 	}
-	
+
+	/**
+	 * Restituisce l'istanza unica della factory.
+	 * 
+	 * @return L'unica istanza di EventFactory
+	 */
 	public EventFactory getFactory() {
 		if (EventFactory.singletonFactory == null) {
 			EventFactory.singletonFactory = new EventFactory();
