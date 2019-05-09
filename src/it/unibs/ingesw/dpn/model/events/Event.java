@@ -32,12 +32,15 @@ public abstract class Event {
 	private static final String ARRAY_SIZE_MISMATCH_EXCEPTION = "L'array di valori dei campi dell'evento non corrisponde all'array dei campi previsti.";
 	private static final String FIELD_TYPE_MISMATCH_EXCEPTION= "Impossibile creare l'evento associando al campo %s il valore dell'oggetto %s poiché quest'ultimo non è del tipo previsto.";
 	private static final String FIELD_NOT_PRESENT_EXCEPTION = "Il campo %s non appartiene alla categoria prevista dall'evento";
+	private static final String STATE_CHANGE_LOG = "L'evento \"%s\" ha cambiato il suo stato in: %s";
 	
 	private final CategoryEnum category;
 	private final Map<Field, Object> valuesMap;
 	private final int fieldsNumber;
 	
 	private EventState state;
+	
+	private EventHistory history;
 	
 	/**
 	 * Crea un nuovo evento con la relativa categoria.
@@ -90,7 +93,10 @@ public abstract class Event {
 		}
 		
 		// A questo punto posso settare lo stato come "valido".
-		this.state = new ValidState();
+		this.setState(new ValidState());
+		
+		// Preparo l'oggetto EventHistory che terrà traccia dei cambiamenti di stato
+		this.history = new EventHistory();
 	}
 	
 	/**
@@ -150,8 +156,10 @@ public abstract class Event {
 	 * suo interno.
 	 * Più nello specifico, invia ad ogni Mailbox una notifica di cambiamento di stato, che potrà essere
 	 * visualizzata dal relativo utente su richiesta.
+	 * 
+	 * @param message Il messaggio da inviare agli iscritti
 	 */
-	private void notifySubscribers() {
+	private void notifySubscribers(String message) {
 		
 		// TODO
 	}
@@ -175,10 +183,14 @@ public abstract class Event {
 		this.state.onEntry(this);
 		
 		// Aggiorno la storia
-		// TODO
+		String message = String.format(
+				STATE_CHANGE_LOG, 
+				this.getFieldValueByName("Titolo"),
+				this.state.getStateName().toUpperCase());
+		this.history.addLog(message);
 		
 		// Avviso tutti gli iscritti tramite le relative Mailbox
-		this.notifySubscribers();
+		this.notifySubscribers(message);
 	}
 	
 	/**
