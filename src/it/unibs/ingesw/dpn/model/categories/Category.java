@@ -57,6 +57,32 @@ public class Category {
 	}
 
 	/**
+	 * Restituisce un campo della categoria con il nome corrispondente.
+	 * Se assente, restituisce "null".
+	 * Ovviamente viene dato per scontato che esista al più un campo con un dato nome all'interno della categoria.
+	 * 
+	 * @return Il campo col nome richiesto, come oggetto {@link Field}
+	 */
+	public Field getFieldByName(String fieldName) {
+		// Scorro attraverso tutti i campi
+		for (Field f : fields) {
+			if (f.getName().equals(fieldName)) {
+				return f;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Restituisce l'array con tutti i campi della categoria.
+	 * 
+	 * @return i campi della categoria
+	 */
+	public Field [] getFieldsArray() {
+		return (Field []) this.fields.toArray();
+	}
+
+	/**
 	 * Aggiunge un campo alla categoria.
 	 * 
 	 * Nota: questo metodo può essere utilizzato solamente all'interno di questo package.
@@ -93,15 +119,6 @@ public class Category {
 		for (Field f : newFields) {
 			this.addField(f);
 		}
-	}
-	
-	/**
-	 * Restituisce l'array con tutti i campi della categoria.
-	 * 
-	 * @return i campi della categoria
-	 */
-	public Field [] getFieldsArray() {
-		return (Field []) this.fields.toArray();
 	}
 	
 	/**

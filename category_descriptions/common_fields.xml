@@ -27,14 +27,8 @@
 			type = "java.lang.String"
 		/>
 		<field
-			name = "Data"
-			description = "Il giorno in cui si svolgerà o avrà inizio l'evento"
-			mandatory = "true"
-			type = "java.util.Date"
-		/>
-		<field
-			name = "Ora"
-			description = "L'orario in cui si svolgerà o avrà inizio l'evento"
+			name = "Data e ora"
+			description = "Il giorno e l'orario in cui si svolgerà o avrà inizio l'evento"
 			mandatory = "true"
 			type = "java.util.Date"
 		/>
@@ -57,14 +51,8 @@
 			type = "java.lang.String"
 		/>
 		<field
-			name = "Data conclusiva"
-			description = "Il giorno di conclusione dell'evento"
-			mandatory = "false"
-			type = "java.util.Date"
-		/>
-		<field
-			name = "Ora conclusiva"
-			description = "L'orario di conclusione dell'evento"
+			name = "Data e ora conclusive"
+			description = "Il giorno e l'orario di conclusione dell'evento"
 			mandatory = "false"
 			type = "java.util.Date"
 		/>

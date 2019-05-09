@@ -32,10 +32,15 @@ public abstract class Event {
 	private static final String ARRAY_SIZE_MISMATCH_EXCEPTION = "L'array di valori dei campi dell'evento non corrisponde all'array dei campi previsti.";
 	private static final String FIELD_TYPE_MISMATCH_EXCEPTION= "Impossibile creare l'evento associando al campo %s il valore dell'oggetto %s poiché quest'ultimo non è del tipo previsto.";
 	private static final String FIELD_NOT_PRESENT_EXCEPTION = "Il campo %s non appartiene alla categoria prevista dall'evento";
+	private static final String STATE_CHANGE_LOG = "L'evento \"%s\" ha cambiato il suo stato in: %s";
 	
 	private final CategoryEnum category;
 	private final Map<Field, Object> valuesMap;
 	private final int fieldsNumber;
+	
+	private EventState state;
+	
+	private EventHistory history;
 	
 	/**
 	 * Crea un nuovo evento con la relativa categoria.
@@ -86,6 +91,12 @@ public abstract class Event {
 			}
 			
 		}
+		
+		// A questo punto posso settare lo stato come "valido".
+		this.setState(new ValidState());
+		
+		// Preparo l'oggetto EventHistory che terrà traccia dei cambiamenti di stato
+		this.history = new EventHistory();
 	}
 	
 	/**
@@ -108,12 +119,132 @@ public abstract class Event {
 	}
 
 	/**
+	 * Restituisce il valore caratterizzante l'evento del campo richiesto.
+	 * Se il nome del campo non corrisponde ad alcun campo dell'evento, verrà restituito il valore "null".
+	 * 
+	 * Precondizione: l'oggetto {@link String} passato come parametro deve corrispondere ad un campo 
+	 * previsto e contenuto nella categoria a cui appartiene l'evento.
+	 * 
+	 * @param chosenFieldName il nome del campo di cui si vuole conoscere il valore
+	 * @return Il valore del campo
+	 */
+	public Object getFieldValueByName(String chosenFieldName) {
+		// Recupero l'oggetto Category con tutti i campi
+		Category cat = CategoryProvider.getProvider().getCategory(this.category);
+		Field field = cat.getFieldByName(chosenFieldName);
+		// Verifico se esiste il campo
+		if (field == null || !this.valuesMap.containsKey(field)) {
+			// Nota: il secondo controllo dovrebbe essere inutile, poiché i campi di un evento e quelli della sua categoria DEVONO coincidere.
+			return null;
+		} else {
+			return this.valuesMap.get(field);
+		}
+		
+	}
+
+	/**
 	 * Restituisce la categoria di appartenenza dell'evento come istanza di {@link CategoryEnum}.
 	 * 
 	 * @return la categoria a cui appartiene l'evento.
 	 */
 	public CategoryEnum getCategory() {
 		return category;
+	}
+	
+	/**
+	 * Si occupa di notificare tutti gli iscritti all'evento dei vari cambiamenti che avvengono al
+	 * suo interno.
+	 * Più nello specifico, invia ad ogni Mailbox una notifica di cambiamento di stato, che potrà essere
+	 * visualizzata dal relativo utente su richiesta.
+	 * 
+	 * @param message Il messaggio da inviare agli iscritti
+	 */
+	private void notifySubscribers(String message) {
+		
+		// TODO
+	}
+	
+	/**
+	 * Modifica lo stato dell'evento, secondo il pattern "State".
+	 * Necessita di un'implementazione concreta dell'interfaccia {@link EventState} come parametro.
+	 * 
+	 * Precondizione: lo stato passato come parametro deve essere un oggetto EventState valido, coerente
+	 * con il funzionamento del programma e correttamente inizializzato.
+	 * Ciò viene garantito in parte dal fatto che solo le classi di questo package possono utilizzare questo metodo.
+	 * Infatti, questo metodo sarà chiamato prevalentemente dagli EventState stessi.
+	 * 
+	 * @param newState il nuovo stato dell'Evento come oggetto {@link EventState}
+	 */
+	synchronized void setState(EventState newState) {
+		// Modifico lo stato
+		this.state = newState;
+		
+		// Effettuo le attività d'entrata nello stato
+		this.state.onEntry(this);
+		
+		// Aggiorno la storia
+		String message = String.format(
+				STATE_CHANGE_LOG, 
+				this.getFieldValueByName("Titolo"),
+				this.state.getStateName().toUpperCase());
+		this.history.addLog(message);
+		
+		// Avviso tutti gli iscritti tramite le relative Mailbox
+		this.notifySubscribers(message);
+	}
+	
+	/**
+	 * Su decisione dell'utente, questo metodo permette di "pubblicare l'evento".
+	 * La bacheca si occuperà di mostrare l'evento agli altri utenti, mentre l'esecuzione di questo metodo
+	 * comporta il passaggio di stato da VALID a OPEN, se ci si trova nello stato corretto.
+	 * 
+	 * Precondizione: l'evento deve essere nello stato VALID. Se questa non è soddisfatta, il metodo 
+	 * non esegue il passaggio di stato e restituisce false.
+	 * 
+	 * Postcondizione: l'evento sarà nello stato OPEN. Questa postcondizione non può essere garantita se l'evento,
+	 * al momento della chiamata del metodo, non si trova nello stato VALID.
+	 * Si noti che, in caso venga chiamato il metodo quando si è già nello stato OPEN, lo stato non verrà modificato
+	 * e sarà restituito il valore false.
+	 * 
+	 * @return true se l'evento viene pubblicato, false altrimenti.
+	 */
+	public boolean publish() {
+		// TODO Eventuali azioni aggiuntive alla pubblicazione
+		try {
+			this.state.onPublication(this);
+			return true;
+		}
+		catch (IllegalStateException e) {
+			return false;
+		}
+	}
+	
+	/**
+	 * Metodo che aggiunge la partecipazione di un utente all'evento.
+	 * La sua funzione non è memorizzare gli utenti iscritti (compito della bacheca), ma tenere traccia
+	 * delle {@link Mailbox} a cui inviare i messaggi di cambiamento di stato dell'evento stesso.
+	 * Questo metodo comporta il cambiamento di stato da OPEN a CLOSED se viene raggiunto il numero massimo di
+	 * partecipanti consentito all'evento.
+	 * 
+	 * Precondizione: l'evento deve essere nello stato OPEN. Non è possibile accettare iscrizioni se non si è in
+	 * tale stato. In questo caso il metodo restituirà false.
+	 * 
+	 * Postcondizione: l'evento sarà nello stato CLOSED se e solo se l'aggiunta del partecipante permette
+	 * di raggiungere il numero massimo di partecipanti. 
+	 * Questa postcondizione non può essere garantita se l'evento, al momento della chiamata del metodo, 
+	 * non si trova nello stato OPEN.
+	 * 
+	 * @return true se il partecipante viene aggiunto, false altrimenti.
+	 */
+	public boolean subscribe(/* User newSubscriber */) {
+		// TODO Memorizzazione della mailbox nella mailing list
+		try {
+			this.state.onNewParticipant(this);
+			return true;
+		}
+		catch (IllegalStateException e) {
+			return false;
+		}
 	}
 
 }
