@@ -36,22 +36,26 @@ public class UsersManager {
 	}
 	
 	/**
-	 * Registra l'utente dato come correntemente connesso al sistema.
+	 * Effettua il login con lo username dato. Se un utente con tale username non esiste
+	 * esso viene creato, in caso contrario viene utilizzato l'utente gia' esistente.
 	 * 
-	 * Precondizione: user deve essere un utente esistente
 	 * Precondizione: nessun altro utente deve essere attualmente connesso al sistema
 	 * 
 	 * @param user L'utente da connettere al sistema
 	 */
-	public void login(User user) {
+	public void login(String username) {
 		
 		// Verifica delle precondizioni
-		if (!this.users.contains(user)) {
-			throw new IllegalArgumentException();
-		}
-		
 		if (this.currentUser != null) {
 			throw new IllegalStateException();
+		}
+		
+		User user = getUser(username);
+		if (user == null) {
+			
+			user = new User(username);
+			this.users.add(user);
+			
 		}
 		
 		this.currentUser = user;
@@ -59,17 +63,16 @@ public class UsersManager {
 	}
 	
 	/**
-	 * Disconnette l'utente dato dal sistema.
+	 * Disconnette l'utente attualmente connesso al sistema.
 	 * 
-	 * Precondizione: l'utente dato deve essere attualmente connesso al sistema
+	 * Precondizione: un utente deve essere attualmente connesso al sistema
 	 * 
-	 * @param user L'utente da disconnettere dal sistema
 	 */
-	public void logout(User user) {
+	public void logout() {
 		
 		// Verifica delle precondizioni
-		if (this.currentUser != user) {
-			throw new IllegalArgumentException();
+		if (this.currentUser == null) {
+			throw new IllegalStateException();
 		}
 		
 		this.currentUser = null;
