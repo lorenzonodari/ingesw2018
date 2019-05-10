@@ -27,11 +27,15 @@ public class UsersManager {
 	 */
 	public User getUser(String username) {
 		
-		User[] results = (User[]) this.users.stream()
-								   .filter(user -> user.getUsername() == username)
-								   .toArray();
+		User result = null;
+		for (User user : this.users) {
+			if (user.getUsername() == username) {
+				result = user;
+				break;
+			}
+		}
 		
-		return (results.length == 0) ? null : results[0];
+		return result;
 		
 	}
 	
