@@ -16,7 +16,12 @@ public class TextRenderer implements UIRenderer {
 		
 		System.out.println();
 		System.out.println(menu.getTitle());
-		System.out.println(menu.getDescription());
+		
+		// Renderizza la descrizione solo se presente
+		if (!menu.getDescription().equals("")) {
+			System.out.println(menu.getDescription());
+		}
+		
 		System.out.println();
 		
 		List<MenuEntry> entries = menu.getEntries();
