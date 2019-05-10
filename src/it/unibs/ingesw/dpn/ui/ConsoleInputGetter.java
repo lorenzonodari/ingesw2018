@@ -37,11 +37,24 @@ public class ConsoleInputGetter implements InputGetter {
 	
 	/**
 	 * Implementazione del metodo getString di InputGetter
+	 * 
+	 * Postcondizione: la stringa restituita non e' vuota
+	 * 
 	 */
 	@Override
 	public String getString() {
 		
-		return this.input.nextLine().trim();
+		StringBuffer buffer = new StringBuffer();
+		
+		do {
+			
+			buffer.append(input.nextLine().trim());
+			
+		} while (buffer.length() == 0);
+		
+		assert buffer.length() > 0;
+		
+		return buffer.toString();
 		
 	}
 
