@@ -4,6 +4,8 @@ import java.util.List;
 import it.unibs.ingesw.dpn.model.ModelManager;
 import it.unibs.ingesw.dpn.model.users.UsersManager;
 import it.unibs.ingesw.dpn.model.categories.Category;
+import it.unibs.ingesw.dpn.model.users.Mailbox;
+import it.unibs.ingesw.dpn.model.users.Notification;
 
 /**
  * Classe adibita alla gestione dell'interfaccia utente. In particolare, alle istanze
@@ -15,6 +17,7 @@ public class UIManager {
 	private static final String GENERIC_PROMPT = "Selezionare una voce";
 	private static final String INVALID_CHOICE_PROMPT = "Scelta non valida, riprovare";
 	private static final String BACK_ENTRY_TITLE = "Indietro";
+	private static final String LIST_ELEMENT_PREFIX = " * ";
 	
 	private UIRenderer renderer;
 	private InputGetter inputManager;
@@ -129,6 +132,96 @@ public class UIManager {
 	}
 	
 	/**
+	 * Crea il menu associato allo spazio personale dell'utente correntemente connesso al sistema
+	 * e lo rende il menu corrente
+	 */
+	public void personalSpace() {
+		
+		MenuAction backAction = (parent) -> {this.mainMenu();};
+		MenuEntry backEntry = new MenuEntry(BACK_ENTRY_TITLE, backAction);
+		
+		MenuAction notificationsAction = (parent) -> {this.notificationsMenu();};
+		MenuEntry notificationsEntry = new MenuEntry("Spazio notifiche", notificationsAction);
+		
+		String username = this.users
+				   .getCurrentUser()
+				   .getUsername();
+		String userString = String.format("User: %s", username);
+		Menu personalSpace = new Menu("Spazio personale", userString, backEntry);
+		personalSpace.addEntry(notificationsEntry);
+		
+		this.currentMenu = personalSpace;
+	}
+	
+	/**
+	 * Crea il menu delle notifiche dell'utente e lo rende il menu corrente
+	 */
+	public void notificationsMenu() {
+		
+		MenuAction backAction = (parent) -> {this.personalSpace();};
+		MenuEntry backEntry = new MenuEntry(BACK_ENTRY_TITLE, backAction);
+		
+		MenuAction deleteAction = (parent) -> {this.deleteNotificationMenu();};
+		MenuEntry deleteEntry = new MenuEntry("Cancella notifiche", deleteAction);
+		
+		Mailbox mailbox = users.getCurrentUser().getMailbox();
+		String menuContent = null;
+		
+		if (!mailbox.isEmpty()) {
+			
+			StringBuffer notifications = new StringBuffer();
+			for (Notification n : mailbox.getEveryNotification()) {
+				notifications.append(LIST_ELEMENT_PREFIX);
+				notifications.append(n.toString());
+				notifications.append("\n");
+			}
+			menuContent = notifications.toString();
+			
+		}
+		else {
+			
+			menuContent = "Nessuna notifica";
+			
+		}
+		
+		Menu notificationsMenu = new Menu("Spazio notifiche", menuContent, backEntry);
+		notificationsMenu.addEntry(deleteEntry);
+		
+		this.currentMenu = notificationsMenu;
+		
+	}
+	
+	/**
+	 * Crea il menu di eliminazione delle notifiche e lo rende il menu corrente
+	 */
+	public void deleteNotificationMenu() {
+		
+		MenuAction backAction = (parent) -> {this.notificationsMenu();};
+		MenuEntry backEntry = new MenuEntry(BACK_ENTRY_TITLE, backAction);
+		
+		Menu deleteMenu = new Menu("Elimina notifiche", "Seleziona la notifica da eliminare", backEntry);
+		
+		Mailbox mailbox = users.getCurrentUser().getMailbox();
+		
+		if (!mailbox.isEmpty()) {
+			
+			for (Notification n : mailbox.getEveryNotification()) {
+				
+				MenuAction deleteAction = (parent) -> {
+					mailbox.delete(n);
+					this.deleteNotificationMenu();
+				};
+				MenuEntry deleteEntry = new MenuEntry(n.toString(), deleteAction);
+				deleteMenu.addEntry(deleteEntry);
+			}
+			
+		}
+		
+		this.currentMenu = deleteMenu;
+		
+	}
+	
+	/**
 	 * Crea il menu principale del programma e lo rende il menu corrente
 	 */
 	public void mainMenu() {
@@ -141,16 +234,11 @@ public class UIManager {
 		MenuEntry quitEntry = new MenuEntry("Logout", quitAction);
 		
 		// Visualizza categorie
-		MenuAction toCategoriesAction = (parent) -> {this.categoriesMenu();};
-		MenuEntry toCategories = new MenuEntry("Visualizza categorie", toCategoriesAction);
+		MenuAction toPersonalSpaceAction = (parent) -> {this.personalSpace();};
+		MenuEntry toPersonalSpaceEntry = new MenuEntry("Spazio personale", toPersonalSpaceAction);
 		
-		String username = this.users
-						   .getCurrentUser()
-						   .getUsername();
-		String title = String.format("User: %s", username);
-		
-		Menu mainMenu = new Menu(title, "Menu principale", quitEntry);
-		mainMenu.addEntry(toCategories);
+		Menu mainMenu = new Menu("Menu principale", null, quitEntry);
+		mainMenu.addEntry(toPersonalSpaceEntry);
 		
 		this.currentMenu = mainMenu;
 				
