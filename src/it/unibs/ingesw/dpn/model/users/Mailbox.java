@@ -70,6 +70,15 @@ public class Mailbox {
 		assert !this.notifications.contains(toDelete);
 	}
 	
+	/**
+	 * Restituisc true se la mailbox dell'utente e' attualmente vuota
+	 * 
+	 * @return true se la mailbox dell'utente e' vuota
+	 */
+	public boolean isEmpty() {
+		return this.notifications.isEmpty();
+	}
+	
 	
 	
 }
