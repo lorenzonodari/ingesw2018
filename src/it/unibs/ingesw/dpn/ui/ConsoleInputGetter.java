@@ -34,5 +34,15 @@ public class ConsoleInputGetter implements InputGetter {
 		
 		return Integer.parseInt(userInput);
 	}
+	
+	/**
+	 * Implementazione del metodo getString di InputGetter
+	 */
+	@Override
+	public String getString() {
+		
+		return this.input.nextLine().trim();
+		
+	}
 
 }

@@ -17,4 +17,11 @@ public interface InputGetter {
 	 */
 	int getInteger(int min, int max) throws NumberFormatException;
 	
+	/**
+	 * Acquisisce una stringa, eliminando gli spazi bianchi a destra del primo carattere e a sinistra dell'ultimo
+	 * 
+	 * @return La stringa acquisita
+	 */
+	String getString();
+	
 }
