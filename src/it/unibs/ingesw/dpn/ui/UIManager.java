@@ -1,8 +1,8 @@
 package it.unibs.ingesw.dpn.ui;
 
 import java.util.List;
-
 import it.unibs.ingesw.dpn.model.ModelManager;
+import it.unibs.ingesw.dpn.model.users.UsersManager;
 import it.unibs.ingesw.dpn.model.categories.Category;
 
 /**
@@ -19,6 +19,7 @@ public class UIManager {
 	private UIRenderer renderer;
 	private InputGetter inputManager;
 	private ModelManager model;
+	private UsersManager users;
 	private Menu currentMenu;
 		
 	/**
@@ -43,6 +44,7 @@ public class UIManager {
 		this.renderer = renderer;
 		this.inputManager = inputManager;
 		this.model = model;
+		this.users = model.getUsersManager();
 		this.currentMenu = null;
 	}
 	
@@ -101,6 +103,9 @@ public class UIManager {
 		
 	}
 	
+	/**
+	 * Crea il menu di login e lo rende il menu corrente
+	 */
 	public void loginMenu() {
 		
 		// Esci
@@ -112,7 +117,7 @@ public class UIManager {
 			this.renderer.renderPrompt("Username: ");
 			
 			String username = this.inputManager.getString();
-			this.model.getUsersManager().login(username);
+			this.users.login(username);
 			mainMenu();
 		};
 		MenuEntry loginEntry = new MenuEntry("Login", loginAction);
@@ -130,7 +135,7 @@ public class UIManager {
 		
 		// Logout
 		MenuAction quitAction = (parent) -> {
-			this.model.getUsersManager().logout();
+			this.users.logout();
 			loginMenu();
 		};
 		MenuEntry quitEntry = new MenuEntry("Logout", quitAction);
@@ -139,8 +144,7 @@ public class UIManager {
 		MenuAction toCategoriesAction = (parent) -> {this.categoriesMenu();};
 		MenuEntry toCategories = new MenuEntry("Visualizza categorie", toCategoriesAction);
 		
-		String username = this.model
-						   .getUsersManager()
+		String username = this.users
 						   .getCurrentUser()
 						   .getUsername();
 		String title = String.format("User: %s", username);
