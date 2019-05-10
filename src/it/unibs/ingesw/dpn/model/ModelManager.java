@@ -2,6 +2,7 @@ package it.unibs.ingesw.dpn.model;
 
 import it.unibs.ingesw.dpn.model.categories.Category;
 import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
+import it.unibs.ingesw.dpn.model.users.UsersManager;
 
 /**
  * Classe che centralizza l'accesso ai dati di dominio. Tramite questa classe
@@ -11,15 +12,27 @@ import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
  */
 public class ModelManager {
 	
-	private CategoryProvider category_provider;
+	private CategoryProvider categoryProvider;
+	private UsersManager usersManager;
 	
 	/**
-	 * Costruttore della classe {@link CategoryProvider}.
-	 * Si occupa di creare i riferimenti alle classi del Model che vengono utilizzate
-	 * per fornire informazioni al resto del programma.
+	 * Istanzia un ModelManager, creando i riferimenti alle classi del che vengono utilizzate
+	 * per fornire informazioni sul modello di dominio al resto del programma.
+	 * 
+	 * Precondizione: usersManager != null
+	 * 
+	 * @param usersManager Il gestore degli utenti da utilizzare
 	 */
-	public ModelManager()  {
-		this.category_provider = CategoryProvider.getProvider();
+	public ModelManager(UsersManager usersManager)  {
+		
+		// Verifica delle precondizioni
+		if (usersManager == null) {
+			throw new IllegalArgumentException();
+		}
+		
+		this.categoryProvider = CategoryProvider.getProvider();
+		this.usersManager = usersManager;
+		
 	}
 	
 	/**
@@ -31,6 +44,15 @@ public class ModelManager {
 	 * @return L'array contenente le categorie registrate
 	 */
 	public Category [] getAllCategories() {
-		return this.category_provider.getAllCategories();
+		return this.categoryProvider.getAllCategories();
+	}
+	
+	/**
+	 * Restituisce il gestore degli utenti associato al model manager.
+	 * 
+	 * @return Il gestore degli utenti in uso
+	 */
+	public UsersManager getUsersManager() {
+		return this.usersManager;
 	}
 }
