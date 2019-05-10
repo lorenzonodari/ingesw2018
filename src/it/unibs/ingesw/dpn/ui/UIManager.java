@@ -88,7 +88,7 @@ public class UIManager {
 	 */
 	public void uiLoop() {
 		
-		mainMenu();
+		loginMenu();
 		while (true) {
 			
 			renderer.renderMenu(currentMenu);
@@ -101,20 +101,51 @@ public class UIManager {
 		
 	}
 	
-	/**
-	 * Crea il menu principale del programma e lo rende il menu corrente
-	 */
-	public void mainMenu() {
+	public void loginMenu() {
 		
 		// Esci
 		MenuAction quitAction = (parent) -> {System.exit(0);};
 		MenuEntry quitEntry = new MenuEntry("Esci", quitAction);
 		
+		// Login
+		MenuAction loginAction = (parent) -> {
+			this.renderer.renderPrompt("Username: ");
+			
+			String username = this.inputManager.getString();
+			this.model.getUsersManager().login(username);
+			mainMenu();
+		};
+		MenuEntry loginEntry = new MenuEntry("Login", loginAction);
+		
+		Menu loginMenu = new Menu("SocialNetwork", "Benvenuto", quitEntry);
+		loginMenu.addEntry(loginEntry);
+		
+		this.currentMenu = loginMenu;
+	}
+	
+	/**
+	 * Crea il menu principale del programma e lo rende il menu corrente
+	 */
+	public void mainMenu() {
+		
+		// Logout
+		MenuAction quitAction = (parent) -> {
+			this.model.getUsersManager().logout();
+			loginMenu();
+		};
+		MenuEntry quitEntry = new MenuEntry("Logout", quitAction);
+		
 		// Visualizza categorie
 		MenuAction toCategoriesAction = (parent) -> {this.categoriesMenu();};
 		MenuEntry toCategories = new MenuEntry("Visualizza categorie", toCategoriesAction);
 		
-		Menu mainMenu = new Menu("SocialNetwork", "Menu principale", quitEntry);
+		String username = this.model
+						   .getUsersManager()
+						   .getCurrentUser()
+						   .getUsername();
+		String title = String.format("User: %s", username);
+		
+		Menu mainMenu = new Menu(title, "Menu principale", quitEntry);
 		mainMenu.addEntry(toCategories);
 		
 		this.currentMenu = mainMenu;
