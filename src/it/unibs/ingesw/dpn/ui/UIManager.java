@@ -233,15 +233,46 @@ public class UIManager {
 		};
 		MenuEntry quitEntry = new MenuEntry("Logout", quitAction);
 		
-		// Visualizza categorie
+		// Spazio personale
 		MenuAction toPersonalSpaceAction = (parent) -> {this.personalSpace();};
 		MenuEntry toPersonalSpaceEntry = new MenuEntry("Spazio personale", toPersonalSpaceAction);
 		
+		// Bacheca
+		MenuAction boardAction = (parent) -> {this.boardMenu();};
+		MenuEntry boardEntry = new MenuEntry("Bacheca", boardAction);
+		
 		Menu mainMenu = new Menu("Menu principale", null, quitEntry);
+		mainMenu.addEntry(boardEntry);
 		mainMenu.addEntry(toPersonalSpaceEntry);
 		
 		this.currentMenu = mainMenu;
 				
+	}
+	
+	/**
+	 * Crea il menu della bacheca e lo rende il menu corrente
+	 */
+	public void boardMenu() {
+		
+		MenuAction backAction = (parent) -> {this.mainMenu();};
+		MenuEntry backEntry = new MenuEntry(BACK_ENTRY_TITLE, backAction);
+		
+		MenuAction eventsAction = (parent) -> {;};
+		MenuEntry eventsEntry = new MenuEntry("Visualizza eventi", eventsAction);
+		
+		MenuAction categoriesAction = (parent) -> {this.categoriesMenu();};
+		MenuEntry categoriesEntry = new MenuEntry("Visualizza categorie", categoriesAction);
+		
+		MenuAction createAction = (parent) -> {;};
+		MenuEntry createEntry = new MenuEntry("Proponi evento", createAction);
+		
+		Menu boardMenu = new Menu("Bacheca", null, backEntry);
+		boardMenu.addEntry(eventsEntry);
+		boardMenu.addEntry(categoriesEntry);
+		boardMenu.addEntry(createEntry);
+		
+		this.currentMenu = boardMenu;
+		
 	}
 	
 	/**
@@ -289,7 +320,7 @@ public class UIManager {
 	public void categoriesMenu() {
 		
 		// Indietro
-		MenuAction backAction = (parent) -> {this.mainMenu();};
+		MenuAction backAction = (parent) -> {this.boardMenu();};
 		MenuEntry backEntry = new MenuEntry(BACK_ENTRY_TITLE, backAction);
 		
 		Menu categoriesMenu = new Menu("Menu categorie", "Categorie di eventi disponibili:", backEntry);
