@@ -25,7 +25,7 @@ public class ConsoleInputGetter implements InputGetter {
 			throw new IllegalArgumentException();
 		}
 		
-		String userInput = input.nextLine();
+		String userInput = input.nextLine().trim();
 		int parsedValue = Integer.parseInt(userInput); // throws NumberFormatException
 		
 		if (parsedValue < min || parsedValue > max) {
