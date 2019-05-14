@@ -32,7 +32,7 @@ public class ConsoleInputGetter implements InputGetter {
 			throw new NumberFormatException();
 		}
 		
-		return Integer.parseInt(userInput);
+		return parsedValue;
 	}
 	
 	/**
