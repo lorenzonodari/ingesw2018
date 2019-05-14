@@ -14,25 +14,37 @@ public class ModelManager {
 	
 	private CategoryProvider categoryProvider;
 	private UsersManager usersManager;
+	private EventBoard eventBoard;
 	
 	/**
 	 * Istanzia un ModelManager, creando i riferimenti alle classi del che vengono utilizzate
 	 * per fornire informazioni sul modello di dominio al resto del programma.
 	 * 
 	 * Precondizione: usersManager != null
+	 * Precondizione: eventBoard != null
 	 * 
 	 * @param usersManager Il gestore degli utenti da utilizzare
 	 */
-	public ModelManager(UsersManager usersManager)  {
+	public ModelManager(UsersManager usersManager, EventBoard eventBoard)  {
 		
 		// Verifica delle precondizioni
-		if (usersManager == null) {
-			throw new IllegalArgumentException();
+		if (usersManager == null || eventBoard == null) {
+			throw new NullPointerException();
 		}
 		
 		this.categoryProvider = CategoryProvider.getProvider();
 		this.usersManager = usersManager;
+		this.eventBoard = eventBoard;
 		
+	}
+	
+	/**
+	 * Restituisce la bacheca gestita da questo ModelManager
+	 * 
+	 * @return La bacheca degli eventi
+	 */
+	public EventBoard getEventBoard() {
+		return this.eventBoard;
 	}
 	
 	/**
