@@ -1,6 +1,5 @@
 package it.unibs.ingesw.dpn.model.users;
 
-import java.util.List;
 import java.util.LinkedList;
 
 /**

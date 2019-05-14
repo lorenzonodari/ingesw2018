@@ -7,25 +7,11 @@ package it.unibs.ingesw.dpn.model.fields;
  *
  */
 public interface FieldValue {
-	
+
 	/**
-	 * Restituisce il valore del campo come stringa, nel formato prestabilito.
+	 * Restituisce una descrizione testuale completa del valore del campo.
 	 * 
-	 * @return Il valore del campo come stringa
-	 */
-	public String getStringValue();
-	
-	/**
-	 * Imposta il valore del campo da una stringa
-	 * 
-	 * @param value Il valore del campo
-	 */
-	void setStringValue(String value);
-	
-	/**
-	 * Restituisce una descrizione testuale del valore del campo.
-	 * 
-	 * @return La descrizione testuale del valore
+	 * @return La descrizione testuale completa del valore
 	 */
 	@Override
 	public String toString();

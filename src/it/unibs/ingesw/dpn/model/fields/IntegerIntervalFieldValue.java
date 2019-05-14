@@ -68,8 +68,9 @@ public class IntegerIntervalFieldValue implements FieldValue {
 		return range;
 	}
 	
+	@Override
 	public String toString() {
-		return String.format("%s %%s; %%s %s", 
+		return String.format("%s%d; %d%s", 
 				this.includeMin ?
 						INCLUDE_MIN_STRING :
 						EXCLUDE_MIN_STRING,
@@ -79,5 +80,6 @@ public class IntegerIntervalFieldValue implements FieldValue {
 						INCLUDE_MAX_STRING :
 						EXCLUDE_MAX_STRING);
 	}
+	
 
 }

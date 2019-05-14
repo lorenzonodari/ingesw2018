@@ -8,6 +8,7 @@ import it.unibs.ingesw.dpn.model.categories.Category;
 import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
 import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
 import it.unibs.ingesw.dpn.model.fields.Field;
+import it.unibs.ingesw.dpn.model.fields.FieldValue;
 import it.unibs.ingesw.dpn.model.users.Mailbox;
 import it.unibs.ingesw.dpn.model.users.Notification;
 import it.unibs.ingesw.dpn.model.users.User;
@@ -44,7 +45,7 @@ public abstract class Event {
 	
 	private final CategoryEnum category;
 	
-	private final Map<Field, Object> valuesMap;
+	private final Map<Field, FieldValue> valuesMap;
 	
 	private EventState state;
 	
@@ -68,7 +69,7 @@ public abstract class Event {
 	 * @param fieldValues le coppie (campo-valore) dell'evento
 	 */
 	@Deprecated 
-	protected Event(CategoryEnum category, Map<Field, Object> fieldValues) {
+	public Event(CategoryEnum category, Map<Field, FieldValue> fieldValues) {
 		if (category == null || fieldValues == null) {
 			throw new IllegalArgumentException(NULL_ARGUMENT_EXCEPTION);
 		}
@@ -109,7 +110,7 @@ public abstract class Event {
 	 * @param category la categoria prescelta
 	 * @param fieldValues le coppie (campo-valore) dell'evento
 	 */
-	protected Event(User creator, CategoryEnum category, Map<Field, Object> fieldValues) {
+	public Event(User creator, CategoryEnum category, Map<Field, FieldValue> fieldValues) {
 		this(category, fieldValues);
 		
 		// Imposto il creatore dell'evento

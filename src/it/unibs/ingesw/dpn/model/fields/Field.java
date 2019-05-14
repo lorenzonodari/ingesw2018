@@ -47,6 +47,9 @@ public class Field {
 	 * @param type Il tipo del valore del campo
 	 */
 	public Field(String name, String description, boolean mandatory, Class<? extends FieldValue> type) {
+		if (name == null || description == null || type == null) {
+			throw new IllegalArgumentException();
+		}
 		this.name = name;
 		this.description = description;
 		this.mandatory = mandatory;

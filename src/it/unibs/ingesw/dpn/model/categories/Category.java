@@ -78,8 +78,8 @@ public class Category {
 	 * 
 	 * @return i campi della categoria
 	 */
-	public Field [] getFieldsArray() {
-		return (Field []) this.fields.toArray();
+	public List<Field> getFields() {
+		return this.fields;
 	}
 
 	/**
