@@ -1,11 +1,16 @@
 package it.unibs.ingesw.dpn.model.events;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import it.unibs.ingesw.dpn.model.categories.Category;
 import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
 import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
 import it.unibs.ingesw.dpn.model.fields.Field;
+import it.unibs.ingesw.dpn.model.users.Mailbox;
+import it.unibs.ingesw.dpn.model.users.Notification;
+import it.unibs.ingesw.dpn.model.users.User;
 
 /**
  * Classe astratta che rappresenta in maniera concettuale un evento generico gestito dal programma.
@@ -30,14 +35,22 @@ public abstract class Event {
 	
 	private static final String NULL_ARGUMENT_EXCEPTION = "Impossibile creare un evento con parametri nulli";
 	private static final String FIELD_NOT_PRESENT_EXCEPTION = "Il campo %s non appartiene alla categoria prevista dall'evento";
+
 	private static final String STATE_CHANGE_LOG = "L'evento \"%s\" ha cambiato il suo stato in: %s";
+	private static final String EVENT_SUBSCRIPTION_MESSAGE = "Ti sei iscritto/a all'evento \"%s\"";
+	private static final String EVENT_STATE_CHANGE_MESSAGE = "L'evento \"%s\" a cui sei iscritto/a ha cambiato il suo stato in: %s";
+	
+	private User creator = null;
 	
 	private final CategoryEnum category;
+	
 	private final Map<Field, Object> valuesMap;
 	
 	private EventState state;
 	
-	private EventHistory history;
+	private final EventHistory history;
+	
+	private final List<Mailbox> mailingList;
 	
 	/**
 	 * Crea un nuovo evento con la relativa categoria.
@@ -54,6 +67,7 @@ public abstract class Event {
 	 * @param category la categoria prescelta
 	 * @param fieldValues le coppie (campo-valore) dell'evento
 	 */
+	@Deprecated 
 	protected Event(CategoryEnum category, Map<Field, Object> fieldValues) {
 		if (category == null || fieldValues == null) {
 			throw new IllegalArgumentException(NULL_ARGUMENT_EXCEPTION);
@@ -68,6 +82,44 @@ public abstract class Event {
 		
 		// Preparo l'oggetto EventHistory che terrà traccia dei cambiamenti di stato
 		this.history = new EventHistory();
+		
+		// Inizializzo la lista di sottoscrittori della mailing list
+		this.mailingList = new LinkedList<>();
+	}
+	
+	/**
+	 * Crea un nuovo evento con la relativa categoria.
+	 * Tale costruttore (o meglio, i costruttori delle classi figlie che fanno affidamento su
+	 * questo costruttore di Event) dovrà essere chiamato da una classe apposita, la cui responsabilità 
+	 * principale sarà creare gli eventi nella maniera prevista dal programma.
+	 * L'utente creatore dell'evento è iscritto automaticamente all'evento e alla relativa mailing list.
+	 * 
+	 * Precondizione: il creatore dell'evento non deve essere un valore nullo. In questo caso verrebbe lanciata un'eccezione.
+	 * 
+	 * Precondizione: la lista di coppie (campo, valore) devono essere istanziate correttamente e devono 
+	 * rispettare i campi previsti dalla categoria. L'unica classe abilitata a fare ciò è la classe {@link EventFactory}.
+	 * 
+	 * Precondizione: i valori dei campi devono essere uguali come numero e come tipo ai campi
+	 * previsti dalla categoria. Questo viene garantito dalla classe adibita alla creazione degli eventi.
+	 * 
+	 * Postcondizione: il creatore dell'evento è iscritto automaticamente alla mailing list dell'evento.
+	 * Da questo momento riceverà in automatico i messaggi di aggiornamento sull'evento.
+	 * 
+	 * @param creator L'utente {@link User} creatore dell'evento
+	 * @param category la categoria prescelta
+	 * @param fieldValues le coppie (campo-valore) dell'evento
+	 */
+	protected Event(User creator, CategoryEnum category, Map<Field, Object> fieldValues) {
+		this(category, fieldValues);
+		
+		// Imposto il creatore dell'evento
+		if (creator == null) {
+			throw new IllegalArgumentException(NULL_ARGUMENT_EXCEPTION);
+		} else {
+			this.creator = creator;
+			// Iscrivo il creatore all'evento
+			this.subscribe(this.creator);
+		}
 	}
 	
 	/**
@@ -131,8 +183,11 @@ public abstract class Event {
 	 * @param message Il messaggio da inviare agli iscritti
 	 */
 	private void notifySubscribers(String message) {
-		
-		// TODO
+		// Cicla su tutte le mailbox
+		for (Mailbox mb : this.mailingList) {
+			// Recapita il messaggio impostato
+			mb.deliver(new Notification(message));
+		}
 	}
 	
 	/**
@@ -154,14 +209,18 @@ public abstract class Event {
 		this.state.onEntry(this);
 		
 		// Aggiorno la storia
-		String message = String.format(
+		String message_log = String.format(
 				STATE_CHANGE_LOG, 
-				this.getFieldValueByName("Titolo"),
+				this.getFieldValueByName("Titolo").toString(),
 				this.state.getStateName().toUpperCase());
-		this.history.addLog(message);
+		this.history.addLog(message_log);
 		
 		// Avviso tutti gli iscritti tramite le relative Mailbox
-		this.notifySubscribers(message);
+		String message_notification = String.format(
+				EVENT_STATE_CHANGE_MESSAGE, 
+				this.getFieldValueByName("Titolo").toString(),
+				this.state.getStateName().toUpperCase());
+		this.notifySubscribers(message_notification);
 	}
 	
 	/**
@@ -207,8 +266,15 @@ public abstract class Event {
 	 * 
 	 * @return true se il partecipante viene aggiunto, false altrimenti.
 	 */
-	public boolean subscribe(/* User newSubscriber */) {
-		// TODO Memorizzazione della mailbox nella mailing list
+	public boolean subscribe(User newSubscriber) {
+		// Aggiunge l'utente alla mailbox
+		this.mailingList.add(newSubscriber.getMailbox());
+		// Comunica all'utente la nuova sottoscrizione
+		newSubscriber.getMailbox().deliver(new Notification(
+				String.format(EVENT_SUBSCRIPTION_MESSAGE, this.getFieldValueByName("Titolo"))
+				));
+		
+		// Effettua un eventuale cambiamento di stato
 		try {
 			this.state.onNewParticipant(this);
 			return true;

@@ -6,6 +6,7 @@ import it.unibs.ingesw.dpn.ui.ConsoleInputGetter;
 import it.unibs.ingesw.dpn.ui.UIRenderer;
 import it.unibs.ingesw.dpn.ui.TextRenderer;
 import it.unibs.ingesw.dpn.model.ModelManager;
+import it.unibs.ingesw.dpn.model.users.UsersManager;
 
 public class Main {
 
@@ -13,7 +14,8 @@ public class Main {
 		
 		UIRenderer renderer = new TextRenderer();
 		InputGetter input = new ConsoleInputGetter();
-		ModelManager model = new ModelManager();
+		UsersManager users = new UsersManager();
+		ModelManager model = new ModelManager(users);
 		UIManager manager = new UIManager(renderer, input, model);
 		manager.uiLoop();
 

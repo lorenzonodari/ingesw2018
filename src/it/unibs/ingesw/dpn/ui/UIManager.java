@@ -1,9 +1,11 @@
 package it.unibs.ingesw.dpn.ui;
 
 import java.util.List;
-
 import it.unibs.ingesw.dpn.model.ModelManager;
+import it.unibs.ingesw.dpn.model.users.UsersManager;
 import it.unibs.ingesw.dpn.model.categories.Category;
+import it.unibs.ingesw.dpn.model.users.Mailbox;
+import it.unibs.ingesw.dpn.model.users.Notification;
 
 /**
  * Classe adibita alla gestione dell'interfaccia utente. In particolare, alle istanze
@@ -14,11 +16,12 @@ public class UIManager {
 	
 	private static final String GENERIC_PROMPT = "Selezionare una voce";
 	private static final String INVALID_CHOICE_PROMPT = "Scelta non valida, riprovare";
-	private static final String BACK_ENTRY_TITLE = "Indietro";
+	private static final String LIST_ELEMENT_PREFIX = " * ";
 	
 	private UIRenderer renderer;
 	private InputGetter inputManager;
 	private ModelManager model;
+	private UsersManager users;
 	private Menu currentMenu;
 		
 	/**
@@ -43,7 +46,9 @@ public class UIManager {
 		this.renderer = renderer;
 		this.inputManager = inputManager;
 		this.model = model;
+		this.users = model.getUsersManager();
 		this.currentMenu = null;
+		
 	}
 	
 	/**
@@ -88,16 +93,125 @@ public class UIManager {
 	 */
 	public void uiLoop() {
 		
-		mainMenu();
+		loginMenu();
 		while (true) {
 			
 			renderer.renderMenu(currentMenu);
 			renderer.renderPrompt(GENERIC_PROMPT);
 			
 			MenuAction action = getUserChoice(currentMenu);
-			action.execute(currentMenu);
+			action.execute();
 			
 		}
+		
+	}
+	
+	/**
+	 * Crea il menu di login e lo rende il menu corrente
+	 */
+	public void loginMenu() {
+		
+		// Callback Esci
+		MenuAction quitAction = () -> {System.exit(0);};
+		
+		// Callback Login
+		MenuAction loginAction = () -> {
+			this.renderer.renderPrompt("Username: ");
+			
+			String username = this.inputManager.getString();
+			this.users.login(username);
+			mainMenu();
+		};
+		
+		Menu loginMenu = new Menu("SocialNetwork", "Benvenuto", "Esci", quitAction);
+		loginMenu.addEntry("Login", loginAction);
+		
+		this.currentMenu = loginMenu;
+	}
+	
+	/**
+	 * Crea il menu associato allo spazio personale dell'utente correntemente connesso al sistema
+	 * e lo rende il menu corrente
+	 */
+	public void personalSpace() {
+		
+		// Callback indietro
+		MenuAction backAction = () -> {this.mainMenu();};
+		
+		// Callback spazio notifiche
+		MenuAction notificationsAction = () -> {this.notificationsMenu();};
+		
+		Menu personalSpace = new Menu("Spazio personale", backAction);
+		personalSpace.addEntry("Spazio notifiche", notificationsAction);
+		
+		this.currentMenu = personalSpace;
+	}
+	
+	/**
+	 * Crea il menu delle notifiche dell'utente e lo rende il menu corrente
+	 */
+	public void notificationsMenu() {
+		
+		// Callback indietro
+		MenuAction backAction = () -> {this.personalSpace();};
+		
+		// Callback Cancella notifiche
+		MenuAction deleteAction = () -> {this.deleteNotificationMenu();};
+		
+		Mailbox mailbox = users.getCurrentUser().getMailbox();
+		String menuContent = null;
+		
+		if (!mailbox.isEmpty()) {
+			
+			StringBuffer notifications = new StringBuffer();
+			for (Notification n : mailbox.getEveryNotification()) {
+				notifications.append(LIST_ELEMENT_PREFIX);
+				notifications.append(n.toString());
+				notifications.append("\n");
+			}
+			menuContent = notifications.toString();
+			
+		}
+		else {
+			
+			menuContent = "Nessuna notifica";
+			
+		}
+		
+		Menu notificationsMenu = new Menu("Spazio notifiche", menuContent, Menu.BACK_ENTRY_TITLE, backAction);
+		notificationsMenu.addEntry("Cancella notifiche", deleteAction);
+		
+		this.currentMenu = notificationsMenu;
+		
+	}
+	
+	/**
+	 * Crea il menu di eliminazione delle notifiche e lo rende il menu corrente
+	 */
+	public void deleteNotificationMenu() {
+		
+		// Callback per tornare allo spazio dell notifiche
+		MenuAction backAction = () -> {this.notificationsMenu();};
+		
+		Menu deleteMenu = new Menu("Elimina notifiche", "Seleziona la notifica da eliminare", Menu.BACK_ENTRY_TITLE, backAction);
+		
+		Mailbox mailbox = users.getCurrentUser().getMailbox();
+		
+		if (!mailbox.isEmpty()) {
+			
+			for (Notification n : mailbox.getEveryNotification()) {
+				
+				MenuAction deleteAction = () -> {
+					mailbox.delete(n);
+					this.deleteNotificationMenu();
+				};
+				
+				deleteMenu.addEntry(n.toString(), deleteAction);
+			}
+			
+		}
+		
+		this.currentMenu = deleteMenu;
 		
 	}
 	
@@ -106,19 +220,50 @@ public class UIManager {
 	 */
 	public void mainMenu() {
 		
-		// Esci
-		MenuAction quitAction = (parent) -> {System.exit(0);};
-		MenuEntry quitEntry = new MenuEntry("Esci", quitAction);
+		// Callback Logout
+		MenuAction quitAction = () -> {
+			this.users.logout();
+			loginMenu();
+		};
 		
-		// Visualizza categorie
-		MenuAction toCategoriesAction = (parent) -> {this.categoriesMenu();};
-		MenuEntry toCategories = new MenuEntry("Visualizza categorie", toCategoriesAction);
+		// Callback Spazio personale
+		MenuAction toPersonalSpaceAction = () -> {this.personalSpace();};
 		
-		Menu mainMenu = new Menu("SocialNetwork", "Menu principale", quitEntry);
-		mainMenu.addEntry(toCategories);
+		// Callback Bacheca
+		MenuAction boardAction = () -> {this.boardMenu();};
+		
+		Menu mainMenu = new Menu("Menu principale", null, "Logout", quitAction);
+		mainMenu.addEntry("Bacheca", boardAction);
+		mainMenu.addEntry("Spazio personale", toPersonalSpaceAction);
 		
 		this.currentMenu = mainMenu;
 				
+	}
+	
+	/**
+	 * Crea il menu della bacheca e lo rende il menu corrente
+	 */
+	public void boardMenu() {
+		
+		// Callback indietro
+		MenuAction backAction = () -> {this.mainMenu();};
+		
+		// Callback visualizza eventi
+		MenuAction eventsAction = () -> {;};
+		
+		// Callback visualizza categorie
+		MenuAction categoriesAction = () -> {this.categoriesMenu();};
+		
+		// Callback proponi evento
+		MenuAction createAction = () -> {;};
+		
+		Menu boardMenu = new Menu("Bacheca", backAction);
+		boardMenu.addEntry("Visualizza eventi", eventsAction);
+		boardMenu.addEntry("Visualizza categorie", categoriesAction);
+		boardMenu.addEntry("Proponi evento", createAction);
+		
+		this.currentMenu = boardMenu;
+		
 	}
 	
 	/**
@@ -128,12 +273,11 @@ public class UIManager {
 	 */
 	public void categoryInfoMenu(Category category) {
 		
-		// Indietro
-		MenuAction backAction = (parent) -> {this.categoryMenu(category);};
-		MenuEntry backEntry = new MenuEntry(BACK_ENTRY_TITLE, backAction);
+		// Callback indietro
+		MenuAction backAction = () -> {this.categoryMenu(category);};
 		
 		String title = String.format("Categoria: %s", category.getName());
-		Menu infoMenu = new Menu(title, category.toString(), backEntry);
+		Menu infoMenu = new Menu(title, category.toString(), Menu.BACK_ENTRY_TITLE, backAction);
 		
 		this.currentMenu = infoMenu;
 	}
@@ -145,16 +289,14 @@ public class UIManager {
 	 */
 	public void categoryMenu(Category category) {
 		
-		// Indietro
-		MenuAction backAction = (parent) -> {this.categoriesMenu();};
-		MenuEntry backEntry = new MenuEntry(BACK_ENTRY_TITLE, backAction);
+		// Callback indietro
+		MenuAction backAction = () -> {this.categoriesMenu();};
 		
 		// Visualizza informazioni dettagliate
-		MenuAction infoAction = (parent) -> {this.categoryInfoMenu(category);};
-		MenuEntry infoEntry = new MenuEntry("Visualizza informazioni dettagliate", infoAction);
+		MenuAction infoAction = () -> {this.categoryInfoMenu(category);};
 		
-		Menu categoryMenu = new Menu("Menu di categoria", category.getName(), backEntry);
-		categoryMenu.addEntry(infoEntry);
+		Menu categoryMenu = new Menu("Menu di categoria", category.getName(), Menu.BACK_ENTRY_TITLE, backAction);
+		categoryMenu.addEntry("Visualizza informazioni dettagliate", infoAction);
 		
 		this.currentMenu = categoryMenu;
 		
@@ -165,18 +307,16 @@ public class UIManager {
 	 */
 	public void categoriesMenu() {
 		
-		// Indietro
-		MenuAction backAction = (parent) -> {this.mainMenu();};
-		MenuEntry backEntry = new MenuEntry(BACK_ENTRY_TITLE, backAction);
+		// Callback indietro
+		MenuAction backAction = () -> {this.boardMenu();};
 		
-		Menu categoriesMenu = new Menu("Menu categorie", "Categorie di eventi disponibili:", backEntry);
+		Menu categoriesMenu = new Menu("Menu categorie", "Categorie di eventi disponibili:", Menu.BACK_ENTRY_TITLE, backAction);
 		
-		// Categorie
+		// Callback categorie
 		for (Category c : model.getAllCategories()) {
 			
-			MenuAction categoryAction = (parent) -> {this.categoryMenu(c);};
-			MenuEntry categoryEntry = new MenuEntry(c.getName(), categoryAction);
-			categoriesMenu.addEntry(categoryEntry);
+			MenuAction categoryAction = () -> {this.categoryMenu(c);};
+			categoriesMenu.addEntry(c.getName(), categoryAction);
 			
 		}
 				

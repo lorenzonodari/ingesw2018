@@ -8,55 +8,77 @@ import java.util.Collections;
  * Classe rappresentante le informazioni contenute in un menu dell'interfaccia utente.
  * Si noti che le istanze di questa classe sono immutabili.
  * 
+ * Ogni menu e' caratterizzato da un titolo, un contenuto testuale opzionale, delle 
+ * opzioni selezionabili ({@link MenuEntry}) e da una opzione speciale per l'uscita dal menu.
+ * 
  */
 public class Menu {
 	
+	public static final String BACK_ENTRY_TITLE = "Indietro";
+	
 	private String title;
-	private String description;
+	private String text;
 	private LinkedList<MenuEntry> entries;
 	private MenuEntry quitEntry;
 	
 	/**
-	 * Crea un nuovo menu vuoto. Il titolo e la descrizione del menu non possono essere vuoti.
-	 * Ogni menu deve inoltre essere obbligatoriamente accompagnato da una voce che permetta all'utente
-	 * di uscire dal menu.
+	 * Crea un nuovo menu. Il titolo non puo' essere vuoto.
+	 * Se il menu non prevede alcun testo al di fuori delle opzioni, il parametro text puo'
+	 * essere null.
 	 * 
 	 * Precondizione: title != null
-	 * Precondizione: description != null
-	 * Precondizione: quitEntry != null
+	 * Precondizione: backTitle != null
+	 * Precondizione: backAction != null
 	 * 
 	 * @param title Il titolo del menu
-	 * @param description La descrizione del menu
-	 * @param quitAction L'opzione di uscita dal menu
+	 * @param text Il testo del menu, o null se non e' necessario
+	 * @param backTitle Il nome dell'opzione di uscita
+	 * @param backAction La callback di uscita dal menu
 	 */
-	public Menu(String title, String description, MenuEntry quitEntry) {
+	public Menu(String title, String text, String backTitle, MenuAction backAction) {
 		
 		// Verifica delle precondizioni
-		if (title == null || description == null || quitEntry == null) {
+		if (title == null || backTitle == null || backAction == null) {
 			throw new NullPointerException();
 		}
 		
 		this.title = title;
-		this.description = description;
-		this.quitEntry = quitEntry;
+		this.text = text != null ? text : "";
+		this.quitEntry = new MenuEntry(backTitle, backAction);
 		this.entries = new LinkedList<MenuEntry>();
 	}
 	
 	/**
-	 * Aggiunge una nuova voce al menu
+	 * Crea un nuovo menu dal titolo dato, privo di contenuto testuale. Il nome dell'opzione di uscita
+	 * dal menu e' assegnato di default.
 	 * 
-	 * Precondizione: entry != null
+	 * Precondizione: title != null
+	 * Precondizione: backAction != null
+	 * 
+	 * @param title Il titolo del menu
+	 * @param backAction La callback di uscita dal menu
+	 */
+	public Menu(String title, MenuAction backAction) {
+		this(title, null, BACK_ENTRY_TITLE, backAction);
+	}
+	
+	/**
+	 * Aggiunge una nuova voce al menu, dato il nome e l'azione associata
+	 * 
+	 * Precondizione: title != null
+	 * Precondizione: action != null
 	 * Postcondizione: this.entries.contains(entry) == true
 	 * 
 	 * @param entry La voce da aggiungere al menu
 	 */
-	public void addEntry(MenuEntry entry) {
+	public void addEntry(String title, MenuAction action) {
 		
-		// Verifica della precondizione
-		if (entry == null) {
-			throw new IllegalArgumentException();
+		// Verifica delle precondizioni
+		if (title == null || action == null) {
+			throw new NullPointerException();
 		}
 		
+		MenuEntry entry = new MenuEntry(title, action);
 		this.entries.add(entry);
 		
 		
@@ -69,7 +91,7 @@ public class Menu {
 	}
 	
 	public String getDescription() {
-		return this.description;
+		return this.text;
 	}
 	
 	public MenuEntry getQuitEntry() {
