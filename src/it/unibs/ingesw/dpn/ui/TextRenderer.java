@@ -50,12 +50,6 @@ public class TextRenderer implements UIRenderer {
 	@Override
 	public void renderEmptyPrompt() {
 		System.out.print(CLI_PROMPT);
-	}	
-	
-	@Override
-	public void renderPrompt(String question) {
-		System.out.println(question);
-		System.out.print(CLI_PROMPT);
 	}
 
 	@Override

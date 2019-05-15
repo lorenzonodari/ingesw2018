@@ -92,7 +92,7 @@ public class UIManager {
 			}
 			catch (NumberFormatException ex) {
 				
-				renderer.renderPrompt(INVALID_CHOICE_PROMPT);
+				renderer.renderText(INVALID_CHOICE_PROMPT);
 			}
 			
 		} while (!done);
@@ -114,7 +114,7 @@ public class UIManager {
 		while (true) {
 			
 			renderer.renderMenu(currentMenu);
-			renderer.renderPrompt(GENERIC_PROMPT);
+			renderer.renderText(GENERIC_PROMPT);
 			
 			MenuAction action = getUserChoice(currentMenu);
 			action.execute();
@@ -133,7 +133,7 @@ public class UIManager {
 		
 		// Callback Login
 		MenuAction loginAction = () -> {
-			this.renderer.renderPrompt("Username: ");
+			this.renderer.renderText("Username: ");
 			
 			String username = this.inputManager.getString();
 			this.users.login(username);
@@ -349,6 +349,12 @@ public class UIManager {
 			
 	}
 	
+	/**
+	 * Crea il menu per la creazione dell'evento.
+	 * 
+	 * @param category La categoria dell'evento
+	 * @param fieldValues Le coppie <Campo, Valore> inizializzate finora.
+	 */
 	public void createEventMenu(CategoryEnum category, Map<Field, FieldValue> fieldValues) {
 		
 		// Callback per abortire la creazione dell'evento
@@ -387,7 +393,7 @@ public class UIManager {
 			// Creo la entry
 			String entryTitle = String.format(
 					"%-35s : %s",
-					f.getName(),
+					f.getName() + ((f.isMandatory()) ? " (*)" : ""),
 					fieldValueString);
 			createEventMenu.addEntry(entryTitle, fieldAction);
 			
@@ -454,19 +460,21 @@ public class UIManager {
 				switch (field.getType().getSimpleName()) {
 				
 				case "DateFieldValue" :
-					renderer.renderPrompt("Inserisci l'anno");
+					// Anno, mese, giorno
+					renderer.renderText("Inserisci l'anno");
 					int anno = inputManager.getInteger(1900, 2200);
-					renderer.renderPrompt("Inserisci il mese");
-					int mese = inputManager.getInteger(1, 12);
-					renderer.renderPrompt("Inserisci il giorno");
+					renderer.renderText("Inserisci il mese");
+					int mese = inputManager.getInteger(1, 12) - 1;
+					renderer.renderText("Inserisci il giorno");
 					int giorno = inputManager.getInteger(1, 31);
-					renderer.renderPrompt("Inserisci l'orario in formato (HH:MM)");
-					String ora = inputManager.getString();
-					Scanner hourScan = new Scanner(ora);
-					int ore = hourScan.nextInt();
-					int minuti = hourScan.nextInt();
+					
+					// Orario
+					renderer.renderText("Inserisci l'orario in formato (HH:MM)");
+					String ora = inputManager.getMatchingString("([0-1][0-9]|2[0-3]):([0-5][0-9])");
+					int ore = Integer.parseInt(ora.substring(0, 2));
+					int minuti = Integer.parseInt(ora.substring(3, 5));
+					
 					java.util.Calendar cal = java.util.Calendar.getInstance();
-					cal.setTimeInMillis(0);
 					cal.set(anno, mese, giorno, ore, minuti, 0);
 					DateFieldValue date = new DateFieldValue(cal.getTimeInMillis());
 					this.temporaryFieldValue = date;
@@ -474,16 +482,16 @@ public class UIManager {
 					break;
 					
 				case "IntegerFieldValue" :
-					renderer.renderPrompt("Inserisci il valore numerico");
+					renderer.renderText("Inserisci il valore numerico");
 					this.temporaryFieldValue = new IntegerFieldValue(
 							inputManager.getInteger(0, Integer.MAX_VALUE));
 					checkIntegrityFlag = true;
 					break;
 					
 				case "IntegerIntervalFieldValue" :
-					renderer.renderPrompt("Inserisci il valore minimo");
+					renderer.renderText("Inserisci il valore minimo");
 					int min = inputManager.getInteger(0, Integer.MAX_VALUE);
-					renderer.renderPrompt("Inserisci il valore massimo");
+					renderer.renderText("Inserisci il valore massimo");
 					int max = inputManager.getInteger(0, Integer.MAX_VALUE);
 					if (min <= max) {
 						this.temporaryFieldValue = new IntegerIntervalFieldValue(min, max);
@@ -494,7 +502,7 @@ public class UIManager {
 					break;
 					
 				case "MoneyAmountFieldValue" :
-					renderer.renderPrompt("Inserisici il valore in virgola mobile");
+					renderer.renderText("Inserisici il valore in virgola mobile");
 					try {
 						this.temporaryFieldValue = new MoneyAmountFieldValue(
 								inputManager.getFloat(Float.MIN_VALUE, Float.MAX_VALUE));

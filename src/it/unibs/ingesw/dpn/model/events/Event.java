@@ -78,14 +78,14 @@ public abstract class Event {
 		this.category = category;
 		this.valuesMap = fieldValues;
 		
-		// A questo punto posso settare lo stato come "valido".
-		this.setState(new ValidState());
-		
 		// Preparo l'oggetto EventHistory che terrà traccia dei cambiamenti di stato
 		this.history = new EventHistory();
 		
 		// Inizializzo la lista di sottoscrittori della mailing list
 		this.mailingList = new LinkedList<>();
+		
+		// A questo punto posso settare lo stato come "valido".
+		this.setState(new ValidState());
 	}
 	
 	/**
@@ -152,7 +152,7 @@ public abstract class Event {
 	 * @param chosenFieldName il nome del campo di cui si vuole conoscere il valore
 	 * @return Il valore del campo
 	 */
-	public Object getFieldValueByName(String chosenFieldName) {
+	public FieldValue getFieldValueByName(String chosenFieldName) {
 		// Recupero l'oggetto Category con tutti i campi
 		Category cat = CategoryProvider.getProvider().getCategory(this.category);
 		Field field = cat.getFieldByName(chosenFieldName);
@@ -209,17 +209,22 @@ public abstract class Event {
 		// Effettuo le attività d'entrata nello stato
 		this.state.onEntry(this);
 		
+		FieldValue fv;
+		String titolo = ((fv = this.getFieldValueByName("Titolo")) != null) ?
+				fv.toString() :
+				"Senza titolo";
+		
 		// Aggiorno la storia
 		String message_log = String.format(
 				STATE_CHANGE_LOG, 
-				this.getFieldValueByName("Titolo").toString(),
+				titolo,
 				this.state.getStateName().toUpperCase());
 		this.history.addLog(message_log);
 		
 		// Avviso tutti gli iscritti tramite le relative Mailbox
 		String message_notification = String.format(
 				EVENT_STATE_CHANGE_MESSAGE, 
-				this.getFieldValueByName("Titolo").toString(),
+				titolo,
 				this.state.getStateName().toUpperCase());
 		this.notifySubscribers(message_notification);
 	}
