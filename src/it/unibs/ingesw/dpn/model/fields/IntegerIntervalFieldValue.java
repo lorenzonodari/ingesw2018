@@ -1,5 +1,6 @@
 package it.unibs.ingesw.dpn.model.fields;
 
+import java.io.Serializable;
 /**
  * Classe che rappresenta un intervallo di valori compreso fra due interi.
  * I due estremi possono essere inclusi o esclusi a piacere.
@@ -9,8 +10,13 @@ package it.unibs.ingesw.dpn.model.fields;
  * @author Michele Dusi, Lorenzo Nodari, Emanuele Poggi
  *
  */
-public class IntegerIntervalFieldValue implements FieldValue {
+public class IntegerIntervalFieldValue implements FieldValue, Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -9171350901257423215L;
+	
 	private static final String INCLUDE_MIN_STRING = "[";
 	private static final String EXCLUDE_MIN_STRING = "]";
 	private static final String INCLUDE_MAX_STRING = "]";

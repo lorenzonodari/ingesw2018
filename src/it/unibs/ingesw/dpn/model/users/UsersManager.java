@@ -1,15 +1,23 @@
 package it.unibs.ingesw.dpn.model.users;
 
+import java.io.Serializable;
 import java.util.LinkedList;
-
 /**
  * Classe adibita alla gestione dei dati relativi agli utenti e dei login/logout
  */
-public class UsersManager {
+public class UsersManager implements Serializable {
 	
-	private User currentUser;		// Utente correntemente loggato
-	private LinkedList<User> users; // Lista degli utenti registrati
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5696141226031129287L;
 	
+	private transient User currentUser;		// Utente correntemente loggato
+	private LinkedList<User> users; 		// Lista degli utenti registrati
+	
+	/**
+	 * Istanzia un nuovo gestore degli utenti. Alla creazione, tale gestore non avra' alcun utente associato.
+	 */
 	public UsersManager() {
 		
 		this.currentUser = null;
@@ -28,7 +36,7 @@ public class UsersManager {
 		
 		User result = null;
 		for (User user : this.users) {
-			if (user.getUsername() == username) {
+			if (user.getUsername().equals(username)) {
 				result = user;
 				break;
 			}

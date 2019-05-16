@@ -1,5 +1,6 @@
 package it.unibs.ingesw.dpn.model.fields;
 
+import java.io.Serializable;
 import it.unibs.ingesw.dpn.model.categories.Category;
 import it.unibs.ingesw.dpn.ui.InputGetter;
 import it.unibs.ingesw.dpn.ui.UIRenderer;
@@ -14,8 +15,10 @@ import it.unibs.ingesw.dpn.ui.UIRenderer;
  * @author Michele Dusi, Lorenzo Nodari, Emanuele Poggi
  * 
  */
-public class Field<T extends FieldValue> {
+public class Field<T extends FieldValue> implements Serializable {
 	
+	private static final long serialVersionUID = -7411339597195983805L;
+
 	private static final String TO_STRING =
 			  "Nome:           %s\n"
 			+ "Descrizione:    %s\n"

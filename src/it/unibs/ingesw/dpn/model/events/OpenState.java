@@ -1,5 +1,8 @@
 package it.unibs.ingesw.dpn.model.events;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -12,10 +15,15 @@ import it.unibs.ingesw.dpn.model.fields.IntegerFieldValue;
  * @author Michele Dusi
  *
  */
-public class OpenState implements EventState {
+public class OpenState implements EventState, Serializable {
 
-	private int currentSubscribers;
-	private Timer timeoutTimer;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8082128824977480600L;
+	
+	private int currentSubscribers = 0;
+	private transient Timer timeoutTimer;
 	
 	private static final String TIMER_NAME = "TimeoutTimer_";
 
@@ -33,8 +41,6 @@ public class OpenState implements EventState {
 	 */
 	@Override
 	public void onEntry(Event e) {
-		// Inizializzo il numero di iscritti a 0.
-		this.currentSubscribers = 0;
 		
 		// Preparo il timer di scadenza del termine ultimo di iscrizioni
 		// Lo configuro in modo che venga eseguito come daemon (grazie al parametro con valore true).
@@ -44,14 +50,7 @@ public class OpenState implements EventState {
 		Date timeoutDate = (Date) e.getFieldValueByName("Termine ultimo di iscrizione");
 		
 		// Schedulo il cambiamento di stato da OPEN a FAILED
-		this.timeoutTimer.schedule(new TimerTask() {
-
-			@Override
-			public void run() {
-				e.setState(new FailedState());
-			}
-			
-		}, timeoutDate);
+		Event.scheduleStateChange(e, EventState.FAILED, timeoutTimer, timeoutDate);
 		
 	}
 	

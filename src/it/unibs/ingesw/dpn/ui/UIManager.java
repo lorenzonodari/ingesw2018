@@ -1,20 +1,26 @@
 package it.unibs.ingesw.dpn.ui;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
-
+import java.util.Scanner;
+import it.unibs.ingesw.dpn.Main;
 import it.unibs.ingesw.dpn.model.ModelManager;
 import it.unibs.ingesw.dpn.model.users.UsersManager;
+import it.unibs.ingesw.dpn.model.users.Mailbox;
+import it.unibs.ingesw.dpn.model.users.Notification;
 import it.unibs.ingesw.dpn.model.categories.Category;
 import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
 import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
 import it.unibs.ingesw.dpn.model.events.Event;
+import it.unibs.ingesw.dpn.model.events.EventState;
 import it.unibs.ingesw.dpn.model.events.EventFactory;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fields.FieldValue;
-import it.unibs.ingesw.dpn.model.users.Mailbox;
-import it.unibs.ingesw.dpn.model.users.Notification;
+import it.unibs.ingesw.dpn.model.fields.IntegerFieldValue;
+import it.unibs.ingesw.dpn.model.fields.IntegerIntervalFieldValue;
+import it.unibs.ingesw.dpn.model.fields.MoneyAmountFieldValue;
+import it.unibs.ingesw.dpn.model.fields.StringFieldValue;
 
 /**
  * Classe adibita alla gestione dell'interfaccia utente. In particolare, alle istanze
@@ -39,23 +45,19 @@ public class UIManager {
 	 * Crea un nuovo UIManager utilizzando il renderer dato per la creazione
 	 * dell'interfaccia utente, il gestore di input utente e il gestorel del model dati.
 	 * 
-	 * Precondizione: renderer != null
-	 * Precondizione: inputManager != null
 	 * Precondizione: model != null
 	 * 
-	 * @param renderer Il renderer {@link UIRenderer} da utilizzare
-	 * @param inputManager Il gestore dell'input utente da utilizzare
 	 * @param model Il gestore dei dati di dominio da utilizzare
 	 */
-	public UIManager(UIRenderer renderer, InputGetter inputManager, ModelManager model) {
+	public UIManager(ModelManager model) {
 		
 		// Verifica della precondizione
-		if (renderer == null || inputManager == null || model == null) {
+		if (model == null) {
 			throw new NullPointerException();
 		}
 		
-		this.renderer = renderer;
-		this.inputManager = inputManager;
+		this.renderer = new TextRenderer();
+		this.inputManager = new ConsoleInputGetter(renderer);
 		this.model = model;
 		this.users = model.getUsersManager();
 		this.currentMenu = null;
@@ -123,7 +125,7 @@ public class UIManager {
 	public void loginMenu() {
 		
 		// Callback Esci
-		MenuAction quitAction = () -> {System.exit(0);};
+		MenuAction quitAction = () -> {Main.terminate(Main.NO_ERROR_EXIT_CODE);};
 		
 		// Callback Login
 		MenuAction loginAction = () -> {
@@ -260,21 +262,14 @@ public class UIManager {
 		MenuAction backAction = () -> {this.mainMenu();};
 		
 		// Callback visualizza eventi
-		MenuAction eventsAction = () -> {;};
+		MenuAction eventsAction = () -> {this.eventView();;};
 		
 		// Callback visualizza categorie
 		MenuAction categoriesAction = () -> {this.categoriesMenu();};
+	
 		
 		// Callback proponi evento
-		MenuAction createAction = () -> {
-			Map<Field<? extends FieldValue>, FieldValue> fieldValuesMap = new HashMap<>();
-			for (Field<? extends FieldValue> f : CategoryProvider.getProvider().getCategory(CategoryEnum.PARTITA_DI_CALCIO).getFields()) {
-				fieldValuesMap.put(f, null);
-				System.out.println((f == null) ? "NULL" : f.toString()); 
-			}
-			this.createEventMenu(
-					CategoryEnum.PARTITA_DI_CALCIO, 
-					fieldValuesMap);};
+		MenuAction createAction = () -> {this.categorySelectorMenu();};
 		
 		Menu boardMenu = new Menu("Bacheca", backAction);
 		boardMenu.addEntry("Visualizza eventi", eventsAction);
@@ -340,6 +335,67 @@ public class UIManager {
 		}
 				
 		this.currentMenu = categoriesMenu;
+			
+	}
+	/**
+	 * Crea un generico menu di dialogo e lo rende il menu corrente. Tali menu sono utilizzati
+	 * per presentare semplici messaggi di conferma o avviso all'utente
+	 * 
+	 * @param dialog Il messaggio da presentare all'utente
+	 * @param backTitle Il nome dell'opzione di uscita
+	 * @param backAction L'azione da compiere all'uscita dal menu
+	 */
+	public void dialog(String dialog, String backTitle, MenuAction backAction) {
+		
+		Menu dialogMenu = new Menu (dialog, null, backTitle, backAction);
+		this.currentMenu = dialogMenu;
+			
+	}
+	
+	/**
+	 * Crea il menu dedicato all'evento
+	 * 
+	 * @param evento a cui punta il menu
+	 */
+	public void eventMenu(Event event) {
+		
+		// Callback indietro
+		MenuAction backAction = () -> {this.eventView();};
+		
+		// Iscriviti azione
+		MenuAction subscriptionAction = () -> {
+			MenuAction dialogBackAction = () -> {this.eventMenu(event);};
+			int i = model.getEventBoard().addSubscription(event, model.getUsersManager().getCurrentUser());
+			this.dialog(i == 0 ? "ti sei inscritto all'evento correttamente" : "eri già inscritto all'evento", dialogBackAction);
+			
+		};
+		
+		Menu eventMenu = new Menu("Azioni su evento", event.getFieldValueByName("Titolo").toString(), Menu.BACK_ENTRY_TITLE, backAction);
+		eventMenu.addEntry("Inscriviti all'evento", subscriptionAction);
+		
+		this.currentMenu = eventMenu;
+		
+	}
+	
+	/**
+	 * Crea il menu della bacheca degli eventi
+	 */
+	public void eventView() {
+		
+		// Callback indietro
+		MenuAction backAction = () -> {this.boardMenu();};
+		
+		Menu eventView = new Menu("Lista eventi aperti", null, Menu.BACK_ENTRY_TITLE, backAction);
+		
+		// Callback categorie
+		for (Event open : model.getEventBoard().getEventsByState(EventState.OPEN)) {
+			
+			MenuAction eventAction = () -> {this.eventMenu(open);};
+			eventView.addEntry(open.getFieldValueByName("Titolo").toString(), eventAction);
+			
+		}
+				
+		this.currentMenu = eventView;
 			
 	}
 	
@@ -521,6 +577,30 @@ public class UIManager {
 			
 		}
 		*/
+		
+	}
+	public void categorySelectorMenu() {
+		
+		// Callback indietro
+		MenuAction backAction = () -> {this.boardMenu();};
+		
+		Menu categorySelector = new Menu("Selezionare una categoria per la creazione dell'evento", null, Menu.BACK_ENTRY_TITLE, backAction);
+		
+		// Callback categorie
+		for (CategoryEnum c : CategoryEnum.values()) {
+			
+			HashMap<Field<? extends FieldValue>, FieldValue> map = new HashMap<>();
+			MenuAction categorySelectionAction = () -> {
+				for (Field<? extends FieldValue> f : CategoryProvider.getProvider().getCategory(c).getFields()) {
+					map.put(f, null);
+					System.out.println((f == null) ? "NULL" : f.toString()); 
+				};
+				this.createEventMenu(c, map);};
+			categorySelector.addEntry(c.toString(), categorySelectionAction);
+			
+		}
+				
+		this.currentMenu = categorySelector;
 		
 	}
 	

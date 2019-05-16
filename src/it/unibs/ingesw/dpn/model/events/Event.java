@@ -1,8 +1,12 @@
 package it.unibs.ingesw.dpn.model.events;
 
+import java.io.Serializable;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import it.unibs.ingesw.dpn.model.categories.Category;
 import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
@@ -32,7 +36,12 @@ import it.unibs.ingesw.dpn.model.users.User;
  * @author Michele Dusi, Lorenzo Nodari, Emanuele Poggi
  *
  */
-public abstract class Event {
+public abstract class Event implements Serializable {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6018235806371842633L;
 	
 	private static final String NULL_ARGUMENT_EXCEPTION = "Impossibile creare un evento con parametri nulli";
 	private static final String FIELD_NOT_PRESENT_EXCEPTION = "Il campo %s non appartiene alla categoria prevista dall'evento";
@@ -192,6 +201,15 @@ public abstract class Event {
 	}
 	
 	/**
+	 * Reimposta lo stato corretto dell'evento. Questo metodo DEVE essere invocato su ogni evento
+	 * quando questi sono caricati da disco mediante serializzazione.
+	 */
+	public void resetState() {
+		
+		this.state.onEntry(this);
+	}
+	
+	/**
 	 * Modifica lo stato dell'evento, secondo il pattern "State".
 	 * Necessita di un'implementazione concreta dell'interfaccia {@link EventState} come parametro.
 	 * 
@@ -291,6 +309,56 @@ public abstract class Event {
 	}
 	public String getEventState() {
 		return state.getStateName();
+	}
+	
+	/**
+	 * Metodo di utilita' utilizzato per avviare il timer di cambio stato di un evento
+	 * 
+	 * @param event L'evento di riferimento
+	 * @param newState Il nome del nuovo stato, come restituito da {@link EventState.getStateName()}
+	 * @param timer Il timer da avviare
+	 * @param timeout Il timeout da impostare al timer
+	 */
+	static void scheduleStateChange(Event event, String state, Timer timer, Date timeout) {
+		
+		EventState newState;
+		
+		switch (state) {
+		
+			case EventState.VALID:
+				newState = new ValidState();
+				break;
+				
+			case EventState.OPEN:
+				newState = new OpenState();
+				break;
+				
+			case EventState.CLOSED:
+				newState = new ClosedState();
+				break;
+				
+			case EventState.FAILED:
+				newState = new FailedState();
+				break;
+				
+			case EventState.ENDED:
+				newState = new EndedState();
+				break;
+				
+			default:
+				newState = null;
+				throw new IllegalArgumentException();
+			
+		}
+		
+		timer.schedule(new TimerTask() {
+			
+			@Override
+			public void run() {
+				event.setState(newState);
+			};
+			
+		}, timeout);
 	}
 
 }

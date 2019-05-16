@@ -1,5 +1,6 @@
 package it.unibs.ingesw.dpn.model.users;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 
@@ -7,8 +8,13 @@ import java.text.SimpleDateFormat;
  * Classe utilizzata per rappresentare le varie notifiche inviate agli utenti del sistema.
  * Una volta creata, un'istanza di Notification non puo' essere modificata.
  */
-public class Notification {
+public class Notification implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -217046894204205232L;
+
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("d/M - H:m");
 
 	private String message;

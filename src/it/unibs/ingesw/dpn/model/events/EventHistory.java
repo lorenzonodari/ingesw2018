@@ -1,5 +1,6 @@
 package it.unibs.ingesw.dpn.model.events;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Deque;
 import java.util.Iterator;
@@ -15,8 +16,13 @@ import java.util.LinkedList;
  * @author Michele Dusi
  *
  */
-public class EventHistory {
+public class EventHistory implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 454808708758724207L;
+
 	/**
 	 * Classe interna che implementa un singolo avvenimento da memorizzare all'interno della storia.
 	 * E' di fatto una struttura che accorpa un messaggio testuale e una data.
@@ -24,7 +30,12 @@ public class EventHistory {
 	 * @author Michele Dusi
 	 *
 	 */
-	private class Log {
+	private class Log implements Serializable {
+		
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -6309804809014983435L;
 		
 		private static final String NULL_MESSAGE_EXCEPTION = "Impossibile creare un Log con un messaggio null";
 		private static final String LOG_FORMAT = "%s - %s";

@@ -1,24 +1,43 @@
 package it.unibs.ingesw.dpn;
 
+import java.io.File;
+
 import it.unibs.ingesw.dpn.ui.UIManager;
-import it.unibs.ingesw.dpn.ui.InputGetter;
-import it.unibs.ingesw.dpn.ui.ConsoleInputGetter;
-import it.unibs.ingesw.dpn.ui.UIRenderer;
-import it.unibs.ingesw.dpn.ui.TextRenderer;
 import it.unibs.ingesw.dpn.model.ModelManager;
-import it.unibs.ingesw.dpn.model.users.UsersManager;
 
 public class Main {
+	
+	public static final int NO_ERROR_EXIT_CODE = 0;
+	public static final int DB_LOAD_ERROR_EXIT_CODE = 1;
+	public static final int DB_SAVE_ERROR_EXIT_CODE = 2;
+	
+	public static final File DEFAULT_DATABASE = new File(System.getProperty("user.home"), "model.db");
+	
+	private static ModelManager modelManager = null;
+	private static UIManager uiManager = null;
 
 	public static void main(String[] args) {
 		
-		UIRenderer renderer = new TextRenderer();
-		InputGetter input = new ConsoleInputGetter(renderer);
-		UsersManager users = new UsersManager();
-		ModelManager model = new ModelManager(users);
-		UIManager manager = new UIManager(renderer, input, model);
-		manager.uiLoop();
+		if (DEFAULT_DATABASE.exists() && DEFAULT_DATABASE.canRead()) {
+			
+			modelManager = ModelManager.loadFromDisk(DEFAULT_DATABASE);
+			
+		}
+		else {
+			
+			modelManager = new ModelManager();
+		}
+		
+		uiManager = new UIManager(modelManager);
+		uiManager.uiLoop();
 
+	}
+	
+	public static void terminate(int status) {
+		
+		modelManager.saveToDisk(DEFAULT_DATABASE);
+		System.exit(status);
+		
 	}
 
 }

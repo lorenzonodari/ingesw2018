@@ -1,8 +1,8 @@
 package it.unibs.ingesw.dpn.model.events;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * Classe che modellizza il comportamento di un evento {@link Event} nello stato CLOSED.
@@ -10,12 +10,17 @@ import java.util.TimerTask;
  * @author Michele Dusi
  *
  */
-public class ClosedState implements EventState {
+public class ClosedState implements EventState, Serializable {
 	
-	private Timer endingTimer;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1343313668189070063L;
 	
 	private static final String TIMER_NAME = "EndingTimer_";
 
+	private transient Timer endingTimer;
+	
 	@Override
 	public String getStateName() {
 		return EventState.CLOSED;
@@ -33,18 +38,11 @@ public class ClosedState implements EventState {
 		// Lo configuro in modo che venga eseguito come daemon (grazie al parametro con valore true).
 		this.endingTimer = new Timer(TIMER_NAME + e.hashCode(), true);
 		
-		// Ricavo la data del termine ultimo di iscrizione
+		// Ricavo la data della conclusione dell'evento
 		Date endingDate = (Date) e.getFieldValueByName("Data e ora conclusive");
 		
 		// Schedulo il cambiamento di stato da CLOSED a ENDED
-		this.endingTimer.schedule(new TimerTask() {
-
-			@Override
-			public void run() {
-				e.setState(new EndedState());
-			}
-			
-		}, endingDate);
+		Event.scheduleStateChange(e, EventState.ENDED, endingTimer, endingDate);
 		
 	}
 

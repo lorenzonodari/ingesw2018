@@ -1,14 +1,18 @@
 package it.unibs.ingesw.dpn.model.fields;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
 import it.unibs.ingesw.dpn.ui.InputGetter;
 import it.unibs.ingesw.dpn.ui.UIRenderer;
 
-public class DateFieldValue extends Date implements FieldValue {
+public class DateFieldValue extends Date implements FieldValue, Serializable {
 
-	private static final long serialVersionUID = 123L;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 715073002238005354L;
+	
 	private static final String DATE_FORMAT_STRING = "dd/MM/yyyy - HH:mm";
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(DATE_FORMAT_STRING);
 
