@@ -366,7 +366,7 @@ public class UIManager {
 		MenuAction subscriptionAction = () -> {
 			MenuAction dialogBackAction = () -> {this.eventMenu(event);};
 			model.getEventBoard().addSubscription(event, model.getUsersManager().getCurrentUser());
-			this.dialog("ti sei inscritto all'evento correttamente", dialogBackAction);
+			this.dialog("Iscrizione effettuata correttamente", Menu.BACK_ENTRY_TITLE, dialogBackAction);
 			
 		};
 		
