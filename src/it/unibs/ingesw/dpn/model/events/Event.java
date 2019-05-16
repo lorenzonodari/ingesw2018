@@ -45,7 +45,7 @@ public abstract class Event {
 	
 	private final CategoryEnum category;
 	
-	private final Map<Field, FieldValue> valuesMap;
+	private final Map<Field<? extends FieldValue>, FieldValue> valuesMap;
 	
 	private EventState state;
 	
@@ -69,7 +69,7 @@ public abstract class Event {
 	 * @param fieldValues le coppie (campo-valore) dell'evento
 	 */
 	@Deprecated 
-	public Event(CategoryEnum category, Map<Field, FieldValue> fieldValues) {
+	public Event(CategoryEnum category, Map<Field<? extends FieldValue>, FieldValue> fieldValues) {
 		if (category == null || fieldValues == null) {
 			throw new IllegalArgumentException(NULL_ARGUMENT_EXCEPTION);
 		}
@@ -110,7 +110,7 @@ public abstract class Event {
 	 * @param category la categoria prescelta
 	 * @param fieldValues le coppie (campo-valore) dell'evento
 	 */
-	public Event(User creator, CategoryEnum category, Map<Field, FieldValue> fieldValues) {
+	public Event(User creator, CategoryEnum category, Map<Field<? extends FieldValue>, FieldValue> fieldValues) {
 		this(category, fieldValues);
 		
 		// Imposto il creatore dell'evento
@@ -132,7 +132,7 @@ public abstract class Event {
 	 * @param chosenField il campo di cui si vuole conoscere il valore
 	 * @return Il valore del campo
 	 */
-	public Object getFieldValue(Field chosenField) {
+	public Object getFieldValue(Field<? extends FieldValue> chosenField) {
 		if (this.valuesMap.containsKey(chosenField)) {
 			return this.valuesMap.get(chosenField);
 		} else {
@@ -155,7 +155,7 @@ public abstract class Event {
 	public FieldValue getFieldValueByName(String chosenFieldName) {
 		// Recupero l'oggetto Category con tutti i campi
 		Category cat = CategoryProvider.getProvider().getCategory(this.category);
-		Field field = cat.getFieldByName(chosenFieldName);
+		Field<? extends FieldValue> field = cat.getFieldByName(chosenFieldName);
 		// Verifico se esiste il campo
 		if (field == null || !this.valuesMap.containsKey(field)) {
 			// Nota: il secondo controllo dovrebbe essere inutile, poiché i campi di un evento e quelli della sua categoria DEVONO coincidere.

@@ -116,7 +116,6 @@ public class Category {
 	 * 
 	 * @param commonFields i nuovi campi da aggiungere.
 	 */
-	@SuppressWarnings("unchecked")
 	void addAllFields(List<Field<? extends FieldValue>> commonFields) {
 		for (Field<? extends FieldValue> f : commonFields) {
 			this.addField(f);

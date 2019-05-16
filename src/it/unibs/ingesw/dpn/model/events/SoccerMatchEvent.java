@@ -25,7 +25,7 @@ public class SoccerMatchEvent extends Event {
 	 * @param fieldValues i valori dei campi dell'evento di tipo "Partita di calcio"
 	 */
 	@Deprecated
-	SoccerMatchEvent(Map<Field, FieldValue> fieldValues) {
+	SoccerMatchEvent(Map<Field<? extends FieldValue>, FieldValue> fieldValues) {
 		super(CategoryEnum.PARTITA_DI_CALCIO, fieldValues);
 	}
 	
@@ -38,7 +38,7 @@ public class SoccerMatchEvent extends Event {
 	 * 
 	 * @param fieldValues i valori dei campi dell'evento di tipo "Partita di calcio"
 	 */
-	SoccerMatchEvent(User creator, Map<Field, FieldValue> fieldValues) {
+	SoccerMatchEvent(User creator, Map<Field<? extends FieldValue>, FieldValue> fieldValues) {
 		super(creator, CategoryEnum.PARTITA_DI_CALCIO, fieldValues);
 	}
 	

@@ -3,7 +3,6 @@ package it.unibs.ingesw.dpn.ui;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 
 import it.unibs.ingesw.dpn.model.ModelManager;
 import it.unibs.ingesw.dpn.model.users.UsersManager;
@@ -12,13 +11,8 @@ import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
 import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
 import it.unibs.ingesw.dpn.model.events.Event;
 import it.unibs.ingesw.dpn.model.events.EventFactory;
-import it.unibs.ingesw.dpn.model.fields.DateFieldValue;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fields.FieldValue;
-import it.unibs.ingesw.dpn.model.fields.IntegerFieldValue;
-import it.unibs.ingesw.dpn.model.fields.IntegerIntervalFieldValue;
-import it.unibs.ingesw.dpn.model.fields.MoneyAmountFieldValue;
-import it.unibs.ingesw.dpn.model.fields.StringFieldValue;
 import it.unibs.ingesw.dpn.model.users.Mailbox;
 import it.unibs.ingesw.dpn.model.users.Notification;
 
@@ -273,8 +267,8 @@ public class UIManager {
 		
 		// Callback proponi evento
 		MenuAction createAction = () -> {
-			Map<Field, FieldValue> fieldValuesMap = new HashMap<>();
-			for (Field f : CategoryProvider.getProvider().getCategory(CategoryEnum.PARTITA_DI_CALCIO).getFields()) {
+			Map<Field<? extends FieldValue>, FieldValue> fieldValuesMap = new HashMap<>();
+			for (Field<? extends FieldValue> f : CategoryProvider.getProvider().getCategory(CategoryEnum.PARTITA_DI_CALCIO).getFields()) {
 				fieldValuesMap.put(f, null);
 				System.out.println((f == null) ? "NULL" : f.toString()); 
 			}
@@ -355,7 +349,7 @@ public class UIManager {
 	 * @param category La categoria dell'evento
 	 * @param fieldValues Le coppie <Campo, Valore> inizializzate finora.
 	 */
-	public void createEventMenu(CategoryEnum category, Map<Field, FieldValue> fieldValues) {
+	public void createEventMenu(CategoryEnum category, Map<Field<? extends FieldValue>, FieldValue> fieldValues) {
 		
 		// Callback per abortire la creazione dell'evento
 		MenuAction abortAction = () -> {this.boardMenu();};
@@ -365,7 +359,7 @@ public class UIManager {
 		// Verifico se tutti i campi obbligatori sono stati compilati
 		boolean checkMandatoryFieldsFlag = true;
 		
-		for (Field f : fieldValues.keySet()) {
+		for (Field<? extends FieldValue> f : fieldValues.keySet()) {
 			
 			/* Azione relativa ad un'opzione */
 			MenuAction fieldAction = () -> {
