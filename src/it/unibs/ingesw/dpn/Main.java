@@ -13,7 +13,7 @@ public class Main {
 	public static void main(String[] args) {
 		
 		UIRenderer renderer = new TextRenderer();
-		InputGetter input = new ConsoleInputGetter();
+		InputGetter input = new ConsoleInputGetter(renderer);
 		UsersManager users = new UsersManager();
 		ModelManager model = new ModelManager(users);
 		UIManager manager = new UIManager(renderer, input, model);

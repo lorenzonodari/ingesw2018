@@ -14,22 +14,39 @@ public class ConsoleInputGetter implements InputGetter {
 	private Scanner input;
 	private UIRenderer renderer;
 	
+	private static final String NULL_RENDERER_EXCEPTION = "Impossibile utrilizzare un Renderer con riferimento nullo";
 	private static final String INVALID_INT_INTERVAL_EXCEPTION = "L'intervallo [%d, %d] non è un intervallo valido";
 	private static final String INVALID_FLOAT_INTERVAL_EXCEPTION = "L'intervallo [%f, %f] non è un intervallo valido";
-
+	
 	private static final String PARSING_INTEGER_ERROR = "Impossibile interpretare il valore \"%s\" come numero intero";
 	private static final String PARSING_FLOAT_ERROR = "Impossibile interpretare il valore \"%s\" come numero in virgola mobile";
 	private static final String PARSING_BOOLEAN_ERROR = "Impossibile interpretare il valore \"%s\" come valore booleano. Usare [V/F], [vero/falso], [T/F] o [true/false].";
 	private static final String LOWERBOUND_NUM_ERROR = "Il valore %d è inferiore al minimo previsto %d";
 	private static final String UPPERBOUND_NUM_ERROR = "Il valore %d è superiore al massimo previsto %d";
 	private static final String INVALID_FORMAT_STRING_ERROR = "La stringa \"%s\" non corrisponde al formato atteso";
-	
+
 	/**
 	 * Crea una nuova istanza di {@link ConsoleInputGetter}.
+	 * Alla costruzione crea anche un nuovo oggetto UIRenderer per la segnalazione di errori.
 	 */
 	public ConsoleInputGetter() {
 		this.input = new Scanner(System.in);
-		this.renderer = new TextRenderer(); // SI PUO' FARE COSI'???
+		this.renderer = new TextRenderer(); // Non consigliato
+	}
+	
+	/**
+	 * Crea una nuova istanza di {@link ConsoleInputGetter}.
+	 * Richiede come parametro un oggetto UIRenderer che si occupi della visualizzazione di eventuali errori.
+	 * 
+	 * @param renderer L'oggetto che renderizza gli errori durante l'acquisizione
+	 */
+	public ConsoleInputGetter(UIRenderer renderer) {
+		this.input = new Scanner(System.in);
+		if (renderer != null) {
+			this.renderer = renderer;
+		} else {
+			throw new IllegalArgumentException(NULL_RENDERER_EXCEPTION);
+		}
 	}
 
 	/**
