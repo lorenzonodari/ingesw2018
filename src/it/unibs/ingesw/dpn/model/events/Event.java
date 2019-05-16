@@ -289,5 +289,8 @@ public abstract class Event {
 			return false;
 		}
 	}
+	public String getEventState() {
+		return state.getStateName();
+	}
 
 }
