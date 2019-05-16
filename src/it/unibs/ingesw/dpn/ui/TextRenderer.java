@@ -11,6 +11,7 @@ public class TextRenderer implements UIRenderer {
 	private static final String CLI_PROMPT = ">> ";
 	private static final String ENTRY_NUM_SEPARATOR = " - ";
 	private static final char FRAME_STAR = '=';
+	private static final String ERROR_PREFIX = "ERRORE: \t";
 
 	@Override
 	public void renderMenu(Menu menu) {
@@ -67,19 +68,19 @@ public class TextRenderer implements UIRenderer {
 	public void renderTextInFrame(String text) {
 		int len = text.trim().length();
 		StringBuffer line = new StringBuffer();
-		for (int i = 0; i < len + 6; i++) {
+		for (int i = 0; i < len + 8; i++) {
 			line.append(FRAME_STAR);
 		}
 		// Stampa la cornice e il testo
 		System.out.println(line.toString());
-		System.out.println(FRAME_STAR + "  " + text + "  " + FRAME_STAR);
+		System.out.println("||  " + text + "  ||");
 		System.out.println(line.toString());
 		
 	}
 
 	@Override
 	public void renderError(String errorText) {
-		System.out.println("ERRORE:\t " + errorText);		
+		System.out.println(ERROR_PREFIX + errorText);		
 	}
 
 }
