@@ -3,7 +3,6 @@ package it.unibs.ingesw.dpn.ui;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 import it.unibs.ingesw.dpn.Main;
 import it.unibs.ingesw.dpn.model.ModelManager;
 import it.unibs.ingesw.dpn.model.users.UsersManager;
@@ -365,13 +364,14 @@ public class UIManager {
 		// Iscriviti azione
 		MenuAction subscriptionAction = () -> {
 			MenuAction dialogBackAction = () -> {this.eventMenu(event);};
-			int i = model.getEventBoard().addSubscription(event, model.getUsersManager().getCurrentUser());
-			this.dialog(i == 0 ? "ti sei inscritto all'evento correttamente" : "eri già inscritto all'evento", dialogBackAction);
+			model.getEventBoard().addSubscription(event, model.getUsersManager().getCurrentUser());
+			this.dialog("Iscrizione effettuata correttamente", Menu.BACK_ENTRY_TITLE, dialogBackAction);
 			
 		};
 		
 		Menu eventMenu = new Menu("Azioni su evento", event.getFieldValueByName("Titolo").toString(), Menu.BACK_ENTRY_TITLE, backAction);
-		eventMenu.addEntry("Inscriviti all'evento", subscriptionAction);
+		if(model.getEventBoard().verifySubscription(event, model.getUsersManager().getCurrentUser()))
+			eventMenu.addEntry("Inscriviti all'evento", subscriptionAction);
 		
 		this.currentMenu = eventMenu;
 		

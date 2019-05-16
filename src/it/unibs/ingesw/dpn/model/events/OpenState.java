@@ -1,11 +1,8 @@
 package it.unibs.ingesw.dpn.model.events;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Timer;
-import java.util.TimerTask;
 
 import it.unibs.ingesw.dpn.model.fields.IntegerFieldValue;
 
