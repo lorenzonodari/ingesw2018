@@ -262,21 +262,14 @@ public class UIManager {
 		MenuAction backAction = () -> {this.mainMenu();};
 		
 		// Callback visualizza eventi
-		MenuAction eventsAction = () -> {;};
+		MenuAction eventsAction = () -> {this.eventView();;};
 		
 		// Callback visualizza categorie
 		MenuAction categoriesAction = () -> {this.categoriesMenu();};
+	
 		
 		// Callback proponi evento
-		MenuAction createAction = () -> {
-			Map<Field, FieldValue> fieldValuesMap = new HashMap<>();
-			for (Field f : CategoryProvider.getProvider().getCategory(CategoryEnum.PARTITA_DI_CALCIO).getFields()) {
-				fieldValuesMap.put(f, null);
-				System.out.println((f == null) ? "NULL" : f.toString()); 
-			}
-			this.createEventMenu(
-					CategoryEnum.PARTITA_DI_CALCIO, 
-					fieldValuesMap);};
+		MenuAction createAction = () -> {this.categorySelectorMenu();};
 		
 		Menu boardMenu = new Menu("Bacheca", backAction);
 		boardMenu.addEntry("Visualizza eventi", eventsAction);
@@ -350,9 +343,9 @@ public class UIManager {
 	 * @param stringa da visualizzare
 	 * @param il menu che lo chiama
 	 */
-	public void dialog(String dialog, Menu back) {
+	public void dialog(String dialog, MenuAction back) {
 		//callback
-		MenuAction backAction = () -> {this.currentMenu = back;};
+		MenuAction backAction = back;
 		
 		Menu dialogMenu = new Menu (dialog, null, Menu.BACK_ENTRY_TITLE, backAction);
 		
@@ -372,11 +365,14 @@ public class UIManager {
 		
 		// Iscriviti azione
 		MenuAction subscriptionAction = () -> {
-			model.get
+			MenuAction dialogBackAction = () -> {this.eventMenu(event);};
+			int i = model.getEventBoard().addSubscription(event, model.getUsersManager().getCurrentUser());
+			this.dialog(i == 0 ? "ti sei inscritto all'evento correttamente" : "eri già inscritto all'evento", dialogBackAction);
+			
 		};
 		
 		Menu eventMenu = new Menu("Azioni su evento", event.getFieldValueByName("Titolo").toString(), Menu.BACK_ENTRY_TITLE, backAction);
-	//	eventMenu.addEntry("Visualizza informazioni dettagliate", infoAction);
+		eventMenu.addEntry("Inscriviti all'evento", subscriptionAction);
 		
 		this.currentMenu = eventMenu;
 		
@@ -390,7 +386,7 @@ public class UIManager {
 		// Callback indietro
 		MenuAction backAction = () -> {this.boardMenu();};
 		
-		Menu eventView = new Menu("Lista eventi aperti", "Categorie di eventi disponibili:", Menu.BACK_ENTRY_TITLE, backAction);
+		Menu eventView = new Menu("Lista eventi aperti", null, Menu.BACK_ENTRY_TITLE, backAction);
 		
 		// Callback categorie
 		for (Event open : model.getEventBoard().getEventsByState(EventState.OPEN)) {
@@ -577,6 +573,30 @@ public class UIManager {
 			} while (!checkIntegrityFlag);
 			
 		}
+		
+	}
+	public void categorySelectorMenu() {
+		
+		// Callback indietro
+		MenuAction backAction = () -> {this.boardMenu();};
+		
+		Menu categorySelector = new Menu("Selezionare una categoria per la creazione dell'evento", null, Menu.BACK_ENTRY_TITLE, backAction);
+		
+		// Callback categorie
+		for (CategoryEnum c : CategoryEnum.values()) {
+			
+			HashMap<Field, FieldValue> map = new HashMap<>();
+			MenuAction categorySelectionAction = () -> {
+				for (Field f : CategoryProvider.getProvider().getCategory(c).getFields()) {
+					map.put(f, null);
+					System.out.println((f == null) ? "NULL" : f.toString()); 
+				};
+				this.createEventMenu(c, map);};
+			categorySelector.addEntry(c.toString(), categorySelectionAction);
+			
+		}
+				
+		this.currentMenu = categorySelector;
 		
 	}
 	
