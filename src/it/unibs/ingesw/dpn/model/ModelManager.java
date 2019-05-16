@@ -72,6 +72,13 @@ public class ModelManager implements Serializable {
 			
 		}
 		
+		// Ripristino lo stato corretto degli eventi in bacheca
+		for (Event e : modelManager.getEventBoard().getEvents()) {
+			
+			e.resetState();
+			
+		}
+		
 		return modelManager;
 		
 	}
