@@ -338,21 +338,20 @@ public class UIManager {
 			
 	}
 	/**
-	 * menu per il dialogo
+	 * Crea un generico menu di dialogo e lo rende il menu corrente. Tali menu sono utilizzati
+	 * per presentare semplici messaggi di conferma o avviso all'utente
 	 * 
-	 * @param stringa da visualizzare
-	 * @param il menu che lo chiama
+	 * @param dialog Il messaggio da presentare all'utente
+	 * @param backTitle Il nome dell'opzione di uscita
+	 * @param backAction L'azione da compiere all'uscita dal menu
 	 */
-	public void dialog(String dialog, MenuAction back) {
-		//callback
-		MenuAction backAction = back;
+	public void dialog(String dialog, String backTitle, MenuAction backAction) {
 		
-		Menu dialogMenu = new Menu (dialog, null, Menu.BACK_ENTRY_TITLE, backAction);
-		
+		Menu dialogMenu = new Menu (dialog, null, backTitle, backAction);
 		this.currentMenu = dialogMenu;
 			
-		
 	}
+	
 	/**
 	 * Crea il menu dedicato all'evento
 	 * 
