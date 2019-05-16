@@ -3,13 +3,7 @@ package it.unibs.ingesw.dpn;
 import java.io.File;
 
 import it.unibs.ingesw.dpn.ui.UIManager;
-import it.unibs.ingesw.dpn.ui.InputGetter;
-import it.unibs.ingesw.dpn.ui.ConsoleInputGetter;
-import it.unibs.ingesw.dpn.ui.UIRenderer;
-import it.unibs.ingesw.dpn.ui.TextRenderer;
 import it.unibs.ingesw.dpn.model.ModelManager;
-import it.unibs.ingesw.dpn.model.users.UsersManager;
-import it.unibs.ingesw.dpn.model.EventBoard;
 
 public class Main {
 	
