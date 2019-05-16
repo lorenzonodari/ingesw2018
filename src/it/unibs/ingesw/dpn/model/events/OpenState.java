@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import it.unibs.ingesw.dpn.model.fields.IntegerFieldValue;
+
 /**
  * Classe che modellizza il comportamento di un evento {@link Event} nello stato OPEN.
  * 
@@ -65,7 +67,7 @@ public class OpenState implements EventState {
 		this.currentSubscribers++;
 		
 		// Verifico se ho raggiunto il numero massimo
-		int numMax = (Integer) e.getFieldValueByName("Numero di partecipanti");
+		int numMax = ((IntegerFieldValue) e.getFieldValueByName("Numero di partecipanti")).getValue();
 		
 		if (this.currentSubscribers >= numMax) {
 			

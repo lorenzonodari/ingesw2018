@@ -8,6 +8,10 @@ public class IntegerFieldValue implements FieldValue {
 		this.value = value;
 	}
 	
+	public int getValue() {
+		return this.value;
+	}
+	
 	public String toString() {
 		return String.format("%d", this.value);
 	}
