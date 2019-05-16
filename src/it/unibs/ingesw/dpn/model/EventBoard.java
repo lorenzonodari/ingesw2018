@@ -39,6 +39,7 @@ public class EventBoard implements Serializable {
 		event.publish();
 		
 	}
+	
 	/**
 	 * Metodo che rimuove un evento dalla bacheca
 	 * 
@@ -54,6 +55,7 @@ public class EventBoard implements Serializable {
 		}
 		eventMap.remove(event);
 	}
+	
 	/**
 	 * Resistuisce la lista degli eventi 
 	 */

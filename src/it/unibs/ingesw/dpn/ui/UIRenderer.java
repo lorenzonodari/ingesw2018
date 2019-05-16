@@ -38,6 +38,17 @@ public interface UIRenderer {
 	 * Nelle interfacce testuali stampa una riga vuota.
 	 */
 	void renderLineSpace();
+	
+	/**
+	 * Renderizza un testo con intorno una cornice.
+	 * Utilizzato solitamente per titoli o testi particolarmente importanti.
+	 * 
+	 * Precondizione: il testo NON deve contenere caratteri speciali come "\n" o "\t".
+	 * In altre parole, deve essere contenuto in un'unica linea compatta.
+	 * 
+	 * @param text Il testo da renderizzare
+	 */
+	public void renderTextInFrame(String text);
 
 	/**
 	 * Metodo che visualizza un testo passato come parametro.

@@ -10,12 +10,13 @@ public class TextRenderer implements UIRenderer {
 	
 	private static final String CLI_PROMPT = ">> ";
 	private static final String ENTRY_NUM_SEPARATOR = " - ";
+	private static final char FRAME_STAR = '=';
 
 	@Override
 	public void renderMenu(Menu menu) {
 		
 		System.out.println();
-		System.out.println(menu.getTitle());
+		this.renderTextInFrame(menu.getTitle());
 		
 		// Renderizza la descrizione solo se presente
 		if (!menu.getDescription().equals("")) {
@@ -60,6 +61,20 @@ public class TextRenderer implements UIRenderer {
 	@Override
 	public void renderText(String text) {
 		System.out.println(text);		
+	}
+	
+	@Override
+	public void renderTextInFrame(String text) {
+		int len = text.trim().length();
+		StringBuffer line = new StringBuffer();
+		for (int i = 0; i < len + 6; i++) {
+			line.append(FRAME_STAR);
+		}
+		// Stampa la cornice e il testo
+		System.out.println(line.toString());
+		System.out.println(FRAME_STAR + "  " + text + "  " + FRAME_STAR);
+		System.out.println(line.toString());
+		
 	}
 
 	@Override

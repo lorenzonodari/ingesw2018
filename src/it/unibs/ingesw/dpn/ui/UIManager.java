@@ -16,10 +16,6 @@ import it.unibs.ingesw.dpn.model.events.EventState;
 import it.unibs.ingesw.dpn.model.events.EventFactory;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fields.FieldValue;
-import it.unibs.ingesw.dpn.model.fields.IntegerFieldValue;
-import it.unibs.ingesw.dpn.model.fields.IntegerIntervalFieldValue;
-import it.unibs.ingesw.dpn.model.fields.MoneyAmountFieldValue;
-import it.unibs.ingesw.dpn.model.fields.StringFieldValue;
 
 /**
  * Classe adibita alla gestione dell'interfaccia utente. In particolare, alle istanze
@@ -371,7 +367,7 @@ public class UIManager {
 		
 		Menu eventMenu = new Menu("Azioni su evento", event.getFieldValueByName("Titolo").toString(), Menu.BACK_ENTRY_TITLE, backAction);
 		if(model.getEventBoard().verifySubscription(event, model.getUsersManager().getCurrentUser()))
-			eventMenu.addEntry("Inscriviti all'evento", subscriptionAction);
+			eventMenu.addEntry("Iscriviti all'evento", subscriptionAction);
 		
 		this.currentMenu = eventMenu;
 		
@@ -410,7 +406,8 @@ public class UIManager {
 		// Callback per abortire la creazione dell'evento
 		MenuAction abortAction = () -> {this.boardMenu();};
 		
-		Menu createEventMenu = new Menu("Proponi evento", null, "Annulla creazione", abortAction);
+		String title = String.format("Creazione di un evento: %s", CategoryProvider.getProvider().getCategory(category).getName());
+		Menu createEventMenu = new Menu(title, "Seleziona i campi dell'evento che vuoi impostare. \nI campi contrassegnati dall'asterisco (*) sono obbligatori.\nQuando avrai completato tutti i campi obbligatori seleziona \"Conferma\".", "Annulla la creazione e torna al menu principale", abortAction);
 		
 		// Verifico se tutti i campi obbligatori sono stati compilati
 		boolean checkMandatoryFieldsFlag = true;
@@ -453,9 +450,11 @@ public class UIManager {
 			createEventMenu.addEntry("Conferma", () -> {
 				EventFactory factory = EventFactory.getFactory();
 				Event newEvent = factory.createEvent(this.users.getCurrentUser(), category, fieldValues);
-				// TODO Bisogna chiedere conferma all'utente se mandare l'evento sulla bacheca
-				// Per ora visualizzo i campi
-				System.out.println(newEvent.toString());
+				
+				this.model.getEventBoard().addEvent(newEvent);
+				
+				MenuAction toHomeAction = () -> {this.mainMenu();};
+				this.dialog("Evento creato correttamente", "Torna al menu principale", toHomeAction);
 			});
 		}
 		
@@ -584,19 +583,21 @@ public class UIManager {
 		// Callback indietro
 		MenuAction backAction = () -> {this.boardMenu();};
 		
-		Menu categorySelector = new Menu("Selezionare una categoria per la creazione dell'evento", null, Menu.BACK_ENTRY_TITLE, backAction);
+		Menu categorySelector = new Menu("Selezione della categoria", "Seleziona la categoria, fra quelle disponibili, in cui rientra l'evento che vuoi creare", Menu.BACK_ENTRY_TITLE, backAction);
 		
 		// Callback categorie
-		for (CategoryEnum c : CategoryEnum.values()) {
+		for (CategoryEnum category : CategoryEnum.values()) {
+			
+			Category completeCategory = CategoryProvider.getProvider().getCategory(category);
 			
 			HashMap<Field<? extends FieldValue>, FieldValue> map = new HashMap<>();
 			MenuAction categorySelectionAction = () -> {
-				for (Field<? extends FieldValue> f : CategoryProvider.getProvider().getCategory(c).getFields()) {
+				// Preparo una Map vuota per memorizzare i parametri di creazione dell'evento
+				for (Field<? extends FieldValue> f : completeCategory.getFields()) {
 					map.put(f, null);
-					System.out.println((f == null) ? "NULL" : f.toString()); 
 				};
-				this.createEventMenu(c, map);};
-			categorySelector.addEntry(c.toString(), categorySelectionAction);
+				this.createEventMenu(category, map);};
+			categorySelector.addEntry(completeCategory.getName(), categorySelectionAction);
 			
 		}
 				
