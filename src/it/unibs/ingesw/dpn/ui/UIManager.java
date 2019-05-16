@@ -345,6 +345,69 @@ public class UIManager {
 	}
 	
 	/**
+	 * Crea il menu per la creazione dell'evento.
+	 * 
+	 * @param category La categoria dell'evento
+	 * @param fieldValues Le coppie <Campo, Valore> inizializzate finora.
+	 */
+	public void createEventMenu(CategoryEnum category, Map<Field, FieldValue> fieldValues) {
+		
+		// Callback per abortire la creazione dell'evento
+		MenuAction abortAction = () -> {this.boardMenu();};
+		
+		Menu createEventMenu = new Menu("Proponi evento", null, "Annulla creazione", abortAction);
+		
+		// Verifico se tutti i campi obbligatori sono stati compilati
+		boolean checkMandatoryFieldsFlag = true;
+		
+		for (Field f : fieldValues.keySet()) {
+			
+			/* Azione relativa ad un'opzione */
+			MenuAction fieldAction = () -> {
+				// Acquisisco il campo
+				acquireFieldValueSubmenu(f);
+				// Salvo il nuovo valore nella mappa
+				fieldValues.put(f, this.temporaryFieldValue);
+				// Creo il nuovo menu aggiornato
+				this.createEventMenu(category, fieldValues);
+				};
+			
+			/* Stringa relativa ad un'opzione */
+			String fieldValueString;
+			if (fieldValues.get(f) != null) {
+				fieldValueString = fieldValues.get(f).toString();
+			} else {
+				fieldValueString = "- - - - -";
+				
+				// Inoltre, setto il controllo del completamento di tutti i campi obbligatori a "false"
+				if (f.isMandatory()) {
+					checkMandatoryFieldsFlag = false;
+				}
+			}
+			
+			// Creo la entry
+			String entryTitle = String.format(
+					"%-35s : %s",
+					f.getName() + ((f.isMandatory()) ? " (*)" : ""),
+					fieldValueString);
+			createEventMenu.addEntry(entryTitle, fieldAction);
+			
+		}
+		
+		if (checkMandatoryFieldsFlag) {
+			createEventMenu.addEntry("Conferma", () -> {
+				EventFactory factory = EventFactory.getFactory();
+				Event newEvent = factory.createEvent(this.users.getCurrentUser(), category, fieldValues);
+				// TODO Bisogna chiedere conferma all'utente se mandare l'evento sulla bacheca
+				// Per ora visualizzo i campi
+				System.out.println(newEvent.toString());
+			});
+		}
+		
+		this.currentMenu = createEventMenu;
+	}
+	
+	/**
 	 * Crea il sottomenu del menu di creazione di un evento utilizzato per acquisire il valore di 
 	 * un dato Field di un evento, lo presenta all'utente e memorizza il dato acquisito all'interno 
 	 * dell'attributo "temporaryFieldValue".
