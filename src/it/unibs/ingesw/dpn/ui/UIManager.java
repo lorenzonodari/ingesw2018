@@ -3,7 +3,6 @@ package it.unibs.ingesw.dpn.ui;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 import it.unibs.ingesw.dpn.Main;
 import it.unibs.ingesw.dpn.model.ModelManager;
 import it.unibs.ingesw.dpn.model.users.UsersManager;

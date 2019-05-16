@@ -2,12 +2,10 @@ package it.unibs.ingesw.dpn.model.events;
 
 import java.util.Map;
 
-import it.unibs.ingesw.dpn.model.ModelManager;
 import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fields.FieldValue;
 import it.unibs.ingesw.dpn.model.users.User;
-import it.unibs.ingesw.dpn.model.users.UsersManager;
 
 /**
  * Classe che permette la creazione di eventi in maniera "controllata", secondo il pattern "Factory".

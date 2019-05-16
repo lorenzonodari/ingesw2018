@@ -16,6 +16,11 @@ import it.unibs.ingesw.dpn.model.users.User;
 public class SoccerMatchEvent extends Event {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4342916685556543088L;
+
+	/**
 	 * Costruttore della classe SoccerMatch, che verrà invocato da una classe
 	 * apposita la cui responsabilità principale sarà creare eventi.
 	 * 
