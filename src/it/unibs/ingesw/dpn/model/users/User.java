@@ -1,9 +1,16 @@
 package it.unibs.ingesw.dpn.model.users;
 
+import java.io.Serializable;
+
 /**
  * Classe utilizzata per contenere i dati relativi ad un singolo utente
  */
-public class User {
+public class User implements Serializable {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1333193895476185438L;
 	
 	private String username;
 	private Mailbox mailbox;

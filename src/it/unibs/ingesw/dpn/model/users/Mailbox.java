@@ -1,5 +1,6 @@
 package it.unibs.ingesw.dpn.model.users;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Collections;
@@ -7,8 +8,13 @@ import java.util.Collections;
  * Classe utilizzata per contenere le informazioni relative ad un insieme di notifiche. In particolare, ad ogni
  * User e' associata una Mailbox contentente tutte le notifiche ricevute da tale utente.
  */
-public class Mailbox {
+public class Mailbox implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4612332277435632397L;
+	
 	private LinkedList<Notification> notifications;
 	
 	/**

@@ -1,5 +1,6 @@
 package it.unibs.ingesw.dpn.model.categories;
 
+import java.io.Serializable;
 import it.unibs.ingesw.dpn.model.events.Event;
 
 /**
@@ -14,7 +15,7 @@ import it.unibs.ingesw.dpn.model.events.Event;
  * @author Michele Dusi, Emanuele Poggi, Lorenzo Nodari
  *
  */
-public enum CategoryEnum {
+public enum CategoryEnum implements Serializable {
 	
 	PARTITA_DI_CALCIO;
 	

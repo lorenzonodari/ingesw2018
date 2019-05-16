@@ -1,6 +1,7 @@
 package it.unibs.ingesw.dpn.ui;
 
 import java.util.List;
+import it.unibs.ingesw.dpn.Main;
 import it.unibs.ingesw.dpn.model.ModelManager;
 import it.unibs.ingesw.dpn.model.users.UsersManager;
 import it.unibs.ingesw.dpn.model.categories.Category;
@@ -28,23 +29,19 @@ public class UIManager {
 	 * Crea un nuovo UIManager utilizzando il renderer dato per la creazione
 	 * dell'interfaccia utente, il gestore di input utente e il gestorel del model dati.
 	 * 
-	 * Precondizione: renderer != null
-	 * Precondizione: inputManager != null
 	 * Precondizione: model != null
 	 * 
-	 * @param renderer Il renderer {@link UIRenderer} da utilizzare
-	 * @param inputManager Il gestore dell'input utente da utilizzare
 	 * @param model Il gestore dei dati di dominio da utilizzare
 	 */
-	public UIManager(UIRenderer renderer, InputGetter inputManager, ModelManager model) {
+	public UIManager(ModelManager model) {
 		
 		// Verifica della precondizione
-		if (renderer == null || inputManager == null || model == null) {
+		if (model == null) {
 			throw new NullPointerException();
 		}
 		
-		this.renderer = renderer;
-		this.inputManager = inputManager;
+		this.renderer = new TextRenderer();
+		this.inputManager = new ConsoleInputGetter();
 		this.model = model;
 		this.users = model.getUsersManager();
 		this.currentMenu = null;
@@ -112,7 +109,7 @@ public class UIManager {
 	public void loginMenu() {
 		
 		// Callback Esci
-		MenuAction quitAction = () -> {System.exit(0);};
+		MenuAction quitAction = () -> {Main.terminate(Main.NO_ERROR_EXIT_CODE);};
 		
 		// Callback Login
 		MenuAction loginAction = () -> {
@@ -158,7 +155,7 @@ public class UIManager {
 		// Callback Cancella notifiche
 		MenuAction deleteAction = () -> {this.deleteNotificationMenu();};
 		
-		Mailbox mailbox = users.getCurrentUser().getMailbox();
+		Mailbox mailbox = users.getCurrentUser().getMailbox();		
 		String menuContent = null;
 		
 		if (!mailbox.isEmpty()) {
