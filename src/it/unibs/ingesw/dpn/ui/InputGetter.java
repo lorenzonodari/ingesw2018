@@ -6,23 +6,74 @@ package it.unibs.ingesw.dpn.ui;
 public interface InputGetter {
 
 	/**
-	 * Acquisisce un numero intero nell'intervallo [min, max] (estremi inclusi), lanciando
-	 * un'eccezione se il dato acquisito non e' un numero o se tale numero non rientra nel range
-	 * richiesto
+	 * Acquisisce un numero intero nell'intervallo [min, max] (estremi inclusi).
+	 * In caso l'input non sia interpretabile come valore intero, o in caso il numero acquisito
+	 * non rientri nell'intervallo previsto, il metodo segnala all'utente che c'è stato un errore 
+	 * e ripropone l'acquisizione del dato.
 	 * 
 	 * Precondizione: min <= max
 	 * 
-	 * @throws NumberFormatException Se l'input non e' un numero valido
-	 * @return Un numero intero positivo nell'intervallo specificato
+	 * @return Un numero intero nell'intervallo specificato
 	 */
-	int getInteger(int min, int max) throws NumberFormatException;
+	public int getInteger(int min, int max);
+	
+	/**
+	 * Acquisisce un numero intero, senza porre vincoli sull'input.
+	 * In caso l'input non sia interpretabile come numero intero, il metodo segnala all'utente che c'è stato
+	 * un errore e ripropone l'acquisizione del dato.
+	 * 
+	 * @return Il numero intero acquisito come input
+	 */
+	public default int getInteger() {
+		return getInteger(Integer.MIN_VALUE, Integer.MAX_VALUE);
+	}
+
+	/**
+	 * Acquisisce un numero in virgola mobile nell'intervallo [min, max] (estremi inclusi).
+	 * In caso l'input non sia interpretabile come numero in virgola mobile, o in caso il numero acquisito
+	 * non rientri nell'intervallo previsto, il metodo segnala all'utente che c'è stato un errore 
+	 * e ripropone l'acquisizione del dato.
+	 * 
+	 * Precondizione: min <= max
+	 * 
+	 * @return Un numero in virgola mobile nell'intervallo specificato
+	 */
+	public float getFloat(float min, float max);
+
+	/**
+	 * Acquisisce un numero in virgola mobile, senza porre vincoli sull'input.
+	 * In caso l'input non sia interpretabile come numero in virgola mobile, 
+	 * il metodo segnala all'utente che c'è stato un errore e ripropone l'acquisizione del dato.
+	 * 
+	 * @return Il numero in virgola mobile acquisito come input
+	 */
+	public default float getFloat() {
+		return getFloat(Float.MIN_VALUE, Float.MAX_VALUE);
+	}
 	
 	/**
 	 * Acquisisce una stringa, eliminando gli spazi bianchi a destra del primo carattere e a sinistra dell'ultimo.
 	 * La stringa restituita non puo' essere vuota.
 	 * 
-	 * @return La stringa acquisita
+	 * @return La stringa acquisita in input
 	 */
-	String getString();
+	public String getString();
+	
+	/**
+	 * Acquisisce una stringa solo se questa "matcha" l'espressione regaolare passata come parametro.
+	 * 
+	 * @param regex L'espressione regolare da confrontare con la stringa acquisita
+	 * @return La stringa in input.
+	 */
+	public String getMatchingString(String regex);
+	
+	/**
+	 * Acquisisce un valore booleano.
+	 * In caso l'input non sia interpretabile come valore booleano, il metodo
+	 * segnala all'utente che c'è stato un errore e ripropone l'acquisizione del dato.
+	 * 
+	 * @return Il valore booleano acquisito
+	 */
+	public boolean getBoolean();
 	
 }

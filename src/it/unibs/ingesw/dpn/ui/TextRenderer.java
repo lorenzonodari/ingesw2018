@@ -27,13 +27,13 @@ public class TextRenderer implements UIRenderer {
 		List<MenuEntry> entries = menu.getEntries();
 		for (int i = entries.size(); i > 0; i--) {
 			System.out.print(" ");
-			System.out.print(i);
+			System.out.printf("%2d", i);
 			System.out.print(ENTRY_NUM_SEPARATOR);
 			renderMenuEntry(entries.get(i - 1));
 		}
 		
 		System.out.print(" ");
-		System.out.print("0");
+		System.out.printf("%2d", 0);
 		System.out.print(ENTRY_NUM_SEPARATOR);
 		renderMenuEntry(menu.getQuitEntry());
 		
@@ -46,11 +46,20 @@ public class TextRenderer implements UIRenderer {
 		System.out.println(entry.getName());
 
 	}
-	
+
 	@Override
-	public void renderPrompt(String question) {
-		System.out.println(question);
+	public void renderEmptyPrompt() {
 		System.out.print(CLI_PROMPT);
+	}
+
+	@Override
+	public void renderText(String text) {
+		System.out.println(text);		
+	}
+
+	@Override
+	public void renderError(String errorText) {
+		System.out.println("ERRORE:\t " + errorText);		
 	}
 
 }

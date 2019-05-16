@@ -12,6 +12,7 @@ import it.unibs.ingesw.dpn.model.categories.Category;
 import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
 import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
 import it.unibs.ingesw.dpn.model.fields.Field;
+import it.unibs.ingesw.dpn.model.fields.FieldValue;
 import it.unibs.ingesw.dpn.model.users.Mailbox;
 import it.unibs.ingesw.dpn.model.users.Notification;
 import it.unibs.ingesw.dpn.model.users.User;
@@ -53,7 +54,7 @@ public abstract class Event implements Serializable {
 	
 	private final CategoryEnum category;
 	
-	private final Map<Field, Object> valuesMap;
+	private final Map<Field, FieldValue> valuesMap;
 	
 	private EventState state;
 	
@@ -77,7 +78,7 @@ public abstract class Event implements Serializable {
 	 * @param fieldValues le coppie (campo-valore) dell'evento
 	 */
 	@Deprecated 
-	protected Event(CategoryEnum category, Map<Field, Object> fieldValues) {
+	public Event(CategoryEnum category, Map<Field, FieldValue> fieldValues) {
 		if (category == null || fieldValues == null) {
 			throw new IllegalArgumentException(NULL_ARGUMENT_EXCEPTION);
 		}
@@ -86,14 +87,14 @@ public abstract class Event implements Serializable {
 		this.category = category;
 		this.valuesMap = fieldValues;
 		
-		// A questo punto posso settare lo stato come "valido".
-		this.setState(new ValidState());
-		
 		// Preparo l'oggetto EventHistory che terrà traccia dei cambiamenti di stato
 		this.history = new EventHistory();
 		
 		// Inizializzo la lista di sottoscrittori della mailing list
 		this.mailingList = new LinkedList<>();
+		
+		// A questo punto posso settare lo stato come "valido".
+		this.setState(new ValidState());
 	}
 	
 	/**
@@ -118,7 +119,7 @@ public abstract class Event implements Serializable {
 	 * @param category la categoria prescelta
 	 * @param fieldValues le coppie (campo-valore) dell'evento
 	 */
-	protected Event(User creator, CategoryEnum category, Map<Field, Object> fieldValues) {
+	public Event(User creator, CategoryEnum category, Map<Field, FieldValue> fieldValues) {
 		this(category, fieldValues);
 		
 		// Imposto il creatore dell'evento
@@ -160,7 +161,7 @@ public abstract class Event implements Serializable {
 	 * @param chosenFieldName il nome del campo di cui si vuole conoscere il valore
 	 * @return Il valore del campo
 	 */
-	public Object getFieldValueByName(String chosenFieldName) {
+	public FieldValue getFieldValueByName(String chosenFieldName) {
 		// Recupero l'oggetto Category con tutti i campi
 		Category cat = CategoryProvider.getProvider().getCategory(this.category);
 		Field field = cat.getFieldByName(chosenFieldName);
@@ -226,17 +227,22 @@ public abstract class Event implements Serializable {
 		// Effettuo le attività d'entrata nello stato
 		this.state.onEntry(this);
 		
+		FieldValue fv;
+		String titolo = ((fv = this.getFieldValueByName("Titolo")) != null) ?
+				fv.toString() :
+				"Senza titolo";
+		
 		// Aggiorno la storia
 		String message_log = String.format(
 				STATE_CHANGE_LOG, 
-				this.getFieldValueByName("Titolo").toString(),
+				titolo,
 				this.state.getStateName().toUpperCase());
 		this.history.addLog(message_log);
 		
 		// Avviso tutti gli iscritti tramite le relative Mailbox
 		String message_notification = String.format(
 				EVENT_STATE_CHANGE_MESSAGE, 
-				this.getFieldValueByName("Titolo").toString(),
+				titolo,
 				this.state.getStateName().toUpperCase());
 		this.notifySubscribers(message_notification);
 	}

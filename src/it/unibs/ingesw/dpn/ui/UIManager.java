@@ -1,11 +1,24 @@
 package it.unibs.ingesw.dpn.ui;
 
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
 import it.unibs.ingesw.dpn.Main;
 import it.unibs.ingesw.dpn.model.ModelManager;
 import it.unibs.ingesw.dpn.model.users.UsersManager;
 import it.unibs.ingesw.dpn.model.categories.Category;
-import it.unibs.ingesw.dpn.model.users.Mailbox;
+import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
+import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
+import it.unibs.ingesw.dpn.model.events.Event;
+import it.unibs.ingesw.dpn.model.events.EventFactory;
+import it.unibs.ingesw.dpn.model.fields.DateFieldValue;
+import it.unibs.ingesw.dpn.model.fields.Field;
+import it.unibs.ingesw.dpn.model.fields.FieldValue;
+import it.unibs.ingesw.dpn.model.fields.IntegerFieldValue;
+import it.unibs.ingesw.dpn.model.fields.IntegerIntervalFieldValue;
+import it.unibs.ingesw.dpn.model.fields.MoneyAmountFieldValue;
+import it.unibs.ingesw.dpn.model.fields.StringFieldValue;import it.unibs.ingesw.dpn.model.users.Mailbox;
 import it.unibs.ingesw.dpn.model.users.Notification;
 
 /**
@@ -24,6 +37,8 @@ public class UIManager {
 	private ModelManager model;
 	private UsersManager users;
 	private Menu currentMenu;
+	
+	private FieldValue temporaryFieldValue = null;
 		
 	/**
 	 * Crea un nuovo UIManager utilizzando il renderer dato per la creazione
@@ -41,7 +56,7 @@ public class UIManager {
 		}
 		
 		this.renderer = new TextRenderer();
-		this.inputManager = new ConsoleInputGetter();
+		this.inputManager = new ConsoleInputGetter(renderer);
 		this.model = model;
 		this.users = model.getUsersManager();
 		this.currentMenu = null;
@@ -72,7 +87,7 @@ public class UIManager {
 			}
 			catch (NumberFormatException ex) {
 				
-				renderer.renderPrompt(INVALID_CHOICE_PROMPT);
+				renderer.renderText(INVALID_CHOICE_PROMPT);
 			}
 			
 		} while (!done);
@@ -94,7 +109,7 @@ public class UIManager {
 		while (true) {
 			
 			renderer.renderMenu(currentMenu);
-			renderer.renderPrompt(GENERIC_PROMPT);
+			renderer.renderText(GENERIC_PROMPT);
 			
 			MenuAction action = getUserChoice(currentMenu);
 			action.execute();
@@ -113,7 +128,7 @@ public class UIManager {
 		
 		// Callback Login
 		MenuAction loginAction = () -> {
-			this.renderer.renderPrompt("Username: ");
+			this.renderer.renderText("Username: ");
 			
 			String username = this.inputManager.getString();
 			this.users.login(username);
@@ -155,7 +170,7 @@ public class UIManager {
 		// Callback Cancella notifiche
 		MenuAction deleteAction = () -> {this.deleteNotificationMenu();};
 		
-		Mailbox mailbox = users.getCurrentUser().getMailbox();		
+		Mailbox mailbox = users.getCurrentUser().getMailbox();
 		String menuContent = null;
 		
 		if (!mailbox.isEmpty()) {
@@ -252,7 +267,15 @@ public class UIManager {
 		MenuAction categoriesAction = () -> {this.categoriesMenu();};
 		
 		// Callback proponi evento
-		MenuAction createAction = () -> {;};
+		MenuAction createAction = () -> {
+			Map<Field, FieldValue> fieldValuesMap = new HashMap<>();
+			for (Field f : CategoryProvider.getProvider().getCategory(CategoryEnum.PARTITA_DI_CALCIO).getFields()) {
+				fieldValuesMap.put(f, null);
+				System.out.println((f == null) ? "NULL" : f.toString()); 
+			}
+			this.createEventMenu(
+					CategoryEnum.PARTITA_DI_CALCIO, 
+					fieldValuesMap);};
 		
 		Menu boardMenu = new Menu("Bacheca", backAction);
 		boardMenu.addEntry("Visualizza eventi", eventsAction);
@@ -319,6 +342,119 @@ public class UIManager {
 				
 		this.currentMenu = categoriesMenu;
 			
+	}
+	
+	/**
+	 * Crea il sottomenu del menu di creazione di un evento utilizzato per acquisire il valore di 
+	 * un dato Field di un evento, lo presenta all'utente e memorizza il dato acquisito all'interno 
+	 * dell'attributo "temporaryFieldValue".
+	 *
+	 * @param field Il campo di cui si vuole acquisire il valore
+	 */
+	private void acquireFieldValueSubmenu(Field field) {
+		Class<?> type = field.getType();
+		
+		if (type.isEnum()) {
+			// L'oggetto FieldValue è un ENUM
+
+			MenuAction cancelAction = () -> {this.temporaryFieldValue = null;};
+			
+			Menu enumCreationMenu = new Menu(
+					"Selezione del campo: " + field.getName(),
+					String.format(
+							"Seleziona fra le opzioni il valore da associare al campo \"%s\".\nDescrizione: %s.",
+							field.getName(),
+							field.getDescription()), 
+					"Annulla",
+					cancelAction);
+			
+			for (Object option : type.getEnumConstants()) {
+				MenuAction setOptionAction = () -> {this.temporaryFieldValue = (FieldValue) option;};
+				enumCreationMenu.addEntry(option.toString(), setOptionAction);
+			}
+
+			renderer.renderMenu(enumCreationMenu);
+			renderer.renderEmptyPrompt();
+			MenuAction action = getUserChoice(enumCreationMenu);
+			action.execute();		
+			
+		} else {
+			// L'oggetto FieldValue NON è un ENUM
+			
+			renderer.renderText("Inserimento del campo: " + field.getName());
+			renderer.renderText(String.format(
+						"Descrizione: %s.",
+						field.getName()));
+
+			boolean checkIntegrityFlag = false;
+			do {
+				
+				switch (field.getType().getSimpleName()) {
+				
+				case "DateFieldValue" :
+					// Anno, mese, giorno
+					renderer.renderText("Inserisci l'anno");
+					int anno = inputManager.getInteger(1900, 2200);
+					renderer.renderText("Inserisci il mese");
+					int mese = inputManager.getInteger(1, 12) - 1;
+					renderer.renderText("Inserisci il giorno");
+					int giorno = inputManager.getInteger(1, 31);
+					
+					// Orario
+					renderer.renderText("Inserisci l'orario in formato (HH:MM)");
+					String ora = inputManager.getMatchingString("([0-1][0-9]|2[0-3]):([0-5][0-9])");
+					int ore = Integer.parseInt(ora.substring(0, 2));
+					int minuti = Integer.parseInt(ora.substring(3, 5));
+					
+					java.util.Calendar cal = java.util.Calendar.getInstance();
+					cal.set(anno, mese, giorno, ore, minuti, 0);
+					DateFieldValue date = new DateFieldValue(cal.getTimeInMillis());
+					this.temporaryFieldValue = date;
+					checkIntegrityFlag = true;
+					break;
+					
+				case "IntegerFieldValue" :
+					renderer.renderText("Inserisci il valore numerico");
+					this.temporaryFieldValue = new IntegerFieldValue(
+							inputManager.getInteger(0, Integer.MAX_VALUE));
+					checkIntegrityFlag = true;
+					break;
+					
+				case "IntegerIntervalFieldValue" :
+					renderer.renderText("Inserisci il valore minimo");
+					int min = inputManager.getInteger(0, Integer.MAX_VALUE);
+					renderer.renderText("Inserisci il valore massimo");
+					int max = inputManager.getInteger(0, Integer.MAX_VALUE);
+					if (min <= max) {
+						this.temporaryFieldValue = new IntegerIntervalFieldValue(min, max);
+						checkIntegrityFlag = true;
+					} else {
+						renderer.renderText("Inserire un valore minimo inferiore al valore massimo");
+					}
+					break;
+					
+				case "MoneyAmountFieldValue" :
+					renderer.renderText("Inserisici il valore in virgola mobile");
+					try {
+						this.temporaryFieldValue = new MoneyAmountFieldValue(
+								inputManager.getFloat(Float.MIN_VALUE, Float.MAX_VALUE));
+						checkIntegrityFlag = true;
+					} catch (NumberFormatException e) {
+						renderer.renderText("Non è stato possibile interpretare correttamente l'input");
+					}
+					break;
+					
+				case "StringFieldValue" :
+					this.temporaryFieldValue = new StringFieldValue(inputManager.getString().trim());
+					checkIntegrityFlag = true;
+					break;
+				
+				}
+				
+			} while (!checkIntegrityFlag);
+			
+		}
+		
 	}
 	
 }

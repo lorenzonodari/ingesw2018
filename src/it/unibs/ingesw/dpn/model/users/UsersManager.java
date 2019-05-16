@@ -1,9 +1,12 @@
 package it.unibs.ingesw.dpn.model.users;
 
+<<<<<<< HEAD
 import java.io.File;
 import java.io.ObjectInputStream;
 import java.io.FileInputStream;
 import java.io.Serializable;
+=======
+>>>>>>> refs/remotes/origin/field_value_problem
 import java.util.LinkedList;
 
 import it.unibs.ingesw.dpn.Main;

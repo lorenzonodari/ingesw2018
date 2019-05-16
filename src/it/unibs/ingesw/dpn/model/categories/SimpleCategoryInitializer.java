@@ -1,6 +1,10 @@
 package it.unibs.ingesw.dpn.model.categories;
 
+import it.unibs.ingesw.dpn.model.fields.DateFieldValue;
 import it.unibs.ingesw.dpn.model.fields.Field;
+import it.unibs.ingesw.dpn.model.fields.IntegerFieldValue;
+import it.unibs.ingesw.dpn.model.fields.MoneyAmountFieldValue;
+import it.unibs.ingesw.dpn.model.fields.StringFieldValue;
 
 /**
  * Classe che si occupa di inizializzare la lista di categorie all'avvio del programma
@@ -128,7 +132,7 @@ public class SimpleCategoryInitializer implements CategoryInitializer {
 						"Titolo",
 						"Nome di fantasia attribuito all'evento",
 						false,
-						String.class
+						StringFieldValue.class
 						),
 				
 				// Campo "numero di partecipanti"
@@ -136,7 +140,7 @@ public class SimpleCategoryInitializer implements CategoryInitializer {
 						"Numero di partecipanti",
 						"Numero di persone da coinvolgere nell'evento",
 						true,
-						Integer.class
+						IntegerFieldValue.class
 						),
 				
 				// Campo "termine ultimo di iscrizione"
@@ -144,7 +148,7 @@ public class SimpleCategoryInitializer implements CategoryInitializer {
 						"Termine ultimo di iscrizione",
 						"Ultimo giorno utile per iscriversi all'evento",
 						true,
-						java.util.Date.class
+						DateFieldValue.class
 						),
 				
 				// Campo "luogo"
@@ -152,7 +156,7 @@ public class SimpleCategoryInitializer implements CategoryInitializer {
 						"Luogo",
 						"Il luogo di svolgimento o di ritrovo dell'evento",
 						true,
-						String.class
+						StringFieldValue.class
 						),
 
 				// Campo "data e ora"
@@ -160,7 +164,7 @@ public class SimpleCategoryInitializer implements CategoryInitializer {
 						"Data e ora",
 						"Il giorno e l'orario in cui si svolgerà o avrà inizio l'evento",
 						true,
-						java.util.Date.class
+						DateFieldValue.class
 						),
 				
 				// Campo "durata"
@@ -168,7 +172,7 @@ public class SimpleCategoryInitializer implements CategoryInitializer {
 						"Durata",
 						"La durata approssimata, in ore e minuti o in giorni, dell'evento",
 						false,
-						Integer.class
+						IntegerFieldValue.class
 						),
 
 				// Campo "quota individuale"
@@ -176,7 +180,7 @@ public class SimpleCategoryInitializer implements CategoryInitializer {
 						"Quota individuale",
 						"La spesa che ogni partecipante dovrà sostenere per l'evento",
 						true,
-						Float.class
+						MoneyAmountFieldValue.class
 						),
 
 				// Campo "compreso nella quota"
@@ -184,7 +188,7 @@ public class SimpleCategoryInitializer implements CategoryInitializer {
 						"Compreso nella quota",
 						"Lista delle voci di spesa comprese nella quota di partecipazione",
 						false,
-						String.class
+						StringFieldValue.class
 						),
 
 				// Campo "data e ora conclusive"
@@ -192,7 +196,7 @@ public class SimpleCategoryInitializer implements CategoryInitializer {
 						"Data e ora conclusive",
 						"Il giorno e l'orario di conclusione dell'evento",
 						false,
-						java.util.Date.class
+						DateFieldValue.class
 						),
 
 				// Campo "note"
@@ -200,7 +204,7 @@ public class SimpleCategoryInitializer implements CategoryInitializer {
 						"Note",
 						"Note aggiuntive sull'evento",
 						false,
-						String.class
+						StringFieldValue.class
 						),
 		};
 		return commonFields;
