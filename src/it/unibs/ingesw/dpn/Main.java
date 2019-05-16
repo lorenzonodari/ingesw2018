@@ -17,7 +17,7 @@ public class Main {
 	public static final int DB_LOAD_ERROR_EXIT_CODE = 1;
 	public static final int DB_SAVE_ERROR_EXIT_CODE = 2;
 	
-	public static final File DEFAULT_DATABASE = new File(System.getProperty("user.home"));
+	public static final File DEFAULT_DATABASE = new File(System.getProperty("user.home"), "model.db");
 	
 	private static ModelManager modelManager = null;
 	private static UIManager uiManager = null;
