@@ -35,6 +35,9 @@ public class EventBoard implements Serializable {
 			throw new IllegalStateException();
 		}
 		eventMap.put(event, new ArrayList<User>());
+		// Comunica all'evento che è stato pubblicato
+		event.publish();
+		
 	}
 	/**
 	 * Metodo che rimuove un evento dalla bacheca

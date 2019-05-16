@@ -13,6 +13,7 @@ import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
 import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fields.FieldValue;
+import it.unibs.ingesw.dpn.model.fields.StringFieldValue;
 import it.unibs.ingesw.dpn.model.users.Mailbox;
 import it.unibs.ingesw.dpn.model.users.Notification;
 import it.unibs.ingesw.dpn.model.users.User;
@@ -36,19 +37,37 @@ import it.unibs.ingesw.dpn.model.users.User;
  * @author Michele Dusi, Lorenzo Nodari, Emanuele Poggi
  *
  */
-public abstract class Event implements Serializable {
+public abstract class Event implements Serializable, Comparable<Event> {
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 6018235806371842633L;
+	private static int id_counter = 0;
 	
+	/** Eccezioni */
 	private static final String NULL_ARGUMENT_EXCEPTION = "Impossibile creare un evento con parametri nulli";
 	private static final String FIELD_NOT_PRESENT_EXCEPTION = "Il campo %s non appartiene alla categoria prevista dall'evento";
-
+	private static final String ILLEGAL_COMPARING_METHOD_EXCEPTION = "Metodologia di ordinamento non riconosciuta";
+	
+	/** Messaggi di Log o di notifica */
 	private static final String STATE_CHANGE_LOG = "L'evento \"%s\" ha cambiato il suo stato in: %s";
 	private static final String EVENT_SUBSCRIPTION_MESSAGE = "Ti sei iscritto/a all'evento \"%s\"";
 	private static final String EVENT_STATE_CHANGE_MESSAGE = "L'evento \"%s\" a cui sei iscritto/a ha cambiato il suo stato in: %s";
+
+	/** Strategie per il confronto di eventi */
+	public enum ComparingMethod {
+		BY_ID,
+		BY_DATE,
+		BY_TITLE
+	};
+	
+	/** Strategia di default, comune a tutti gli Event */
+	private static ComparingMethod comparingMethod = ComparingMethod.BY_ID;
+	
+	/** Attributi d'istanza */
+	
+	private final int id;
 	
 	private User creator = null;
 	
@@ -83,6 +102,9 @@ public abstract class Event implements Serializable {
 			throw new IllegalArgumentException(NULL_ARGUMENT_EXCEPTION);
 		}
 		
+		// ID univoco dell'evento
+		this.id = id_counter++;
+		
 		// Inizializzo gli attributi della classe
 		this.category = category;
 		this.valuesMap = fieldValues;
@@ -95,6 +117,14 @@ public abstract class Event implements Serializable {
 		
 		// A questo punto posso settare lo stato come "valido".
 		this.setState(new ValidState());
+		
+		// Fornisco all'evento un Titolo di default, se non è presente un altro titolo
+		// Recupero l'oggetto Field di titolo
+		Category cat = CategoryProvider.getProvider().getCategory(this.category);
+		Field<? extends FieldValue> titleField = cat.getFieldByName("Titolo");
+		if (this.valuesMap.get(titleField) == null) {
+			this.valuesMap.put(titleField, new StringFieldValue(String.format("Event_%04d", this.id)));
+		}
 	}
 	
 	/**
@@ -174,6 +204,15 @@ public abstract class Event implements Serializable {
 		}
 		
 	}
+	
+	/**
+	 * Restituisce l'ID univoco dell'evento.
+	 * 
+	 * @return L'ID univoco dell'evento
+	 */
+	public long getId() {
+		return this.id;
+	}
 
 	/**
 	 * Restituisce la categoria di appartenenza dell'evento come istanza di {@link CategoryEnum}.
@@ -205,7 +244,6 @@ public abstract class Event implements Serializable {
 	 * quando questi sono caricati da disco mediante serializzazione.
 	 */
 	public void resetState() {
-		
 		this.state.onEntry(this);
 	}
 	
@@ -227,10 +265,7 @@ public abstract class Event implements Serializable {
 		// Effettuo le attività d'entrata nello stato
 		this.state.onEntry(this);
 		
-		FieldValue fv;
-		String titolo = ((fv = this.getFieldValueByName("Titolo")) != null) ?
-				fv.toString() :
-				"Senza titolo";
+		String titolo = this.getFieldValueByName("Titolo").toString();
 		
 		// Aggiorno la storia
 		String message_log = String.format(
@@ -307,6 +342,12 @@ public abstract class Event implements Serializable {
 			return false;
 		}
 	}
+	
+	/**
+	 * Restituisce una stringa corrispondente allo stato dell'oggetto {@link Event}.
+	 * 
+	 * @return La stringa corrispondente allo stato in cui si trova l'evento
+	 */
 	public String getEventState() {
 		return state.getStateName();
 	}
@@ -359,6 +400,104 @@ public abstract class Event implements Serializable {
 			};
 			
 		}, timeout);
+	}
+	
+	/**
+	 * Metodo di classe che imposta (per tutti gli oggetti {@link Event}) il metodo di comparazione
+	 * degli stessi, utilizzato per ordinamenti basilari.
+	 * Poiché il metodo ha effetto su tutte le istanze della classe (poiché modifica il comportamento
+	 * del metodo "compareTo"), NON è possibile utilizzare questo metodo per ordinare una sottolista di {@link Event}.
+	 * Si consiglia, per fare ciò, di creare un comparatore apposito avvalendosi dei metodi "compareBy-Strategy-To(Event e)".
+	 * 
+	 * Nota: questo metodo NON garantisce un ri-ordino automatico degli oggetti {@link Event} a seguito della
+	 * sua chiamata. E' necessario occuparsi direttamente di tale ordinamento secondo altri modi.
+	 * 
+	 * @param comparingMethod La stringa che indica il modo per confrontare e ordinare due eventi.
+	 */
+	public static void setComparingMethod(ComparingMethod method) {
+		Event.comparingMethod = method;
+	}
+	
+
+	/**
+	 * Confronta due eventi sulla base del criterio specificato dal metodo "setComparingMethod".
+	 * Al momento è possibile ordinare due eventi:
+	 * - Per ID crescenti.
+	 * - Per date crescenti.
+	 * - Per titolo, in ordina alfabetico.
+	 * 
+	 * @param e L'evento con cui effettuare il confronto
+	 * @return Un valore numerico per capire l'ordinamento dei due eventi
+	 */
+	@Override
+	public int compareTo(Event e) {
+		switch (Event.comparingMethod) {
+		case BY_DATE: 
+			return this.compareByEventDateTo(e);
+		case BY_ID:
+			return this.compareByIdTo(e);
+		case BY_TITLE:
+			return this.compareByTitleTo(e);
+		default:
+			throw new IllegalStateException(ILLEGAL_COMPARING_METHOD_EXCEPTION);
+		}
+	}
+	
+	/**
+	 * Confronta due eventi in base al loro ID.
+	 * 
+	 * @param e L'evento con cui effettuare il confronto
+	 * @return Un valore numerico per capire l'ordinamento dei due eventi
+	 */
+	public int compareByIdTo(Event e) {
+		// Se l'evento corrente è più recente come data di creazione dell'evento passato come parametro
+		if (this.id > e.id) {
+			return +1;
+		// Se l'evento corrente è meno recente dell'evento passato come parametro
+		} else if (this.id < e.id) {
+			return -1;
+		// Se i due eventi sono lo stesso evento
+		// (L'unico caso in cui i due ID sono uguali)
+		} else {
+			return 0;
+		}
+	}
+	
+	/**
+	 * Confronta due eventi in base alla loro data di inizio.
+	 * Un evento è "maggiore" di un altro se la sua data è posteriore alla data dell'altro.
+	 * 
+	 * @param e L'evento con cui effettuare il confronto
+	 * @return Un valore numerico per capire l'ordinamento dei due eventi
+	 */
+	public int compareByEventDateTo(Event e) {
+		Date thisDate = (Date) this.getFieldValueByName("Data e ora");
+		Date otherDate = (Date) e.getFieldValueByName("Data e ora");
+		// Se l'evento corrente è più recente come data di creazione dell'evento passato come parametro
+		if (thisDate.after(otherDate)) {
+			return +1;
+		// Se l'evento corrente è meno recente dell'evento passato come parametro
+		} else if (thisDate.before(otherDate)) {
+			return -1;
+		// Se i due eventi sono lo stesso evento
+		// (L'unico caso in cui i due ID sono uguali)
+		} else {
+			return 0;
+		}
+	}
+
+	/**
+	 * Confronta due eventi in base al loro titolo, in ordine alfabetico.
+	 * Un evento è "maggiore" di un altro il suo titolo è successivo (in ordine alfabetico)
+	 * al titolo dell'altro.
+	 * 
+	 * @param e L'evento con cui effettuare il confronto
+	 * @return Un valore numerico per capire l'ordinamento dei due eventi
+	 */
+	public int compareByTitleTo(Event e) {
+		String thisTitle = this.getFieldValueByName("Titolo").toString();
+		String otherTitle = e.getFieldValueByName("Titolo").toString();
+		return thisTitle.compareTo(otherTitle);
 	}
 
 }
