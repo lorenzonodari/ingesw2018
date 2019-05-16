@@ -22,7 +22,8 @@ public interface CategoryInitializer {
 	 * @return L'istanza unica di ICategoryInitializer.
 	 */
 	static CategoryInitializer getInstance() {
-		return FromFileCategoryInitializer.getInstance();
+//		return FromFileCategoryInitializer.getInstance();
+		return SimpleCategoryInitializer.getInstance();
 	}
 	
 	/**

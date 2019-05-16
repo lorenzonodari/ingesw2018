@@ -1,5 +1,6 @@
 package it.unibs.ingesw.dpn.model.fields;
 
+import java.io.Serializable;
 import it.unibs.ingesw.dpn.model.categories.Category;
 
 /**
@@ -12,8 +13,13 @@ import it.unibs.ingesw.dpn.model.categories.Category;
  * @author Michele Dusi, Lorenzo Nodari, Emanuele Poggi
  * 
  */
-public class Field {
+public class Field implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7411339597195983805L;
+
 	private static final String TO_STRING =
 			  "Nome:           %s\n"
 			+ "Descrizione:    %s\n"
@@ -26,9 +32,30 @@ public class Field {
 	private final String name;
 	private final String description;
 	private final boolean mandatory;
-	private Class<?> type = Object.class;
+	private Class<? extends FieldValue> type = FieldValue.class;
 	
-	public Field(String name, String description, boolean mandatory, Class<?> type) {
+	/**
+	 * Costruttore.
+	 * 
+	 * Precondizione: name deve essere un nome valido, non nullo.
+	 * 
+	 * Precondizione: description deve essere una stringa non nulla.
+	 * 
+	 * Precondizione: mandatory deve essere un valore non nullo.
+	 * 
+	 * Precondizione: type deve essere un valore non nullo, relativo ad una classe che implementa
+	 * l'interfaccia {@link FieldValue}. Quest'ultima condizione dovrebbe essere garantita in automatico
+	 * dall'IDE utilizzato per programmare.
+	 * 
+	 * @param name Il nome del campo
+	 * @param description La descrizione del campo
+	 * @param mandatory L'obbligatorietà del campo
+	 * @param type Il tipo del valore del campo
+	 */
+	public Field(String name, String description, boolean mandatory, Class<? extends FieldValue> type) {
+		if (name == null || description == null || type == null) {
+			throw new IllegalArgumentException();
+		}
 		this.name = name;
 		this.description = description;
 		this.mandatory = mandatory;
@@ -36,28 +63,28 @@ public class Field {
 	}
 
 	/**
-	 * @return the name
+	 * @return Il nome del campo
 	 */
 	public String getName() {
 		return name;
 	}
 	
 	/**
-	 * @return the description
+	 * @return La descrizione del campo
 	 */
 	public String getDescription() {
 		return description;
 	}
 
 	/**
-	 * @return the mandatory
+	 * @return L'obbligatorietà del campo
 	 */
 	public boolean isMandatory() {
 		return mandatory;
 	}
 
 	/**
-	 * @return the type
+	 * @return Il tipo del campo
 	 */
 	public Class<?> getType() {
 		return type;

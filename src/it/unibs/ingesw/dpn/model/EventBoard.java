@@ -1,11 +1,9 @@
 package it.unibs.ingesw.dpn.model;
 
+import java.io.Serializable;
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-
 import it.unibs.ingesw.dpn.model.events.Event;
-import it.unibs.ingesw.dpn.model.events.EventState;
 import it.unibs.ingesw.dpn.model.users.User;
 
 /**
@@ -16,7 +14,13 @@ import it.unibs.ingesw.dpn.model.users.User;
  * 
  * @author Michele Dusi, Emanuele Poggi, Lorenzo Nodari
  */
-public class EventBoard {
+public class EventBoard implements Serializable {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8389735292299317677L;
+	
 	private HashMap<Event, List<User>> eventMap = new HashMap<Event, List<User>>();
 	
 	/**
@@ -90,7 +94,7 @@ public class EventBoard {
 	 * Metodo che aggiunge un iscrizione di un utente ad un evento nella bacheca
 	 * 
 	 * Precondizioni: l'evento deve essere un evento esistente e aperto in bacheca 
-	 * 				  l'utente deve non essere già inscritto all'evento stesso 
+	 * 				  l'utente deve non essere già iscritto all'evento stesso 
 	 * 				  
 	 * @param Evento in cui inscrivere un utente 
 	 * @param L'utente da inscrivere
@@ -112,7 +116,7 @@ public class EventBoard {
 	 * Metodo che rimuove una inscrizione di un utente ad un evento nella bacheca 
 	 * 
 	 * Precondizioni: l'evento deve esistere ed essere aperto in bacheca 
-	 * 				  l'utente deve essere inscritto all'evento
+	 * 				  l'utente deve essere iscritto all'evento
 	 * 
 	 * @param evento a cui si vuole disiscrivere l'utente
 	 * @param Utente da rimuovere dalla lista degli iscritti 

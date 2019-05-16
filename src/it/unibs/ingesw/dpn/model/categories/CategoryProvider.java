@@ -15,7 +15,7 @@ public final class CategoryProvider {
 	
 	private static final CategoryProvider singletonProvider = new CategoryProvider();
 	
-	private Category [] categories;
+	private Category[] categories;
 	
 	/**
 	 * Costruttore privato.
@@ -56,6 +56,6 @@ public final class CategoryProvider {
 	 */
 	public Category [] getAllCategories() {
 		return this.categories;
-	}	
+	}
 	
 }
