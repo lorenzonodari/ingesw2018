@@ -17,7 +17,7 @@ public class IntegerIntervalFieldValue implements FieldValue {
 	private static final String EXCLUDE_MAX_STRING = "[";
 
 	private static final boolean DEFAULT_MIN_INCLUSION = true;
-	private static final boolean DEFAULT_MAX_INCLUSION = false;
+	private static final boolean DEFAULT_MAX_INCLUSION = true;
 	
 	private int min, max;
 	private boolean includeMin, includeMax;

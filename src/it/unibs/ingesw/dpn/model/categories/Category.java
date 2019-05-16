@@ -123,23 +123,6 @@ public class Category {
 	}
 	
 	/**
-	 * Aggiunge un'intera lista di campi alla categoria.
-	 * 
-	 * Nota: questo metodo può essere utilizzato solamente all'interno di questo package.
-	 * 
-	 * Precondizione: non devono esserci campi con lo stesso nome o con nomi già presenti
-	 * all'interno della categoria. Questo metodo non fa altro che richiamare il metodo 
-	 * di questa classe "addField" su tutti i campi passati come parametro.
-	 * 
-	 * @param newFields i nuovi campi da aggiungere.
-	 */ 
-//	void addAllFields(List<Field<? extends FieldValue>> newFields) {
-//		for (Field<? extends FieldValue> f : newFields) {
-//			this.addField(f);
-//		}
-//	}
-	
-	/**
 	 * Restituisce una descrizione testuale completa dell'intera categoria e dei suoi campi.
 	 * 
 	 * @return la descrizione testuale della categoria e dei suoi campi.

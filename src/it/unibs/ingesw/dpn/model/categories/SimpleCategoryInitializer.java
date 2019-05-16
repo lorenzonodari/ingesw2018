@@ -180,7 +180,8 @@ public class SimpleCategoryInitializer implements CategoryInitializer {
 						"Numero di persone da coinvolgere nell'evento",
 						true,
 						(renderer, getter) -> {
-							return new IntegerFieldValue(getter.getInteger(0, Integer.MAX_VALUE));
+							renderer.renderText("Inserisci il numero di partecipanti (almeno 2)");
+							return new IntegerFieldValue(getter.getInteger(2, Integer.MAX_VALUE));
 						}
 						));
 
