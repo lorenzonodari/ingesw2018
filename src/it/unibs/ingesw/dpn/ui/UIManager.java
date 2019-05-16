@@ -366,13 +366,14 @@ public class UIManager {
 		// Iscriviti azione
 		MenuAction subscriptionAction = () -> {
 			MenuAction dialogBackAction = () -> {this.eventMenu(event);};
-			int i = model.getEventBoard().addSubscription(event, model.getUsersManager().getCurrentUser());
-			this.dialog(i == 0 ? "ti sei inscritto all'evento correttamente" : "eri già inscritto all'evento", dialogBackAction);
+			model.getEventBoard().addSubscription(event, model.getUsersManager().getCurrentUser());
+			this.dialog("ti sei inscritto all'evento correttamente", dialogBackAction);
 			
 		};
 		
 		Menu eventMenu = new Menu("Azioni su evento", event.getFieldValueByName("Titolo").toString(), Menu.BACK_ENTRY_TITLE, backAction);
-		eventMenu.addEntry("Inscriviti all'evento", subscriptionAction);
+		if(model.getEventBoard().verifySubscription(event, model.getUsersManager().getCurrentUser()))
+			eventMenu.addEntry("Inscriviti all'evento", subscriptionAction);
 		
 		this.currentMenu = eventMenu;
 		

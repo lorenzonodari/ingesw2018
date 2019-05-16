@@ -93,22 +93,31 @@ public class EventBoard implements Serializable {
 	/**
 	 * Metodo che aggiunge un iscrizione di un utente ad un evento nella bacheca
 	 * 
-	 * Precondizioni: l'evento deve essere un evento esistente e aperto in bacheca 
-	 * 				  l'utente deve non essere già iscritto all'evento stesso 
+	 * Precondizione: l'evento deve essere un evento esistente e aperto in bacheca 
+	 * Precondizione: l'utente deve non essere già iscritto all'evento stesso 
 	 * 				  
-	 * @param Evento in cui inscrivere un utente 
-	 * @param L'utente da inscrivere
+	 * @param event -> Evento in cui iscrivere un utente 
+	 * @param subscription -> L'utente da iscrivere
 	 */
-	public int addSubscription(Event event, User subscription) {
+	public void addSubscription(Event event, User subscription) {
 		// verifica precondizione
 		if (event == null || subscription == null ) {
 			throw new IllegalStateException();
 		}
-		if(!eventMap.get(event).contains(subscription)){
-			eventMap.get(event).add(subscription);
-			return 0;
+		eventMap.get(event).add(subscription);
+		
+	}
+	/**
+	 * Metodo che verifica se in un determinato evento si è già inscritto un utente
+	 * 
+	 * @return  true se l'utente non è già iscritto all'evento, false altrimenti 
+	 */
+	public boolean verifySubscription(Event event, User subscription) {
+		// verifica precondizione
+		if (event == null || subscription == null ) {
+			throw new IllegalStateException();
 		}
-		return 1;
+		return  !eventMap.get(event).contains(subscription);
 		
 	}
 	
