@@ -4,6 +4,8 @@ import java.util.List;
 import it.unibs.ingesw.dpn.model.ModelManager;
 import it.unibs.ingesw.dpn.model.users.UsersManager;
 import it.unibs.ingesw.dpn.model.categories.Category;
+import it.unibs.ingesw.dpn.model.events.Event;
+import it.unibs.ingesw.dpn.model.events.EventState;
 import it.unibs.ingesw.dpn.model.users.Mailbox;
 import it.unibs.ingesw.dpn.model.users.Notification;
 
@@ -321,6 +323,65 @@ public class UIManager {
 		}
 				
 		this.currentMenu = categoriesMenu;
+			
+	}
+	/**
+	 * menu per il dialogo
+	 * 
+	 * @param stringa da visualizzare
+	 * @param il menu che lo chiama
+	 */
+	public void dialog(String dialog, Menu back) {
+		//callback
+		MenuAction backAction = () -> {this.currentMenu = back;};
+		
+		Menu dialogMenu = new Menu (dialog, null, Menu.BACK_ENTRY_TITLE, backAction);
+		
+		this.currentMenu = dialogMenu;
+			
+		
+	}
+	/**
+	 * Crea il menu dedicato all'evento
+	 * 
+	 * @param evento a cui punta il menu
+	 */
+	public void eventMenu(Event event) {
+		
+		// Callback indietro
+		MenuAction backAction = () -> {this.eventView();};
+		
+		// Iscriviti azione
+		MenuAction subscriptionAction = () -> {
+			model.get
+		}
+		
+		Menu eventMenu = new Menu("Azioni su evento", event.getFieldValueByName("Titolo").toString(), Menu.BACK_ENTRY_TITLE, backAction);
+	//	eventMenu.addEntry("Visualizza informazioni dettagliate", infoAction);
+		
+		this.currentMenu = eventMenu;
+		
+	}
+	
+	/**
+	 * Crea il menu della bacheca degli eventi
+	 */
+	public void eventView() {
+		
+		// Callback indietro
+		MenuAction backAction = () -> {this.boardMenu();};
+		
+		Menu eventView = new Menu("Lista eventi aperti", "Categorie di eventi disponibili:", Menu.BACK_ENTRY_TITLE, backAction);
+		
+		// Callback categorie
+		for (Event open : model.getEventBoard().getEventsByState(EventState.OPEN)) {
+			
+			MenuAction eventAction = () -> {this.eventMenu(open);};
+			eventView.addEntry(open.getFieldValueByName("Titolo").toString(), eventAction);
+			
+		}
+				
+		this.currentMenu = eventView;
 			
 	}
 	

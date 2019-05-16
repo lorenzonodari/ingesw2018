@@ -95,12 +95,17 @@ public class EventBoard {
 	 * @param Evento in cui inscrivere un utente 
 	 * @param L'utente da inscrivere
 	 */
-	public void addSubscription(Event event, User subscription) {
+	public int addSubscription(Event event, User subscription) {
 		// verifica precondizione
 		if (event == null || subscription == null ) {
 			throw new IllegalStateException();
 		}
-		eventMap.get(event).add(subscription);
+		if(!eventMap.get(event).contains(subscription)){
+			eventMap.get(event).add(subscription);
+			return 0;
+		}
+		return 1;
+		
 	}
 	
 	/**
