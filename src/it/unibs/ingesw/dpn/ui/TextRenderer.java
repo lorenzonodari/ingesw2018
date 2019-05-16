@@ -51,6 +51,11 @@ public class TextRenderer implements UIRenderer {
 	public void renderEmptyPrompt() {
 		System.out.print(CLI_PROMPT);
 	}
+	
+	@Override
+	public void renderLineSpace() {
+		System.out.println();
+	}
 
 	@Override
 	public void renderText(String text) {

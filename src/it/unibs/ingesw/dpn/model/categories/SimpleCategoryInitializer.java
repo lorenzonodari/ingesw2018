@@ -1,8 +1,14 @@
 package it.unibs.ingesw.dpn.model.categories;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import it.unibs.ingesw.dpn.model.fields.DateFieldValue;
 import it.unibs.ingesw.dpn.model.fields.Field;
+import it.unibs.ingesw.dpn.model.fields.FieldValue;
+import it.unibs.ingesw.dpn.model.fields.GenderEnumFieldValue;
 import it.unibs.ingesw.dpn.model.fields.IntegerFieldValue;
+import it.unibs.ingesw.dpn.model.fields.IntegerIntervalFieldValue;
 import it.unibs.ingesw.dpn.model.fields.MoneyAmountFieldValue;
 import it.unibs.ingesw.dpn.model.fields.StringFieldValue;
 
@@ -59,7 +65,7 @@ public class SimpleCategoryInitializer implements CategoryInitializer {
 	public Category [] initCategories() {
 		
 		// Creo e inizializzo l'array di campi comuni (una sola volta per tutte le categorie)
-		Field [] commonFields = getCommonFields();
+		List<Field<? extends FieldValue>> commonFields = getCommonFields();
 		
 		// Creo l'array delle categorie
 		Category [] categories = new Category[CategoryEnum.CATEGORIES_NUMBER];
@@ -93,20 +99,51 @@ public class SimpleCategoryInitializer implements CategoryInitializer {
 				categories[c].addAllFields(commonFields);
 				
 				// Aggiungo i campi esclusivi
-				categories[c].addAllFields(	
+				categories[c].addField(
+						
 					// Campo "genere"
-					new Field(
+					new Field<GenderEnumFieldValue>(
 							"Genere",
 							"Il genere dei giocatori che partecipano alla partita",
 							true,
-							it.unibs.ingesw.dpn.model.fields.GenderEnumFieldValue.class
-							),
+							(renderer, getter) -> {
+								GenderEnumFieldValue [] values = GenderEnumFieldValue.values();
+								int i = 1;
+								for (GenderEnumFieldValue gender : values) {
+									renderer.renderText(String.format("%3d)\t%s", 
+											i++, gender.toString()));
+								}
+								int input = getter.getInteger(1, values.length);
+								return values[input - 1];
+							})
+						);
+					
+
+				categories[c].addField(				
 					// Campo "fascia d'età"
-					new Field(
+					new Field<IntegerIntervalFieldValue>(
 							"Fascia di età",
 							"L'intervallo in cui sono comprese le età accettate dei giocatori",
 							true,
-							it.unibs.ingesw.dpn.model.fields.IntegerIntervalFieldValue.class
+							(renderer, getter) -> {
+
+								IntegerIntervalFieldValue value = null;
+								boolean check = false;
+								do {
+									renderer.renderText("Inserisci il valore minimo");
+									int min = getter.getInteger(0, Integer.MAX_VALUE);
+									renderer.renderText("Inserisci il valore massimo");
+									int max = getter.getInteger(0, Integer.MAX_VALUE);
+									
+									if (min <= max) {
+										value = new IntegerIntervalFieldValue(min, max);
+										check = true;
+									} else {
+										renderer.renderError("Inserire un valore minimo inferiore al valore massimo");
+									}
+								} while (!check);
+								return value;
+							}
 							)
 					);
 				break;
@@ -124,89 +161,107 @@ public class SimpleCategoryInitializer implements CategoryInitializer {
 	 * 
 	 * @return L'array di campi comuni a tutte le categorie
 	 */
-	private Field [] getCommonFields() {
-		Field [] commonFields = {
-				
+	private List<Field<? extends FieldValue>> getCommonFields() {
+		
+		List<Field<? extends FieldValue>> commonFields = new ArrayList<>();
+		commonFields.add(
 				// Campo "titolo"
-				new Field(
+				new Field<StringFieldValue>(
 						"Titolo",
 						"Nome di fantasia attribuito all'evento",
 						false,
-						StringFieldValue.class
-						),
-				
+						StringFieldValue::acquireValue
+						));
+
+		commonFields.add(
 				// Campo "numero di partecipanti"
-				new Field(
+				new Field<IntegerFieldValue>(
 						"Numero di partecipanti",
 						"Numero di persone da coinvolgere nell'evento",
 						true,
-						IntegerFieldValue.class
-						),
-				
+						(renderer, getter) -> {
+							return new IntegerFieldValue(getter.getInteger(0, Integer.MAX_VALUE));
+						}
+						));
+
+		commonFields.add(
 				// Campo "termine ultimo di iscrizione"
-				new Field(
+				new Field<DateFieldValue>(
 						"Termine ultimo di iscrizione",
 						"Ultimo giorno utile per iscriversi all'evento",
 						true,
-						DateFieldValue.class
-						),
+						DateFieldValue::acquireValue
+						));
 				
+		commonFields.add(
 				// Campo "luogo"
-				new Field(
+				new Field<StringFieldValue>(
 						"Luogo",
 						"Il luogo di svolgimento o di ritrovo dell'evento",
 						true,
-						StringFieldValue.class
-						),
+						StringFieldValue::acquireValue
+						));
 
+		commonFields.add(
 				// Campo "data e ora"
-				new Field(
+				new Field<DateFieldValue>(
 						"Data e ora",
 						"Il giorno e l'orario in cui si svolgerà o avrà inizio l'evento",
 						true,
-						DateFieldValue.class
-						),
-				
+						DateFieldValue::acquireValue
+						));
+
+		commonFields.add(
 				// Campo "durata"
-				new Field(
+				new Field<IntegerFieldValue>(
 						"Durata",
 						"La durata approssimata, in ore e minuti o in giorni, dell'evento",
 						false,
-						IntegerFieldValue.class
-						),
+						(renderer, getter) -> {
+							renderer.renderText("Inserisci il valore numerico della durata");
+							return new IntegerFieldValue(getter.getInteger(0, Integer.MAX_VALUE));
+						}
+						));
 
+		commonFields.add(
 				// Campo "quota individuale"
-				new Field(
+				new Field<MoneyAmountFieldValue>(
 						"Quota individuale",
 						"La spesa che ogni partecipante dovrà sostenere per l'evento",
 						true,
-						MoneyAmountFieldValue.class
-						),
+						(renderer, getter) -> {
+							renderer.renderText("Inserisci il costo di partecipazione");
+							return new MoneyAmountFieldValue(getter.getFloat(0, Float.MAX_VALUE));
+						}
+						));
 
+		commonFields.add(
 				// Campo "compreso nella quota"
-				new Field(
+				new Field<StringFieldValue>(
 						"Compreso nella quota",
 						"Lista delle voci di spesa comprese nella quota di partecipazione",
 						false,
-						StringFieldValue.class
-						),
+						StringFieldValue::acquireValue
+						));
 
+		commonFields.add(
 				// Campo "data e ora conclusive"
-				new Field(
+				new Field<DateFieldValue>(
 						"Data e ora conclusive",
 						"Il giorno e l'orario di conclusione dell'evento",
 						false,
-						DateFieldValue.class
-						),
+						DateFieldValue::acquireValue
+						));
 
+		commonFields.add(
 				// Campo "note"
-				new Field(
+				new Field<StringFieldValue>(
 						"Note",
 						"Note aggiuntive sull'evento",
 						false,
-						StringFieldValue.class
-						),
-		};
+						StringFieldValue::acquireValue
+						));
+		
 		return commonFields;
 	}
 	

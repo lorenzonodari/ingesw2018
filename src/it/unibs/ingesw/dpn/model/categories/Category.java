@@ -5,6 +5,7 @@ import java.util.List;
 
 import it.unibs.ingesw.dpn.model.events.Event;
 import it.unibs.ingesw.dpn.model.fields.Field;
+import it.unibs.ingesw.dpn.model.fields.FieldValue;
 
 /**
  * Classe che rappresenta una categoria di eventi all'interno del programma.
@@ -26,7 +27,7 @@ public class Category {
 	
 	private String name;
 	private String description;
-	private List<Field> fields;
+	private List<Field<? extends FieldValue>> fields;
 	
 	/**
 	 * Costruttore con modificatore di accesso "friendly" della classe Category.
@@ -63,9 +64,9 @@ public class Category {
 	 * 
 	 * @return Il campo col nome richiesto, come oggetto {@link Field}
 	 */
-	public Field getFieldByName(String fieldName) {
+	public Field<? extends FieldValue> getFieldByName(String fieldName) {
 		// Scorro attraverso tutti i campi
-		for (Field f : fields) {
+		for (Field<? extends FieldValue> f : fields) {
 			if (f.getName().equals(fieldName)) {
 				return f;
 			}
@@ -78,7 +79,7 @@ public class Category {
 	 * 
 	 * @return i campi della categoria
 	 */
-	public List<Field> getFields() {
+	public List<Field<? extends FieldValue>> getFields() {
 		return this.fields;
 	}
 
@@ -95,7 +96,7 @@ public class Category {
 	 * 
 	 * @param newField il nuovo campo da aggiungere.
 	 */
-	void addField(Field newField) {
+	void addField(Field<? extends FieldValue> newField) {
 		if (!this.fields.contains(newField)) {
 			this.fields.add(newField);
 		} else {
@@ -113,13 +114,31 @@ public class Category {
 	 * all'interno della categoria. Questo metodo non fa altro che richiamare il metodo 
 	 * di questa classe "addField" su tutti i campi passati come parametro.
 	 * 
-	 * @param newFields i nuovi campi da aggiungere.
+	 * @param commonFields i nuovi campi da aggiungere.
 	 */
-	void addAllFields(Field ... newFields) {
-		for (Field f : newFields) {
+	@SuppressWarnings("unchecked")
+	void addAllFields(List<Field<? extends FieldValue>> commonFields) {
+		for (Field<? extends FieldValue> f : commonFields) {
 			this.addField(f);
 		}
 	}
+	
+	/**
+	 * Aggiunge un'intera lista di campi alla categoria.
+	 * 
+	 * Nota: questo metodo può essere utilizzato solamente all'interno di questo package.
+	 * 
+	 * Precondizione: non devono esserci campi con lo stesso nome o con nomi già presenti
+	 * all'interno della categoria. Questo metodo non fa altro che richiamare il metodo 
+	 * di questa classe "addField" su tutti i campi passati come parametro.
+	 * 
+	 * @param newFields i nuovi campi da aggiungere.
+	 */ 
+//	void addAllFields(List<Field<? extends FieldValue>> newFields) {
+//		for (Field<? extends FieldValue> f : newFields) {
+//			this.addField(f);
+//		}
+//	}
 	
 	/**
 	 * Restituisce una descrizione testuale completa dell'intera categoria e dei suoi campi.
@@ -133,7 +152,7 @@ public class Category {
 				this.name,
 				this.description));
 		// Per ciascun campo aggiungo la relativa descrizione alla descrizione della categoria.
-		for (Field f : this.fields) {
+		for (Field<? extends FieldValue> f : this.fields) {
 			str.append("\n" + f.toString());
 		}
 		return str.toString();

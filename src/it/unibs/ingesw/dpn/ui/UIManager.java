@@ -419,7 +419,11 @@ public class UIManager {
 	 *
 	 * @param field Il campo di cui si vuole acquisire il valore
 	 */
-	private void acquireFieldValueSubmenu(Field field) {
+	private void acquireFieldValueSubmenu(Field<?> field) {
+		
+		this.temporaryFieldValue = field.acquireFieldValue(renderer, inputManager);
+		
+		/*
 		Class<?> type = field.getType();
 		
 		if (type.isEnum()) {
@@ -522,6 +526,7 @@ public class UIManager {
 			} while (!checkIntegrityFlag);
 			
 		}
+		*/
 		
 	}
 	

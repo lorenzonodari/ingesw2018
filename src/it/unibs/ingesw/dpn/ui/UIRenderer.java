@@ -32,6 +32,12 @@ public interface UIRenderer {
 //	 * @param question La richiesta da porre all'utente
 //	 */
 //	void renderPrompt(String question);
+	
+	/**
+	 * Renderizza uno spazio vuoto orizzontale.
+	 * Nelle interfacce testuali stampa una riga vuota.
+	 */
+	void renderLineSpace();
 
 	/**
 	 * Metodo che visualizza un testo passato come parametro.

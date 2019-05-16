@@ -1,24 +1,25 @@
 package it.unibs.ingesw.dpn.model.fields;
 
 import it.unibs.ingesw.dpn.model.categories.Category;
+import it.unibs.ingesw.dpn.ui.InputGetter;
+import it.unibs.ingesw.dpn.ui.UIRenderer;
 
 /**
  * La classe "Field" rappresenta un campo di una categoria all'interno del modello concettuale del progetto.
- * Un campo è caratterizzato da un nome, da una descrizione, dall'essere o meno obbligatorio e dal tipo di valore
- * atteso. 
+ * Un campo è caratterizzato da un nome, da una descrizione e dall'essere o meno obbligatorio.
+ * Inoltre è parametrizzato su una classe, che è la classe le cui istanze rappresentano il valore del campo.
  * 
  * Nota: ogni attributo viene presentato come "final" poichè non vi è mai la necessità che il suo valore cambi runtime.
  * 
  * @author Michele Dusi, Lorenzo Nodari, Emanuele Poggi
  * 
  */
-public class Field {
+public class Field<T extends FieldValue> {
 	
 	private static final String TO_STRING =
 			  "Nome:           %s\n"
 			+ "Descrizione:    %s\n"
-			+ "%s\n"
-			+ "Tipo:           %s\n";
+			+ "%s\n";
 	
 	private static final String MANDATORY_TAG = "Obbligatorio";
 	private static final String OPTIONAL_TAG = "Facoltativo";
@@ -26,7 +27,12 @@ public class Field {
 	private final String name;
 	private final String description;
 	private final boolean mandatory;
-	private Class<? extends FieldValue> type = FieldValue.class;
+	private final FieldValueAcquirer<T> valueAcquirer;
+	
+	
+	public interface FieldValueAcquirer<T> {
+		public T acquireFieldValue(UIRenderer renderer, InputGetter getter);
+	}
 	
 	/**
 	 * Costruttore.
@@ -46,14 +52,14 @@ public class Field {
 	 * @param mandatory L'obbligatorietà del campo
 	 * @param type Il tipo del valore del campo
 	 */
-	public Field(String name, String description, boolean mandatory, Class<? extends FieldValue> type) {
-		if (name == null || description == null || type == null) {
+	public Field(String name, String description, boolean mandatory, FieldValueAcquirer<T> valueAcquirer) {
+		if (name == null || description == null || valueAcquirer == null) {
 			throw new IllegalArgumentException();
 		}
 		this.name = name;
 		this.description = description;
 		this.mandatory = mandatory;
-		this.type = type;
+		this.valueAcquirer = valueAcquirer;
 	}
 
 	/**
@@ -76,31 +82,6 @@ public class Field {
 	public boolean isMandatory() {
 		return mandatory;
 	}
-
-	/**
-	 * @return Il tipo del campo
-	 */
-	public Class<?> getType() {
-		return type;
-	}
-	
-	/**
-	 * Casta un oggetto al tipo previsto.
-	 * Nel caso in cui l'oggetto non sia un oggetto di tale istanza, viene lanciata un'eccezione.
-	 * 
-	 * Precondizione: l'oggetto deve essere del tipo previsto.
-	 * 
-	 * @param value il valore da castare.
-	 * @return il valore 
-	 */
-	@SuppressWarnings("unchecked")
-	public <T> T castToType(Object value) throws ClassCastException {
-		if (this.type.isInstance(value)) {
-			return (T) this.type.cast(value);
-		} else {
-			throw new ClassCastException();
-		}
-	}
 	
 	/**
 	 * Verifica se questo campo è uguale ad un altro.
@@ -115,7 +96,9 @@ public class Field {
 	@Override
 	public boolean equals(Object otherField) {
 		if (otherField != null && Field.class.isInstance(otherField)) {
-			return this.name.equals(((Field) otherField).name);
+			@SuppressWarnings("unchecked")
+			Field<T> castOtherField = (Field<T>) otherField;
+			return this.name.equals(castOtherField.name);
 		} else {
 			return false;
 		}
@@ -136,9 +119,30 @@ public class Field {
 				this.description,
 				this.mandatory ? 
 						MANDATORY_TAG :
-						OPTIONAL_TAG,
-				this.type.getSimpleName()
+						OPTIONAL_TAG
 				);
 		return str;
 	}
+
+	/**
+	 * Passa il controllo all'istanza di {@link FieldValueAcquirer} che si occupa di acquisire
+	 * un valore per questo specifico campo.
+	 * 
+	 * @param renderer Il renderer da chiamare per visualizzare eventuali messaggi d'errore
+	 * @param getter L'oggetto che si occupa di acquisire i dati in maniera primitiva
+	 * @return L'oggetto <T> che rappresenta il valore del campo
+	 */
+	public T acquireFieldValue(UIRenderer renderer, InputGetter getter) {
+		renderer.renderLineSpace();
+		renderer.renderText(String.format(
+				" ### %-35s",
+				this.name.toUpperCase()));
+		renderer.renderText(String.format(
+				" ### %s",
+				this.description));
+		renderer.renderLineSpace();
+		return this.valueAcquirer.acquireFieldValue(renderer, getter);
+	}
+	
+	
 }
