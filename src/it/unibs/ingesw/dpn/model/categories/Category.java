@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.unibs.ingesw.dpn.model.events.Event;
-import it.unibs.ingesw.dpn.model.fields.Field;
-import it.unibs.ingesw.dpn.model.fields.FieldValue;
+import it.unibs.ingesw.dpn.model.fields.IField;
 
 /**
  * Classe che rappresenta una categoria di eventi all'interno del programma.
@@ -27,7 +26,7 @@ public class Category {
 	
 	private String name;
 	private String description;
-	private List<Field<? extends FieldValue>> fields;
+	private List<IField> fields;
 	
 	/**
 	 * Costruttore con modificatore di accesso "friendly" della classe Category.
@@ -56,30 +55,13 @@ public class Category {
 	public String getDescription() {
 		return description;
 	}
-
-	/**
-	 * Restituisce un campo della categoria con il nome corrispondente.
-	 * Se assente, restituisce "null".
-	 * Ovviamente viene dato per scontato che esista al più un campo con un dato nome all'interno della categoria.
-	 * 
-	 * @return Il campo col nome richiesto, come oggetto {@link Field}
-	 */
-	public Field<? extends FieldValue> getFieldByName(String fieldName) {
-		// Scorro attraverso tutti i campi
-		for (Field<? extends FieldValue> f : fields) {
-			if (f.getName().equals(fieldName)) {
-				return f;
-			}
-		}
-		return null;
-	}
 	
 	/**
 	 * Restituisce l'array con tutti i campi della categoria.
 	 * 
 	 * @return i campi della categoria
 	 */
-	public List<Field<? extends FieldValue>> getFields() {
+	public List<IField> getFields() {
 		return this.fields;
 	}
 
@@ -96,7 +78,7 @@ public class Category {
 	 * 
 	 * @param newField il nuovo campo da aggiungere.
 	 */
-	void addField(Field<? extends FieldValue> newField) {
+	void addField(IField newField) {
 		if (!this.fields.contains(newField)) {
 			this.fields.add(newField);
 		} else {
@@ -116,8 +98,8 @@ public class Category {
 	 * 
 	 * @param commonFields i nuovi campi da aggiungere.
 	 */
-	void addAllFields(List<Field<? extends FieldValue>> commonFields) {
-		for (Field<? extends FieldValue> f : commonFields) {
+	void addAllFields(List<IField> commonFields) {
+		for (IField f : commonFields) {
 			this.addField(f);
 		}
 	}
@@ -134,7 +116,7 @@ public class Category {
 				this.name,
 				this.description));
 		// Per ciascun campo aggiungo la relativa descrizione alla descrizione della categoria.
-		for (Field<? extends FieldValue> f : this.fields) {
+		for (IField f : this.fields) {
 			str.append("\n" + f.toString());
 		}
 		return str.toString();

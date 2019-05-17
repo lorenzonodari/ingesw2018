@@ -15,7 +15,7 @@ import it.unibs.ingesw.dpn.ui.UIRenderer;
  * @author Michele Dusi, Lorenzo Nodari, Emanuele Poggi
  * 
  */
-public class Field<T extends FieldValue> implements Serializable {
+public class Field<T extends FieldValue> implements Serializable, IField {
 	
 	private static final long serialVersionUID = -7411339597195983805L;
 

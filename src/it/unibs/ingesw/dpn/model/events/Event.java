@@ -8,11 +8,11 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import it.unibs.ingesw.dpn.model.categories.Category;
 import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
-import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
+import it.unibs.ingesw.dpn.model.fields.CommonField;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fields.FieldValue;
+import it.unibs.ingesw.dpn.model.fields.IField;
 import it.unibs.ingesw.dpn.model.fields.StringFieldValue;
 import it.unibs.ingesw.dpn.model.users.Mailbox;
 import it.unibs.ingesw.dpn.model.users.Notification;
@@ -73,7 +73,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	
 	private final CategoryEnum category;
 	
-	private final Map<Field<? extends FieldValue>, FieldValue> valuesMap;
+	private final Map<IField, FieldValue> valuesMap;
 	
 	private EventState state;
 	
@@ -97,7 +97,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * @param fieldValues le coppie (campo-valore) dell'evento
 	 */
 	@Deprecated 
-	public Event(CategoryEnum category, Map<Field<? extends FieldValue>, FieldValue> fieldValues) {
+	public Event(CategoryEnum category, Map<IField, FieldValue> fieldValues) {
 		if (category == null || fieldValues == null) {
 			throw new IllegalArgumentException(NULL_ARGUMENT_EXCEPTION);
 		}
@@ -119,11 +119,8 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		this.setState(new ValidState());
 		
 		// Fornisco all'evento un Titolo di default, se non è presente un altro titolo
-		// Recupero l'oggetto Field di titolo
-		Category cat = CategoryProvider.getProvider().getCategory(this.category);
-		Field<? extends FieldValue> titleField = cat.getFieldByName("Titolo");
-		if (this.valuesMap.get(titleField) == null) {
-			this.valuesMap.put(titleField, new StringFieldValue(String.format("Event_%04d", this.id)));
+		if (this.valuesMap.get(CommonField.TITOLO) == null) {
+			this.valuesMap.put(CommonField.TITOLO, new StringFieldValue(String.format("Event_%04d", this.id)));
 		}
 	}
 	
@@ -149,7 +146,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * @param category la categoria prescelta
 	 * @param fieldValues le coppie (campo-valore) dell'evento
 	 */
-	public Event(User creator, CategoryEnum category, Map<Field<? extends FieldValue>, FieldValue> fieldValues) {
+	public Event(User creator, CategoryEnum category, Map<IField, FieldValue> fieldValues) {
 		this(category, fieldValues);
 		
 		// Imposto il creatore dell'evento
@@ -171,7 +168,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * @param chosenField il campo di cui si vuole conoscere il valore
 	 * @return Il valore del campo
 	 */
-	public Object getFieldValue(Field<? extends FieldValue> chosenField) {
+	public Object getFieldValue(IField chosenField) {
 		if (this.valuesMap.containsKey(chosenField)) {
 			return this.valuesMap.get(chosenField);
 		} else {
@@ -179,30 +176,6 @@ public abstract class Event implements Serializable, Comparable<Event> {
 					FIELD_NOT_PRESENT_EXCEPTION, 
 					chosenField.getName()));
 		}
-	}
-
-	/**
-	 * Restituisce il valore caratterizzante l'evento del campo richiesto.
-	 * Se il nome del campo non corrisponde ad alcun campo dell'evento, verrà restituito il valore "null".
-	 * 
-	 * Precondizione: l'oggetto {@link String} passato come parametro deve corrispondere ad un campo 
-	 * previsto e contenuto nella categoria a cui appartiene l'evento.
-	 * 
-	 * @param chosenFieldName il nome del campo di cui si vuole conoscere il valore
-	 * @return Il valore del campo
-	 */
-	public FieldValue getFieldValueByName(String chosenFieldName) {
-		// Recupero l'oggetto Category con tutti i campi
-		Category cat = CategoryProvider.getProvider().getCategory(this.category);
-		Field<? extends FieldValue> field = cat.getFieldByName(chosenFieldName);
-		// Verifico se esiste il campo
-		if (field == null || !this.valuesMap.containsKey(field)) {
-			// Nota: il secondo controllo dovrebbe essere inutile, poiché i campi di un evento e quelli della sua categoria DEVONO coincidere.
-			return null;
-		} else {
-			return this.valuesMap.get(field);
-		}
-		
 	}
 	
 	/**
@@ -265,7 +238,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		// Effettuo le attività d'entrata nello stato
 		this.state.onEntry(this);
 		
-		String titolo = this.getFieldValueByName("Titolo").toString();
+		String titolo = this.valuesMap.get(CommonField.TITOLO).toString();
 		
 		// Aggiorno la storia
 		String message_log = String.format(
@@ -330,7 +303,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		this.mailingList.add(newSubscriber.getMailbox());
 		// Comunica all'utente la nuova sottoscrizione
 		newSubscriber.getMailbox().deliver(new Notification(
-				String.format(EVENT_SUBSCRIPTION_MESSAGE, this.getFieldValueByName("Titolo"))
+				String.format(EVENT_SUBSCRIPTION_MESSAGE, this.valuesMap.get(CommonField.TITOLO))
 				));
 		
 		// Effettua un eventuale cambiamento di stato
@@ -471,8 +444,8 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * @return Un valore numerico per capire l'ordinamento dei due eventi
 	 */
 	public int compareByEventDateTo(Event e) {
-		Date thisDate = (Date) this.getFieldValueByName("Data e ora");
-		Date otherDate = (Date) e.getFieldValueByName("Data e ora");
+		Date thisDate = (Date) this.valuesMap.get(CommonField.DATA_E_ORA);
+		Date otherDate = (Date) e.valuesMap.get(CommonField.DATA_E_ORA);
 		// Se l'evento corrente è più recente come data di creazione dell'evento passato come parametro
 		if (thisDate.after(otherDate)) {
 			return +1;
@@ -495,8 +468,8 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * @return Un valore numerico per capire l'ordinamento dei due eventi
 	 */
 	public int compareByTitleTo(Event e) {
-		String thisTitle = this.getFieldValueByName("Titolo").toString();
-		String otherTitle = e.getFieldValueByName("Titolo").toString();
+		String thisTitle = this.valuesMap.get(CommonField.TITOLO).toString();
+		String otherTitle = e.valuesMap.get(CommonField.TITOLO).toString();
 		return thisTitle.compareTo(otherTitle);
 	}
 

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Timer;
 
+import it.unibs.ingesw.dpn.model.fields.CommonField;
 import it.unibs.ingesw.dpn.model.fields.IntegerFieldValue;
 
 /**
@@ -44,7 +45,7 @@ public class OpenState implements EventState, Serializable {
 		this.timeoutTimer = new Timer(TIMER_NAME + e.hashCode(), true);
 		
 		// Ricavo la data del termine ultimo di iscrizione
-		Date timeoutDate = (Date) e.getFieldValueByName("Termine ultimo di iscrizione");
+		Date timeoutDate = (Date) e.getFieldValue(CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE);
 		
 		// Schedulo il cambiamento di stato da OPEN a FAILED
 		Event.scheduleStateChange(e, EventState.FAILED, timeoutTimer, timeoutDate);
@@ -63,7 +64,7 @@ public class OpenState implements EventState, Serializable {
 		this.currentSubscribers++;
 		
 		// Verifico se ho raggiunto il numero massimo
-		int numMax = ((IntegerFieldValue) e.getFieldValueByName("Numero di partecipanti")).getValue();
+		int numMax = ((IntegerFieldValue) e.getFieldValue(CommonField.NUMERO_DI_PARTECIPANTI)).getValue();
 		
 		if (this.currentSubscribers >= numMax) {
 			

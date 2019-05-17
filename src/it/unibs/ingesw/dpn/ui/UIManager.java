@@ -14,8 +14,9 @@ import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
 import it.unibs.ingesw.dpn.model.events.Event;
 import it.unibs.ingesw.dpn.model.events.EventState;
 import it.unibs.ingesw.dpn.model.events.EventFactory;
-import it.unibs.ingesw.dpn.model.fields.Field;
+import it.unibs.ingesw.dpn.model.fields.CommonField;
 import it.unibs.ingesw.dpn.model.fields.FieldValue;
+import it.unibs.ingesw.dpn.model.fields.IField;
 
 /**
  * Classe adibita alla gestione dell'interfaccia utente. In particolare, alle istanze
@@ -365,7 +366,7 @@ public class UIManager {
 			
 		};
 		
-		Menu eventMenu = new Menu("Azioni su evento", event.getFieldValueByName("Titolo").toString(), Menu.BACK_ENTRY_TITLE, backAction);
+		Menu eventMenu = new Menu("Azioni su evento", event.getFieldValue(CommonField.TITOLO).toString(), Menu.BACK_ENTRY_TITLE, backAction);
 		if(model.getEventBoard().verifySubscription(event, model.getUsersManager().getCurrentUser()))
 			eventMenu.addEntry("Iscriviti all'evento", subscriptionAction);
 		
@@ -387,7 +388,7 @@ public class UIManager {
 		for (Event open : model.getEventBoard().getEventsByState(EventState.OPEN)) {
 			
 			MenuAction eventAction = () -> {this.eventMenu(open);};
-			eventView.addEntry(open.getFieldValueByName("Titolo").toString(), eventAction);
+			eventView.addEntry(open.getFieldValue(CommonField.TITOLO).toString(), eventAction);
 			
 		}
 				
@@ -401,7 +402,7 @@ public class UIManager {
 	 * @param category La categoria dell'evento
 	 * @param fieldValues Le coppie <Campo, Valore> inizializzate finora.
 	 */
-	public void createEventMenu(CategoryEnum category, Map<Field<? extends FieldValue>, FieldValue> fieldValues) {
+	public void createEventMenu(CategoryEnum category, Map<IField, FieldValue> fieldValues) {
 		
 		// Callback per abortire la creazione dell'evento
 		MenuAction abortAction = () -> {this.boardMenu();};
@@ -412,7 +413,7 @@ public class UIManager {
 		// Verifico se tutti i campi obbligatori sono stati compilati
 		boolean checkMandatoryFieldsFlag = true;
 		
-		for (Field<? extends FieldValue> f : fieldValues.keySet()) {
+		for (IField f : fieldValues.keySet()) {
 			
 			/* Azione relativa ad un'opzione */
 			MenuAction fieldAction = () -> {
@@ -468,116 +469,12 @@ public class UIManager {
 	 *
 	 * @param field Il campo di cui si vuole acquisire il valore
 	 */
-	private void acquireFieldValueSubmenu(Field<?> field) {
+	private void acquireFieldValueSubmenu(IField field) {
 		
-		this.temporaryFieldValue = field.acquireFieldValue(renderer, inputManager);
-		
-		/*
-		Class<?> type = field.getType();
-		
-		if (type.isEnum()) {
-			// L'oggetto FieldValue è un ENUM
-
-			MenuAction cancelAction = () -> {this.temporaryFieldValue = null;};
-			
-			Menu enumCreationMenu = new Menu(
-					"Selezione del campo: " + field.getName(),
-					String.format(
-							"Seleziona fra le opzioni il valore da associare al campo \"%s\".\nDescrizione: %s.",
-							field.getName(),
-							field.getDescription()), 
-					"Annulla",
-					cancelAction);
-			
-			for (Object option : type.getEnumConstants()) {
-				MenuAction setOptionAction = () -> {this.temporaryFieldValue = (FieldValue) option;};
-				enumCreationMenu.addEntry(option.toString(), setOptionAction);
-			}
-
-			renderer.renderMenu(enumCreationMenu);
-			renderer.renderEmptyPrompt();
-			MenuAction action = getUserChoice(enumCreationMenu);
-			action.execute();		
-			
-		} else {
-			// L'oggetto FieldValue NON è un ENUM
-			
-			renderer.renderText("Inserimento del campo: " + field.getName());
-			renderer.renderText(String.format(
-						"Descrizione: %s.",
-						field.getName()));
-
-			boolean checkIntegrityFlag = false;
-			do {
-				
-				switch (field.getType().getSimpleName()) {
-				
-				case "DateFieldValue" :
-					// Anno, mese, giorno
-					renderer.renderText("Inserisci l'anno");
-					int anno = inputManager.getInteger(1900, 2200);
-					renderer.renderText("Inserisci il mese");
-					int mese = inputManager.getInteger(1, 12) - 1;
-					renderer.renderText("Inserisci il giorno");
-					int giorno = inputManager.getInteger(1, 31);
-					
-					// Orario
-					renderer.renderText("Inserisci l'orario in formato (HH:MM)");
-					String ora = inputManager.getMatchingString("([0-1][0-9]|2[0-3]):([0-5][0-9])");
-					int ore = Integer.parseInt(ora.substring(0, 2));
-					int minuti = Integer.parseInt(ora.substring(3, 5));
-					
-					java.util.Calendar cal = java.util.Calendar.getInstance();
-					cal.set(anno, mese, giorno, ore, minuti, 0);
-					DateFieldValue date = new DateFieldValue(cal.getTimeInMillis());
-					this.temporaryFieldValue = date;
-					checkIntegrityFlag = true;
-					break;
-					
-				case "IntegerFieldValue" :
-					renderer.renderText("Inserisci il valore numerico");
-					this.temporaryFieldValue = new IntegerFieldValue(
-							inputManager.getInteger(0, Integer.MAX_VALUE));
-					checkIntegrityFlag = true;
-					break;
-					
-				case "IntegerIntervalFieldValue" :
-					renderer.renderText("Inserisci il valore minimo");
-					int min = inputManager.getInteger(0, Integer.MAX_VALUE);
-					renderer.renderText("Inserisci il valore massimo");
-					int max = inputManager.getInteger(0, Integer.MAX_VALUE);
-					if (min <= max) {
-						this.temporaryFieldValue = new IntegerIntervalFieldValue(min, max);
-						checkIntegrityFlag = true;
-					} else {
-						renderer.renderText("Inserire un valore minimo inferiore al valore massimo");
-					}
-					break;
-					
-				case "MoneyAmountFieldValue" :
-					renderer.renderText("Inserisici il valore in virgola mobile");
-					try {
-						this.temporaryFieldValue = new MoneyAmountFieldValue(
-								inputManager.getFloat(Float.MIN_VALUE, Float.MAX_VALUE));
-						checkIntegrityFlag = true;
-					} catch (NumberFormatException e) {
-						renderer.renderText("Non è stato possibile interpretare correttamente l'input");
-					}
-					break;
-					
-				case "StringFieldValue" :
-					this.temporaryFieldValue = new StringFieldValue(inputManager.getString().trim());
-					checkIntegrityFlag = true;
-					break;
-				
-				}
-				
-			} while (!checkIntegrityFlag);
-			
-		}
-		*/
+		this.temporaryFieldValue = (FieldValue) field.acquireFieldValue(renderer, inputManager);
 		
 	}
+	
 	public void categorySelectorMenu() {
 		
 		// Callback indietro
@@ -590,10 +487,10 @@ public class UIManager {
 			
 			Category completeCategory = CategoryProvider.getProvider().getCategory(category);
 			
-			HashMap<Field<? extends FieldValue>, FieldValue> map = new HashMap<>();
+			HashMap<IField, FieldValue> map = new HashMap<>();
 			MenuAction categorySelectionAction = () -> {
 				// Preparo una Map vuota per memorizzare i parametri di creazione dell'evento
-				for (Field<? extends FieldValue> f : completeCategory.getFields()) {
+				for (IField f : completeCategory.getFields()) {
 					map.put(f, null);
 				};
 				this.createEventMenu(category, map);};

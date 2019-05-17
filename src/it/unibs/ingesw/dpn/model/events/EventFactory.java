@@ -3,8 +3,8 @@ package it.unibs.ingesw.dpn.model.events;
 import java.util.Map;
 
 import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
-import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fields.FieldValue;
+import it.unibs.ingesw.dpn.model.fields.IField;
 import it.unibs.ingesw.dpn.model.users.User;
 
 /**
@@ -44,7 +44,7 @@ public class EventFactory {
 	 * @param fieldValues I campi dell'evento
 	 * @return l'istanza di {@link Event} creata
 	 */
-	public Event createEvent(User creator, CategoryEnum category, Map<Field<? extends FieldValue>, FieldValue> fieldValues) {
+	public Event createEvent(User creator, CategoryEnum category, Map<IField, FieldValue> fieldValues) {
 		
 		if (category == null) {
 			throw new IllegalArgumentException("Impossibile creare un Evento con categoria \"null\"");

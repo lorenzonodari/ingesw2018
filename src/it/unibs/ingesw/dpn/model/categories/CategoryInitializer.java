@@ -23,7 +23,7 @@ public interface CategoryInitializer {
 	 */
 	static CategoryInitializer getInstance() {
 //		return FromFileCategoryInitializer.getInstance();
-		return SimpleCategoryInitializer.getInstance();
+		return FromEnumCategoryInitializer.getInstance();
 	}
 	
 	/**

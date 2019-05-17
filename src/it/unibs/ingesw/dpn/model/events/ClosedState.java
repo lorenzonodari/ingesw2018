@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Timer;
 
+import it.unibs.ingesw.dpn.model.fields.CommonField;
+
 /**
  * Classe che modellizza il comportamento di un evento {@link Event} nello stato CLOSED.
  * 
@@ -39,7 +41,7 @@ public class ClosedState implements EventState, Serializable {
 		this.endingTimer = new Timer(TIMER_NAME + e.hashCode(), true);
 		
 		// Ricavo la data della conclusione dell'evento
-		Date endingDate = (Date) e.getFieldValueByName("Data e ora conclusive");
+		Date endingDate = (Date) e.getFieldValue(CommonField.DATA_E_ORA_CONCLUSIVE);
 		
 		// Schedulo il cambiamento di stato da CLOSED a ENDED
 		Event.scheduleStateChange(e, EventState.ENDED, endingTimer, endingDate);
