@@ -42,7 +42,7 @@ public class DateFieldValue extends Date implements FieldValue, Serializable {
 				+ "(/|-)" // Divisore
 				+ "(19|20|21)([0-9][0-9])"); // Anno
 		int giorno = Integer.parseInt(data.substring(0, 2));
-		int mese = Integer.parseInt(data.substring(3, 5)) + 1;
+		int mese = Integer.parseInt(data.substring(3, 5)) - 1;
 		int anno = Integer.parseInt(data.substring(6, 10));							
 				
 		// Ora e minuti
