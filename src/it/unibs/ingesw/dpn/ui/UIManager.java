@@ -413,7 +413,9 @@ public class UIManager {
 		// Verifico se tutti i campi obbligatori sono stati compilati
 		boolean checkMandatoryFieldsFlag = true;
 		
-		for (Field f : fieldValues.keySet()) {
+		List<Field> fields = CategoryProvider.getProvider().getCategory(category).getFields();
+		
+		for (Field f : fields) {
 			
 			/* Azione relativa ad un'opzione */
 			MenuAction fieldAction = () -> {

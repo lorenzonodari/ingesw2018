@@ -10,7 +10,7 @@ public class TextRenderer implements UIRenderer {
 	
 	private static final String CLI_PROMPT = ">> ";
 	private static final String ENTRY_NUM_SEPARATOR = " - ";
-	private static final char FRAME_STAR = '=';
+	private static final char FRAME_CHAR = '=';
 	private static final String ERROR_PREFIX = "ERRORE: \t";
 
 	@Override
@@ -27,11 +27,11 @@ public class TextRenderer implements UIRenderer {
 		System.out.println();
 		
 		List<MenuEntry> entries = menu.getEntries();
-		for (int i = entries.size(); i > 0; i--) {
+		for (int i = 0; i < entries.size(); i++) {
 			System.out.print(" ");
-			System.out.printf("%2d", i);
+			System.out.printf("%2d", (i + 1));
 			System.out.print(ENTRY_NUM_SEPARATOR);
-			renderMenuEntry(entries.get(i - 1));
+			renderMenuEntry(entries.get(i));
 		}
 		
 		System.out.print(" ");
@@ -69,7 +69,7 @@ public class TextRenderer implements UIRenderer {
 		int len = text.trim().length();
 		StringBuffer line = new StringBuffer();
 		for (int i = 0; i < len + 8; i++) {
-			line.append(FRAME_STAR);
+			line.append(FRAME_CHAR);
 		}
 		// Stampa la cornice e il testo
 		System.out.println(line.toString());
