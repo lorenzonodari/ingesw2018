@@ -44,7 +44,7 @@ public class ClosedState implements EventState, Serializable {
 		Date endingDate = (Date) e.getFieldValue(CommonField.DATA_E_ORA_CONCLUSIVE);
 		
 		// Schedulo il cambiamento di stato da CLOSED a ENDED
-		Event.scheduleStateChange(e, EventState.ENDED, endingTimer, endingDate);
+		EventState.scheduleStateChange(e, EventState.ENDED, endingTimer, endingDate);
 		
 	}
 

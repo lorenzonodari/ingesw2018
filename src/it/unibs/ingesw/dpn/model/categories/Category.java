@@ -98,7 +98,7 @@ public class Category {
 	 * 
 	 * @param commonFields i nuovi campi da aggiungere.
 	 */
-	void addAllFields(List<IField> commonFields) {
+	void addAllFields(IField [] commonFields) {
 		for (IField f : commonFields) {
 			this.addField(f);
 		}

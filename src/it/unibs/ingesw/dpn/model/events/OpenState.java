@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.Timer;
 
 import it.unibs.ingesw.dpn.model.fields.CommonField;
-import it.unibs.ingesw.dpn.model.fields.IntegerFieldValue;
+import it.unibs.ingesw.dpn.model.fieldvalues.IntegerFieldValue;
 
 /**
  * Classe che modellizza il comportamento di un evento {@link Event} nello stato OPEN.
@@ -48,7 +48,7 @@ public class OpenState implements EventState, Serializable {
 		Date timeoutDate = (Date) e.getFieldValue(CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE);
 		
 		// Schedulo il cambiamento di stato da OPEN a FAILED
-		Event.scheduleStateChange(e, EventState.FAILED, timeoutTimer, timeoutDate);
+		EventState.scheduleStateChange(e, EventState.FAILED, timeoutTimer, timeoutDate);
 		
 	}
 	

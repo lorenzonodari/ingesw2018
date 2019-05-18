@@ -3,8 +3,8 @@ package it.unibs.ingesw.dpn.model.events;
 import java.util.Map;
 
 import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
-import it.unibs.ingesw.dpn.model.fields.FieldValue;
 import it.unibs.ingesw.dpn.model.fields.IField;
+import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 import it.unibs.ingesw.dpn.model.users.User;
 
 /**

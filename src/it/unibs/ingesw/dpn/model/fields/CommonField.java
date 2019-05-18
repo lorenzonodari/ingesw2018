@@ -1,6 +1,13 @@
 package it.unibs.ingesw.dpn.model.fields;
 
 import java.io.Serializable;
+
+import it.unibs.ingesw.dpn.model.fields.IField.FieldValueAcquirer;
+import it.unibs.ingesw.dpn.model.fieldvalues.DateFieldValue;
+import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
+import it.unibs.ingesw.dpn.model.fieldvalues.IntegerFieldValue;
+import it.unibs.ingesw.dpn.model.fieldvalues.MoneyAmountFieldValue;
+import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
 import it.unibs.ingesw.dpn.ui.InputGetter;
 import it.unibs.ingesw.dpn.ui.UIRenderer;
 
@@ -10,6 +17,7 @@ public enum CommonField implements IField, Serializable {
 			"Titolo",
 			"Nome di fantasia attribuito all'evento",
 			false,
+			StringFieldValue.class,
 			StringFieldValue::acquireValue
 			),
 	
@@ -17,6 +25,7 @@ public enum CommonField implements IField, Serializable {
 			"Numero di partecipanti",
 			"Numero di persone da coinvolgere nell'evento",
 			true,
+			IntegerFieldValue.class,
 			(renderer, getter) -> {
 				renderer.renderText("Inserisci il numero di partecipanti (almeno 2)");
 				return new IntegerFieldValue(getter.getInteger(2, Integer.MAX_VALUE));
@@ -27,6 +36,7 @@ public enum CommonField implements IField, Serializable {
 			"Termine ultimo di iscrizione",
 			"Ultimo giorno utile per iscriversi all'evento",
 			true,
+			DateFieldValue.class,
 			DateFieldValue::acquireValue
 			),
 	
@@ -34,6 +44,7 @@ public enum CommonField implements IField, Serializable {
 			"Luogo",
 			"Il luogo di svolgimento o di ritrovo dell'evento",
 			true,
+			StringFieldValue.class,
 			StringFieldValue::acquireValue
 			),
 	
@@ -41,6 +52,7 @@ public enum CommonField implements IField, Serializable {
 			"Data e ora",
 			"Il giorno e l'orario in cui si svolgerà o avrà inizio l'evento",
 			true,
+			DateFieldValue.class,
 			DateFieldValue::acquireValue
 			),
 	
@@ -48,6 +60,7 @@ public enum CommonField implements IField, Serializable {
 			"Durata",
 			"La durata approssimata, in ore e minuti o in giorni, dell'evento",
 			false,
+			IntegerFieldValue.class,
 			(renderer, getter) -> {
 				renderer.renderText("Inserisci il valore numerico della durata");
 				return new IntegerFieldValue(getter.getInteger(0, Integer.MAX_VALUE));
@@ -58,6 +71,7 @@ public enum CommonField implements IField, Serializable {
 			"Quota individuale",
 			"La spesa che ogni partecipante dovrà sostenere per l'evento",
 			true,
+			MoneyAmountFieldValue.class,
 			(renderer, getter) -> {
 				renderer.renderText("Inserisci il costo di partecipazione");
 				return new MoneyAmountFieldValue(getter.getFloat(0, Float.MAX_VALUE));
@@ -68,6 +82,7 @@ public enum CommonField implements IField, Serializable {
 			"Compreso nella quota",
 			"Lista delle voci di spesa comprese nella quota di partecipazione",
 			false,
+			StringFieldValue.class,
 			StringFieldValue::acquireValue
 			),
 	
@@ -75,6 +90,7 @@ public enum CommonField implements IField, Serializable {
 			"Data e ora conclusive",
 			"Il giorno e l'orario di conclusione dell'evento",
 			false,
+			DateFieldValue.class,
 			DateFieldValue::acquireValue
 			),
 	
@@ -82,6 +98,7 @@ public enum CommonField implements IField, Serializable {
 			"Note",
 			"Note aggiuntive sull'evento",
 			false,
+			StringFieldValue.class,
 			StringFieldValue::acquireValue
 			)
 	
@@ -97,6 +114,7 @@ public enum CommonField implements IField, Serializable {
 	private final String name;
 	private final String description;
 	private final boolean mandatory;
+	private final Class<? extends FieldValue> type;
 	private final FieldValueAcquirer valueAcquirer;
 
 	/**
@@ -117,19 +135,23 @@ public enum CommonField implements IField, Serializable {
 	 * @param description La descrizione del campo
 	 * @param mandatory L'obbligatorietà del campo
 	 * @param type Il tipo del valore del campo
+	 * @param acquirer Il metodo di acquisizione del dato
 	 */
-	private CommonField(String name, String description, boolean mandatory, FieldValueAcquirer acquirer) {
-		if (name == null || description == null || acquirer == null) {
+	private CommonField(String name, String description, boolean mandatory, Class<? extends FieldValue> type, FieldValueAcquirer acquirer) {
+		if (name == null || description == null || type == null || acquirer == null) {
 			throw new IllegalArgumentException();
 		}
 		this.name = name;
 		this.description = description;
 		this.mandatory = mandatory;
+		this.type = type;
 		this.valueAcquirer = acquirer;
 	}
 
 	/**
-	 * @return Il nome del campo
+	 * Restituisce il nome dell'oggetto Field.
+	 * 
+	 * @return il nome dell'oggetto Field.
 	 */
 	@Override
 	public String getName() {
@@ -137,7 +159,9 @@ public enum CommonField implements IField, Serializable {
 	}
 
 	/**
-	 * @return La descrizione del campo
+	 * Restituisce la descrizione del campo.
+	 * 
+	 * @return la descrizione del campo, come oggetto {@link String}
 	 */
 	@Override
 	public String getDescription() {
@@ -145,13 +169,25 @@ public enum CommonField implements IField, Serializable {
 	}
 
 	/**
-	 * @return L'obbligatorietà del campo
+	 * Restituisce l'obbligatorietà del campo.
+	 * 
+	 * @return true se la compilazione del campo è obbligatoria, false altrimenti
 	 */
 	@Override
 	public boolean isMandatory() {
 		return this.mandatory;
 	}
 
+	/**
+	 * Restituisce la classe le cui istanze sono i possibili valori di questo Field.
+	 * 
+	 * @return il "tipo" del campo
+	 */
+	@Override
+	public Class<? extends FieldValue> getType() {
+		return this.type;
+	}
+	
 	/**
 	 * Passa il controllo all'istanza di {@link FieldValueAcquirer} che si occupa di acquisire
 	 * un valore per questo specifico campo.
@@ -161,7 +197,7 @@ public enum CommonField implements IField, Serializable {
 	 * @return L'oggetto che rappresenta il valore del campo
 	 */
 	@Override
-	public Object acquireFieldValue(UIRenderer renderer, InputGetter getter) {
+	public FieldValue acquireFieldValue(UIRenderer renderer, InputGetter getter) {
 		renderer.renderLineSpace();
 		renderer.renderText(String.format(
 				" ### %-35s",

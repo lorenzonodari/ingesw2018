@@ -1,4 +1,4 @@
-package it.unibs.ingesw.dpn.model.fields;
+package it.unibs.ingesw.dpn.model.fieldvalues;
 
 /**
  * Interfaccia che unforma il comportamento di un oggetto rappresentante il valore di un campo.

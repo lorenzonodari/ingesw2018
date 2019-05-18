@@ -1,10 +1,6 @@
 package it.unibs.ingesw.dpn.model.categories;
 
-import java.util.Arrays;
-import java.util.List;
-
 import it.unibs.ingesw.dpn.model.fields.CommonField;
-import it.unibs.ingesw.dpn.model.fields.IField;
 import it.unibs.ingesw.dpn.model.fields.SoccerMatchField;
 
 public class FromEnumCategoryInitializer implements CategoryInitializer {
@@ -46,9 +42,6 @@ public class FromEnumCategoryInitializer implements CategoryInitializer {
 	@Override
 	public Category [] initCategories() {
 		
-		// Creo e inizializzo l'array di campi comuni (una sola volta per tutte le categorie)
-		List<IField> commonFields = Arrays.asList(CommonField.values());
-		
 		// Creo l'array delle categorie
 		Category [] categories = new Category[CategoryEnum.CATEGORIES_NUMBER];
 		
@@ -60,7 +53,7 @@ public class FromEnumCategoryInitializer implements CategoryInitializer {
 			 * (poiché non esiste del codice ripetuto all'interno del for, dato che ad ogni iterazione il costrutto
 			 * switch seleziona solo il frammento relativo alla corretta categoria).
 			 * Tuttavia, in questo modo l'aggiunta di una nuova categoria all'enumerator scatena un warning
-			 * -a livello di IDE- all'interno del switch, finché non viene implementato il codice relativo 
+			 * -a livello di IDE- all'interno del costrutto switch finché non viene implementato il codice relativo 
 			 * all'ultima opzione aggiunta. In questo modo il programmatore che in futuro volesse aggiungere 
 			 * nuove categorie sarebbe facilitato nell'aggiunta.
 			 * Inoltre, questa scelta non è in alcun modo limitante per quanto riguarda l'efficienza. Infatti,
@@ -78,10 +71,10 @@ public class FromEnumCategoryInitializer implements CategoryInitializer {
 						"Evento sportivo che prevede una partita di calcio fra due squadre di giocatori");
 				
 				// Aggiungo i campi comuni
-				categories[c].addAllFields(commonFields);
+				categories[c].addAllFields(CommonField.values());
 				
 				// Aggiungo i campi esclusivi
-				categories[c].addAllFields(Arrays.asList(SoccerMatchField.values()));
+				categories[c].addAllFields(SoccerMatchField.values());
 				break;
 			}
 		}

@@ -5,15 +5,12 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
 import it.unibs.ingesw.dpn.model.fields.CommonField;
-import it.unibs.ingesw.dpn.model.fields.Field;
-import it.unibs.ingesw.dpn.model.fields.FieldValue;
 import it.unibs.ingesw.dpn.model.fields.IField;
-import it.unibs.ingesw.dpn.model.fields.StringFieldValue;
+import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
+import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
 import it.unibs.ingesw.dpn.model.users.Mailbox;
 import it.unibs.ingesw.dpn.model.users.Notification;
 import it.unibs.ingesw.dpn.model.users.User;
@@ -291,6 +288,9 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * Precondizione: l'evento deve essere nello stato OPEN. Non è possibile accettare iscrizioni se non si è in
 	 * tale stato. In questo caso il metodo restituirà false.
 	 * 
+	 * Precondizione: l'utente non è ancora iscritto all'evento. In caso si cerchi di iscrivere un utente
+	 * già iscritto, il metodo restituisce false.
+	 * 
 	 * Postcondizione: l'evento sarà nello stato CLOSED se e solo se l'aggiunta del partecipante permette
 	 * di raggiungere il numero massimo di partecipanti. 
 	 * Questa postcondizione non può essere garantita se l'evento, al momento della chiamata del metodo, 
@@ -299,7 +299,10 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * @return true se il partecipante viene aggiunto, false altrimenti.
 	 */
 	public boolean subscribe(User newSubscriber) {
-		// Aggiunge l'utente alla mailbox
+		// Aggiunge l'utente alla mailbox SE non è già iscritto
+		if (this.mailingList.contains(newSubscriber.getMailbox())) {
+			return false;
+		}
 		this.mailingList.add(newSubscriber.getMailbox());
 		// Comunica all'utente la nuova sottoscrizione
 		newSubscriber.getMailbox().deliver(new Notification(
@@ -326,56 +329,6 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	}
 	
 	/**
-	 * Metodo di utilita' utilizzato per avviare il timer di cambio stato di un evento
-	 * 
-	 * @param event L'evento di riferimento
-	 * @param newState Il nome del nuovo stato, come restituito da {@link EventState.getStateName()}
-	 * @param timer Il timer da avviare
-	 * @param timeout Il timeout da impostare al timer
-	 */
-	static void scheduleStateChange(Event event, String state, Timer timer, Date timeout) {
-		
-		EventState newState;
-		
-		switch (state) {
-		
-			case EventState.VALID:
-				newState = new ValidState();
-				break;
-				
-			case EventState.OPEN:
-				newState = new OpenState();
-				break;
-				
-			case EventState.CLOSED:
-				newState = new ClosedState();
-				break;
-				
-			case EventState.FAILED:
-				newState = new FailedState();
-				break;
-				
-			case EventState.ENDED:
-				newState = new EndedState();
-				break;
-				
-			default:
-				newState = null;
-				throw new IllegalArgumentException();
-			
-		}
-		
-		timer.schedule(new TimerTask() {
-			
-			@Override
-			public void run() {
-				event.setState(newState);
-			};
-			
-		}, timeout);
-	}
-	
-	/**
 	 * Metodo di classe che imposta (per tutti gli oggetti {@link Event}) il metodo di comparazione
 	 * degli stessi, utilizzato per ordinamenti basilari.
 	 * Poiché il metodo ha effetto su tutte le istanze della classe (poiché modifica il comportamento
@@ -385,12 +338,20 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * Nota: questo metodo NON garantisce un ri-ordino automatico degli oggetti {@link Event} a seguito della
 	 * sua chiamata. E' necessario occuparsi direttamente di tale ordinamento secondo altri modi.
 	 * 
-	 * @param comparingMethod La stringa che indica il modo per confrontare e ordinare due eventi.
+	 * @param comparingMethod Il modo per confrontare e ordinare due eventi.
 	 */
 	public static void setComparingMethod(ComparingMethod method) {
 		Event.comparingMethod = method;
 	}
 	
+	/**
+	 * Restituisce, come oggetto enun {@link ComparingMethod}, il metodo di confronto degli eventi.
+	 * 
+	 * @return Il metodo di comparazione utilizzato per gli eventi
+	 */
+	public static ComparingMethod getComparingMethod() {
+		return Event.comparingMethod;
+	}
 
 	/**
 	 * Confronta due eventi sulla base del criterio specificato dal metodo "setComparingMethod".

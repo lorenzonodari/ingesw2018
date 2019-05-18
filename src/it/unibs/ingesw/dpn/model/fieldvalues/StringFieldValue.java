@@ -1,6 +1,7 @@
-package it.unibs.ingesw.dpn.model.fields;
+package it.unibs.ingesw.dpn.model.fieldvalues;
 
 import java.io.Serializable;
+
 import it.unibs.ingesw.dpn.ui.InputGetter;
 import it.unibs.ingesw.dpn.ui.UIRenderer;
 

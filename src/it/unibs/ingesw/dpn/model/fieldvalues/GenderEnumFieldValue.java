@@ -1,4 +1,4 @@
-package it.unibs.ingesw.dpn.model.fields;
+package it.unibs.ingesw.dpn.model.fieldvalues;
 
 /**
  * Classe che rappresenta un valore di un campo contenente il genere.

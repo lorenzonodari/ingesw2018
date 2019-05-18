@@ -1,5 +1,9 @@
 package it.unibs.ingesw.dpn.model.events;
 
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
+
 /**
  * Interfaccia che implementa il pattern "State" per la classe context {@link Event}.
  * - Ogni evento, al momento della sua creazione, è nello stato {@link ValidState}.
@@ -61,5 +65,56 @@ public interface EventState {
 	public default void onNewParticipant(Event e) {
 		throw new IllegalStateException(String.format(STATE_EXCEPTION, this.getStateName().toUpperCase()));
 	}
+
+	/**
+	 * Metodo di utilita' utilizzato per avviare il timer di cambio stato di un evento
+	 * 
+	 * @param event L'evento di riferimento
+	 * @param newState Il nome del nuovo stato, come restituito da {@link EventState.getStateName()}
+	 * @param timer Il timer da avviare
+	 * @param timeout Il timeout da impostare al timer
+	 */
+	static void scheduleStateChange(Event event, String state, Timer timer, Date timeout) {
+		
+		EventState newState;
+		
+		switch (state) {
+		
+			case EventState.VALID:
+				newState = new ValidState();
+				break;
+				
+			case EventState.OPEN:
+				newState = new OpenState();
+				break;
+				
+			case EventState.CLOSED:
+				newState = new ClosedState();
+				break;
+				
+			case EventState.FAILED:
+				newState = new FailedState();
+				break;
+				
+			case EventState.ENDED:
+				newState = new EndedState();
+				break;
+				
+			default:
+				newState = null;
+				throw new IllegalArgumentException();
+			
+		}
+		
+		timer.schedule(new TimerTask() {
+			
+			@Override
+			public void run() {
+				event.setState(newState);
+			};
+			
+		}, timeout);
+	}
+	
 
 }
