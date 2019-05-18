@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.unibs.ingesw.dpn.model.events.Event;
-import it.unibs.ingesw.dpn.model.fields.IField;
+import it.unibs.ingesw.dpn.model.fields.Field;
 
 /**
  * Classe che rappresenta una categoria di eventi all'interno del programma.
@@ -26,7 +26,7 @@ public class Category {
 	
 	private String name;
 	private String description;
-	private List<IField> fields;
+	private List<Field> fields;
 	
 	/**
 	 * Costruttore con modificatore di accesso "friendly" della classe Category.
@@ -61,7 +61,7 @@ public class Category {
 	 * 
 	 * @return i campi della categoria
 	 */
-	public List<IField> getFields() {
+	public List<Field> getFields() {
 		return this.fields;
 	}
 
@@ -78,7 +78,7 @@ public class Category {
 	 * 
 	 * @param newField il nuovo campo da aggiungere.
 	 */
-	void addField(IField newField) {
+	void addField(Field newField) {
 		if (!this.fields.contains(newField)) {
 			this.fields.add(newField);
 		} else {
@@ -98,8 +98,8 @@ public class Category {
 	 * 
 	 * @param commonFields i nuovi campi da aggiungere.
 	 */
-	void addAllFields(IField [] commonFields) {
-		for (IField f : commonFields) {
+	void addAllFields(Field [] commonFields) {
+		for (Field f : commonFields) {
 			this.addField(f);
 		}
 	}
@@ -116,7 +116,7 @@ public class Category {
 				this.name,
 				this.description));
 		// Per ciascun campo aggiungo la relativa descrizione alla descrizione della categoria.
-		for (IField f : this.fields) {
+		for (Field f : this.fields) {
 			str.append("\n" + f.toString());
 		}
 		return str.toString();

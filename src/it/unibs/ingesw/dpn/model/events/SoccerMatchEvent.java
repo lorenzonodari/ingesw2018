@@ -3,7 +3,7 @@ package it.unibs.ingesw.dpn.model.events;
 import java.util.Map;
 
 import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
-import it.unibs.ingesw.dpn.model.fields.IField;
+import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 import it.unibs.ingesw.dpn.model.users.User;
 
@@ -30,7 +30,7 @@ public class SoccerMatchEvent extends Event {
 	 * @param fieldValues i valori dei campi dell'evento di tipo "Partita di calcio"
 	 */
 	@Deprecated
-	SoccerMatchEvent(Map<IField, FieldValue> fieldValues) {
+	SoccerMatchEvent(Map<Field, FieldValue> fieldValues) {
 		super(CategoryEnum.PARTITA_DI_CALCIO, fieldValues);
 	}
 	
@@ -43,7 +43,7 @@ public class SoccerMatchEvent extends Event {
 	 * 
 	 * @param fieldValues i valori dei campi dell'evento di tipo "Partita di calcio"
 	 */
-	SoccerMatchEvent(User creator, Map<IField, FieldValue> fieldValues) {
+	SoccerMatchEvent(User creator, Map<Field, FieldValue> fieldValues) {
 		super(creator, CategoryEnum.PARTITA_DI_CALCIO, fieldValues);
 	}
 	

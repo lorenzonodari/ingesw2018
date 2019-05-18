@@ -2,7 +2,7 @@ package it.unibs.ingesw.dpn.model.fields;
 
 import java.io.Serializable;
 
-import it.unibs.ingesw.dpn.model.fields.IField.FieldValueAcquirer;
+import it.unibs.ingesw.dpn.model.fields.Field.FieldValueAcquirer;
 import it.unibs.ingesw.dpn.model.fieldvalues.DateFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.IntegerFieldValue;
@@ -11,7 +11,7 @@ import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
 import it.unibs.ingesw.dpn.ui.InputGetter;
 import it.unibs.ingesw.dpn.ui.UIRenderer;
 
-public enum CommonField implements IField, Serializable {
+public enum CommonField implements Field, Serializable {
 	
 	TITOLO (
 			"Titolo",
@@ -19,25 +19,6 @@ public enum CommonField implements IField, Serializable {
 			false,
 			StringFieldValue.class,
 			StringFieldValue::acquireValue
-			),
-	
-	NUMERO_DI_PARTECIPANTI (
-			"Numero di partecipanti",
-			"Numero di persone da coinvolgere nell'evento",
-			true,
-			IntegerFieldValue.class,
-			(renderer, getter) -> {
-				renderer.renderText("Inserisci il numero di partecipanti (almeno 2)");
-				return new IntegerFieldValue(getter.getInteger(2, Integer.MAX_VALUE));
-			}
-			),
-	
-	TERMINE_ULTIMO_DI_ISCRIZIONE (
-			"Termine ultimo di iscrizione",
-			"Ultimo giorno utile per iscriversi all'evento",
-			true,
-			DateFieldValue.class,
-			DateFieldValue::acquireValue
 			),
 	
 	LUOGO (
@@ -56,6 +37,14 @@ public enum CommonField implements IField, Serializable {
 			DateFieldValue::acquireValue
 			),
 	
+	DATA_E_ORA_CONCLUSIVE (
+			"Data e ora conclusive",
+			"Il giorno e l'orario di conclusione dell'evento",
+			false,
+			DateFieldValue.class,
+			DateFieldValue::acquireValue
+			),
+	
 	DURATA (
 			"Durata",
 			"La durata approssimata, in ore e minuti o in giorni, dell'evento",
@@ -64,6 +53,25 @@ public enum CommonField implements IField, Serializable {
 			(renderer, getter) -> {
 				renderer.renderText("Inserisci il valore numerico della durata");
 				return new IntegerFieldValue(getter.getInteger(0, Integer.MAX_VALUE));
+			}
+			),
+	
+	TERMINE_ULTIMO_DI_ISCRIZIONE (
+			"Termine ultimo di iscrizione",
+			"Ultimo giorno utile per iscriversi all'evento",
+			true,
+			DateFieldValue.class,
+			DateFieldValue::acquireValue
+			),
+	
+	NUMERO_DI_PARTECIPANTI (
+			"Numero di partecipanti",
+			"Numero di persone da coinvolgere nell'evento",
+			true,
+			IntegerFieldValue.class,
+			(renderer, getter) -> {
+				renderer.renderText("Inserisci il numero di partecipanti (almeno 2)");
+				return new IntegerFieldValue(getter.getInteger(2, Integer.MAX_VALUE));
 			}
 			),
 	
@@ -84,14 +92,6 @@ public enum CommonField implements IField, Serializable {
 			false,
 			StringFieldValue.class,
 			StringFieldValue::acquireValue
-			),
-	
-	DATA_E_ORA_CONCLUSIVE (
-			"Data e ora conclusive",
-			"Il giorno e l'orario di conclusione dell'evento",
-			false,
-			DateFieldValue.class,
-			DateFieldValue::acquireValue
 			),
 	
 	NOTE (

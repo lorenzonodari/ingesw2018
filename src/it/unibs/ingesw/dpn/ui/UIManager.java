@@ -15,7 +15,7 @@ import it.unibs.ingesw.dpn.model.events.Event;
 import it.unibs.ingesw.dpn.model.events.EventState;
 import it.unibs.ingesw.dpn.model.events.EventFactory;
 import it.unibs.ingesw.dpn.model.fields.CommonField;
-import it.unibs.ingesw.dpn.model.fields.IField;
+import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 
 /**
@@ -402,7 +402,7 @@ public class UIManager {
 	 * @param category La categoria dell'evento
 	 * @param fieldValues Le coppie <Campo, Valore> inizializzate finora.
 	 */
-	public void createEventMenu(CategoryEnum category, Map<IField, FieldValue> fieldValues) {
+	public void createEventMenu(CategoryEnum category, Map<Field, FieldValue> fieldValues) {
 		
 		// Callback per abortire la creazione dell'evento
 		MenuAction abortAction = () -> {this.boardMenu();};
@@ -413,7 +413,7 @@ public class UIManager {
 		// Verifico se tutti i campi obbligatori sono stati compilati
 		boolean checkMandatoryFieldsFlag = true;
 		
-		for (IField f : fieldValues.keySet()) {
+		for (Field f : fieldValues.keySet()) {
 			
 			/* Azione relativa ad un'opzione */
 			MenuAction fieldAction = () -> {
@@ -469,7 +469,7 @@ public class UIManager {
 	 *
 	 * @param field Il campo di cui si vuole acquisire il valore
 	 */
-	private void acquireFieldValueSubmenu(IField field) {
+	private void acquireFieldValueSubmenu(Field field) {
 		
 		this.temporaryFieldValue = (FieldValue) field.acquireFieldValue(renderer, inputManager);
 		
@@ -487,10 +487,10 @@ public class UIManager {
 			
 			Category completeCategory = CategoryProvider.getProvider().getCategory(category);
 			
-			HashMap<IField, FieldValue> map = new HashMap<>();
+			HashMap<Field, FieldValue> map = new HashMap<>();
 			MenuAction categorySelectionAction = () -> {
 				// Preparo una Map vuota per memorizzare i parametri di creazione dell'evento
-				for (IField f : completeCategory.getFields()) {
+				for (Field f : completeCategory.getFields()) {
 					map.put(f, null);
 				};
 				this.createEventMenu(category, map);};

@@ -1,6 +1,6 @@
 package it.unibs.ingesw.dpn.model.fields;
 
-import it.unibs.ingesw.dpn.model.fields.IField.FieldValueAcquirer;
+import it.unibs.ingesw.dpn.model.fields.Field.FieldValueAcquirer;
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.GenderEnumFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.IntegerFieldValue;
@@ -8,7 +8,7 @@ import it.unibs.ingesw.dpn.model.fieldvalues.IntegerIntervalFieldValue;
 import it.unibs.ingesw.dpn.ui.InputGetter;
 import it.unibs.ingesw.dpn.ui.UIRenderer;
 
-public enum SoccerMatchField implements IField {
+public enum SoccerMatchField implements Field {
 	
 	GENERE (
 			"Genere",

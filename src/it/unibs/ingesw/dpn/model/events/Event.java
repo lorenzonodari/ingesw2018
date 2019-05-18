@@ -8,7 +8,7 @@ import java.util.Map;
 
 import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
 import it.unibs.ingesw.dpn.model.fields.CommonField;
-import it.unibs.ingesw.dpn.model.fields.IField;
+import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
 import it.unibs.ingesw.dpn.model.users.Mailbox;
@@ -70,7 +70,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	
 	private final CategoryEnum category;
 	
-	private final Map<IField, FieldValue> valuesMap;
+	private final Map<Field, FieldValue> valuesMap;
 	
 	private EventState state;
 	
@@ -94,7 +94,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * @param fieldValues le coppie (campo-valore) dell'evento
 	 */
 	@Deprecated 
-	public Event(CategoryEnum category, Map<IField, FieldValue> fieldValues) {
+	public Event(CategoryEnum category, Map<Field, FieldValue> fieldValues) {
 		if (category == null || fieldValues == null) {
 			throw new IllegalArgumentException(NULL_ARGUMENT_EXCEPTION);
 		}
@@ -143,7 +143,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * @param category la categoria prescelta
 	 * @param fieldValues le coppie (campo-valore) dell'evento
 	 */
-	public Event(User creator, CategoryEnum category, Map<IField, FieldValue> fieldValues) {
+	public Event(User creator, CategoryEnum category, Map<Field, FieldValue> fieldValues) {
 		this(category, fieldValues);
 		
 		// Imposto il creatore dell'evento
@@ -165,7 +165,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * @param chosenField il campo di cui si vuole conoscere il valore
 	 * @return Il valore del campo
 	 */
-	public Object getFieldValue(IField chosenField) {
+	public Object getFieldValue(Field chosenField) {
 		if (this.valuesMap.containsKey(chosenField)) {
 			return this.valuesMap.get(chosenField);
 		} else {

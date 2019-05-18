@@ -12,7 +12,7 @@ import it.unibs.ingesw.dpn.ui.UIRenderer;
  * @author Michele Dusi, Lorenzo Nodari, Emanuele Poggi
  * 
  */
-public interface IField {	
+public interface Field {	
 	
 	/**
 	 * Interfaccia funzionale per acquisire un valore del tipo specifico.
