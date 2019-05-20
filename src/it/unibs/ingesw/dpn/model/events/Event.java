@@ -40,7 +40,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * 
 	 */
 	private static final long serialVersionUID = 6018235806371842633L;
-	private static int id_counter = 0;
+	private static long id_counter = 0;
 	
 	/** Eccezioni */
 	private static final String NULL_ARGUMENT_EXCEPTION = "Impossibile creare un evento con parametri nulli";
@@ -64,7 +64,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	
 	/** Attributi d'istanza */
 	
-	private final int id;
+	private final long id;
 	
 	private User creator = null;
 	
@@ -157,31 +157,21 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	}
 	
 	/**
-	 * Restituisce il valore caratterizzante l'evento del campo richiesto.
-	 * 
-	 * Precondizione: l'oggetto {@link Field} passato come parametro deve essere un campo previsto e contenuto
-	 * nella categoria a cui appartiene l'evento.
-	 * 
-	 * @param chosenField il campo di cui si vuole conoscere il valore
-	 * @return Il valore del campo
-	 */
-	public Object getFieldValue(Field chosenField) {
-		if (this.valuesMap.containsKey(chosenField)) {
-			return this.valuesMap.get(chosenField);
-		} else {
-			throw new IllegalArgumentException(String.format(
-					FIELD_NOT_PRESENT_EXCEPTION, 
-					chosenField.getName()));
-		}
-	}
-	
-	/**
 	 * Restituisce l'ID univoco dell'evento.
 	 * 
 	 * @return L'ID univoco dell'evento
 	 */
 	public long getId() {
 		return this.id;
+	}
+	
+	/**
+	 * Restituisce l'utente che ha creato l'evento, impostato all'atto della creazione.
+	 * 
+	 * @return il creatore dell'evento come oggetto {@link User}
+	 */
+	public User getCreator() {
+		return this.creator;
 	}
 
 	/**
@@ -190,7 +180,26 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * @return la categoria a cui appartiene l'evento.
 	 */
 	public CategoryEnum getCategory() {
-		return category;
+		return this.category;
+	}
+	
+	/**
+	 * Restituisce il valore caratterizzante l'evento del campo richiesto.
+	 * 
+	 * Precondizione: l'oggetto {@link Field} passato come parametro deve essere un campo previsto e contenuto
+	 * nella categoria a cui appartiene l'evento.
+	 * 
+	 * @param chosenField il campo di cui si vuole conoscere il valore
+	 * @return Il valore del campo
+	 */
+	public FieldValue getFieldValue(Field chosenField) {
+		if (this.valuesMap.containsKey(chosenField)) {
+			return this.valuesMap.get(chosenField);
+		} else {
+			throw new IllegalArgumentException(String.format(
+					FIELD_NOT_PRESENT_EXCEPTION, 
+					chosenField.getName()));
+		}
 	}
 	
 	/**
@@ -207,14 +216,6 @@ public abstract class Event implements Serializable, Comparable<Event> {
 			// Recapita il messaggio impostato
 			mb.deliver(new Notification(message));
 		}
-	}
-	
-	/**
-	 * Reimposta lo stato corretto dell'evento. Questo metodo DEVE essere invocato su ogni evento
-	 * quando questi sono caricati da disco mediante serializzazione.
-	 */
-	public void resetState() {
-		this.state.onEntry(this);
 	}
 	
 	/**
@@ -250,6 +251,23 @@ public abstract class Event implements Serializable, Comparable<Event> {
 				titolo,
 				this.state.getStateName().toUpperCase());
 		this.notifySubscribers(message_notification);
+	}
+	
+	/**
+	 * Reimposta lo stato corretto dell'evento. Questo metodo DEVE essere invocato su ogni evento
+	 * quando questi sono caricati da disco mediante serializzazione.
+	 */
+	public void resetState() {
+		this.state.onEntry(this);
+	}
+	
+	/**
+	 * Restituisce una stringa corrispondente allo stato dell'oggetto {@link Event}.
+	 * 
+	 * @return La stringa corrispondente allo stato in cui si trova l'evento
+	 */
+	public String getState() {
+		return state.getStateName();
 	}
 	
 	/**
@@ -317,15 +335,6 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		catch (IllegalStateException e) {
 			return false;
 		}
-	}
-	
-	/**
-	 * Restituisce una stringa corrispondente allo stato dell'oggetto {@link Event}.
-	 * 
-	 * @return La stringa corrispondente allo stato in cui si trova l'evento
-	 */
-	public String getEventState() {
-		return state.getStateName();
 	}
 	
 	/**
