@@ -76,7 +76,7 @@ public class EventBoard implements Serializable {
 		return eventMap
 				.keySet()
 				.stream()
-				.filter(event -> event.getEventState() == stateName)
+				.filter(event -> event.getState() == stateName)
 				.collect(Collectors.toCollection(ArrayList::new));
 	}
 	
@@ -110,6 +110,10 @@ public class EventBoard implements Serializable {
 			throw new IllegalStateException();
 		}
 		eventMap.get(event).add(subscription);
+		
+		// TODO 
+		// Aggiungere utente alla mailbox
+//		event.subscribe(subscription);
 		
 	}
 	/**
