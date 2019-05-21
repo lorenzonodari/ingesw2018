@@ -37,15 +37,16 @@ public class SoccerMatchEvent extends Event {
 	}
 
 	@Override
-	public void renderEvent(UIRenderer renderer) {
-		renderer.renderTextInFrame("Evento : Partita di calcio");
+	public String toString() {
+		StringBuffer exit = new StringBuffer();;
+		exit.append("Evento : Partita di calcio");
 		Category cat = CategoryProvider.getProvider().getCategory(CategoryEnum.PARTITA_DI_CALCIO);
 		for (Field f : cat.getFields()) {
-			renderer.renderText(String.format(" | %-35s : %s",
+			exit.append(String.format(" | %-35s : %s",
 					f.getName(),
 					this.getFieldValue(f).toString()));
 		}
-		renderer.renderLineSpace();
+		return exit.toString();
 	}
 	
 }

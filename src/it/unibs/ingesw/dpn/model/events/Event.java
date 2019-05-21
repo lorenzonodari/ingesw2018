@@ -423,6 +423,8 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	}
 	
 	
-	public abstract void renderEvent(UIRenderer renderer);
+	//public abstract void renderEvent(UIRenderer renderer);
 	
+	
+	public abstract String toString();
 }
