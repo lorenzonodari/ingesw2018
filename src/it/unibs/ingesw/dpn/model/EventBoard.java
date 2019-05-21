@@ -97,6 +97,8 @@ public class EventBoard implements Serializable {
 	}
 	/**
 	 * Metodo che aggiunge un iscrizione di un utente ad un evento nella bacheca
+	 * Prima l'iscrizione avviene sulla bacheca cioè tramite l'associazione dell'utente alla lista dei suoi iscritti
+	 * poi la mailbox dell'utente viene aggiunta alla lista delle mailbox in ascolto dell'evento
 	 * 
 	 * Precondizione: l'evento deve essere un evento esistente e aperto in bacheca 
 	 * Precondizione: l'utente deve non essere già iscritto all'evento stesso 
@@ -109,7 +111,9 @@ public class EventBoard implements Serializable {
 		if (event == null || subscription == null ) {
 			throw new IllegalStateException();
 		}
+		
 		eventMap.get(event).add(subscription);
+		event.subscribe(subscription);
 		
 		// TODO 
 		// Aggiungere utente alla mailbox
@@ -133,6 +137,7 @@ public class EventBoard implements Serializable {
 	/**
 	 * Metodo che rimuove una inscrizione di un utente ad un evento nella bacheca 
 	 * 
+	 * 
 	 * Precondizioni: l'evento deve esistere ed essere aperto in bacheca 
 	 * 				  l'utente deve essere iscritto all'evento
 	 * 
@@ -146,6 +151,8 @@ public class EventBoard implements Serializable {
 			throw new IllegalStateException();
 		}
 		eventMap.get(event).remove(toRemove);
+	
+		
 	}
 	
 }
