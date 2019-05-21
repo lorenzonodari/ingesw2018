@@ -114,6 +114,11 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		this.category = category;
 		this.valuesMap = fieldValues;
 		
+		// Fornisco all'evento un Titolo di default, se non è presente un altro titolo
+		if (this.valuesMap.get(CommonField.TITOLO) == null) {
+			this.valuesMap.put(CommonField.TITOLO, new StringFieldValue(String.format("Event_%04d", this.id)));
+		}
+		
 		// Preparo l'oggetto EventHistory che terrà traccia dei cambiamenti di stato
 		this.history = new EventHistory();
 		
@@ -122,11 +127,6 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		
 		// A questo punto posso settare lo stato come "valido".
 		this.setState(new ValidState());
-		
-		// Fornisco all'evento un Titolo di default, se non è presente un altro titolo
-		if (this.valuesMap.get(CommonField.TITOLO) == null) {
-			this.valuesMap.put(CommonField.TITOLO, new StringFieldValue(String.format("Event_%04d", this.id)));
-		}
 
 		// Imposto il creatore dell'evento
 		this.creator = creator;
