@@ -35,8 +35,21 @@ public class SoccerMatchEvent extends Event {
 
 	@Override
 	public String toString() {
+<<<<<<< HEAD
 		// TODO Auto-generated method stub
 		return null;
 	}
 	
+=======
+		StringBuffer exit = new StringBuffer();;
+		exit.append("Evento : Partita di calcio");
+		Category cat = CategoryProvider.getProvider().getCategory(CategoryEnum.PARTITA_DI_CALCIO);
+		for (Field f : cat.getFields()) {
+			exit.append(String.format(" | %-35s : %s",
+					f.getName(),
+					this.getFieldValue(f).toString()));
+		}
+		return exit.toString();
+	}
+>>>>>>> 73c830abb933e0ce9fdfaed1a82911021a262e4d
 }
