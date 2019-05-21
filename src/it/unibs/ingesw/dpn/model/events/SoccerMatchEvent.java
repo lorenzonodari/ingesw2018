@@ -2,7 +2,9 @@ package it.unibs.ingesw.dpn.model.events;
 
 import java.util.Map;
 
+import it.unibs.ingesw.dpn.model.categories.Category;
 import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
+import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 import it.unibs.ingesw.dpn.model.users.User;
@@ -35,12 +37,6 @@ public class SoccerMatchEvent extends Event {
 
 	@Override
 	public String toString() {
-<<<<<<< HEAD
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-=======
 		StringBuffer exit = new StringBuffer();;
 		exit.append("Evento : Partita di calcio");
 		Category cat = CategoryProvider.getProvider().getCategory(CategoryEnum.PARTITA_DI_CALCIO);
@@ -51,5 +47,4 @@ public class SoccerMatchEvent extends Event {
 		}
 		return exit.toString();
 	}
->>>>>>> 73c830abb933e0ce9fdfaed1a82911021a262e4d
 }
