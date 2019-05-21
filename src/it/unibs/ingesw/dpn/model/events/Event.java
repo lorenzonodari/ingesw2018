@@ -421,8 +421,5 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		String otherTitle = e.valuesMap.get(CommonField.TITOLO).toString();
 		return thisTitle.compareTo(otherTitle);
 	}
-	
-	
-	public abstract void renderEvent(UIRenderer renderer);
-	
+		
 }
