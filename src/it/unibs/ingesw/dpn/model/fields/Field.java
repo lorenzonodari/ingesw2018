@@ -1,5 +1,7 @@
 package it.unibs.ingesw.dpn.model.fields;
 
+import java.util.Map;
+
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 import it.unibs.ingesw.dpn.ui.InputGetter;
 import it.unibs.ingesw.dpn.ui.UIRenderer;
@@ -19,7 +21,7 @@ public interface Field {
 	 */
 	@FunctionalInterface
 	public interface FieldValueAcquirer {
-		public FieldValue acquireFieldValue(UIRenderer renderer, InputGetter getter);
+		public FieldValue acquireFieldValue(UIRenderer renderer, InputGetter getter, Map<Field, FieldValue> partialValues);
 	};
 
 	/**
@@ -59,6 +61,6 @@ public interface Field {
 	 * @param getter Un'istanza di InputGetter per catturare le informazioni
 	 * @return un valore (formalmente corretto) per il campo
 	 */
-	public FieldValue acquireFieldValue(UIRenderer renderer, InputGetter getter);
+	public FieldValue acquireFieldValue(UIRenderer renderer, InputGetter getter, Map<Field, FieldValue> partialValues);
 	
 }

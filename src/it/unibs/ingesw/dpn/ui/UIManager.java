@@ -420,7 +420,7 @@ public class UIManager {
 			/* Azione relativa ad un'opzione */
 			MenuAction fieldAction = () -> {
 				// Acquisisco il campo
-				acquireFieldValueSubmenu(f);
+				acquireFieldValueSubmenu(f, fieldValues);
 				// Salvo il nuovo valore nella mappa
 				fieldValues.put(f, this.temporaryFieldValue);
 				// Creo il nuovo menu aggiornato
@@ -471,9 +471,9 @@ public class UIManager {
 	 *
 	 * @param field Il campo di cui si vuole acquisire il valore
 	 */
-	private void acquireFieldValueSubmenu(Field field) {
+	private void acquireFieldValueSubmenu(Field field, Map<Field, FieldValue> partialValues) {
 		
-		this.temporaryFieldValue = (FieldValue) field.acquireFieldValue(renderer, inputManager);
+		this.temporaryFieldValue = (FieldValue) field.acquireFieldValue(renderer, inputManager, partialValues);
 		
 	}
 	

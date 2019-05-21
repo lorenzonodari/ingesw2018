@@ -1,6 +1,8 @@
 package it.unibs.ingesw.dpn.model.fields;
 
 import java.io.Serializable;
+import java.util.Date;
+import java.util.Map;
 
 import it.unibs.ingesw.dpn.model.fields.Field.FieldValueAcquirer;
 import it.unibs.ingesw.dpn.model.fieldvalues.DateFieldValue;
@@ -18,7 +20,9 @@ public enum CommonField implements Field, Serializable {
 			"Nome di fantasia attribuito all'evento",
 			false,
 			StringFieldValue.class,
-			StringFieldValue::acquireValue
+			(renderer, getter, partialValues) -> {
+				return StringFieldValue.acquireValue(renderer, getter);
+			}
 			),
 	
 	LUOGO (
@@ -26,7 +30,9 @@ public enum CommonField implements Field, Serializable {
 			"Il luogo di svolgimento o di ritrovo dell'evento",
 			true,
 			StringFieldValue.class,
-			StringFieldValue::acquireValue
+			(renderer, getter, partialValues) -> {
+				return StringFieldValue.acquireValue(renderer, getter);
+			}
 			),
 	
 	DATA_E_ORA (
@@ -34,7 +40,24 @@ public enum CommonField implements Field, Serializable {
 			"Il giorno e l'orario in cui si svolgerà o avrà inizio l'evento",
 			true,
 			DateFieldValue.class,
-			DateFieldValue::acquireValue
+			(renderer, getter, partialValues) -> {
+				boolean okFlag = false;
+				DateFieldValue acquiredDate = null;
+				do {
+					acquiredDate = DateFieldValue.acquireValue(renderer, getter);
+					// Verifico che la data dell'evento sia posteriore alla creazione
+					if (acquiredDate.before(new Date())) {
+						renderer.renderError("Inserire una data futura");
+					} else if (isAfterEndingDate(acquiredDate, partialValues)) {
+						renderer.renderError("Data d'inizio posteriore alla data conclusiva dell'evento");
+					} else if (isBeforeSubscriptionDate(acquiredDate, partialValues)) {
+						renderer.renderError("Data d'inizio precedente al termine ultimo di iscrizione");
+					} else {
+						okFlag = true;
+					}
+				} while (!okFlag);
+				return acquiredDate;
+			}
 			),
 	
 	DATA_E_ORA_CONCLUSIVE (
@@ -42,7 +65,24 @@ public enum CommonField implements Field, Serializable {
 			"Il giorno e l'orario di conclusione dell'evento",
 			false,
 			DateFieldValue.class,
-			DateFieldValue::acquireValue
+			(renderer, getter, partialValues) -> {
+				boolean okFlag = false;
+				DateFieldValue acquiredDate = null;
+				do {
+					acquiredDate = DateFieldValue.acquireValue(renderer, getter);
+					// Verifico che la data dell'evento sia posteriore alla creazione
+					if (acquiredDate.before(new Date())) {
+						renderer.renderError("Inserire una data futura");
+					} else if (isBeforeStartingDate(acquiredDate, partialValues)) {
+						renderer.renderError("Data di conclusione precedente alla data d'inizio dell'evento");
+					} else if (isBeforeSubscriptionDate(acquiredDate, partialValues)) {
+						renderer.renderError("Data di conclusione precedente al termine ultimo di iscrizione");
+					} else {
+						okFlag = true;
+					}
+				} while (!okFlag);
+				return acquiredDate;
+			}
 			),
 	
 	DURATA (
@@ -50,7 +90,7 @@ public enum CommonField implements Field, Serializable {
 			"La durata approssimata, in ore e minuti o in giorni, dell'evento",
 			false,
 			IntegerFieldValue.class,
-			(renderer, getter) -> {
+			(renderer, getter, partialValues) -> {
 				renderer.renderText("Inserisci il valore numerico della durata");
 				return new IntegerFieldValue(getter.getInteger(0, Integer.MAX_VALUE));
 			}
@@ -61,7 +101,24 @@ public enum CommonField implements Field, Serializable {
 			"Ultimo giorno utile per iscriversi all'evento",
 			true,
 			DateFieldValue.class,
-			DateFieldValue::acquireValue
+			(renderer, getter, partialValues) -> {
+				boolean okFlag = false;
+				DateFieldValue acquiredDate = null;
+				do {
+					acquiredDate = DateFieldValue.acquireValue(renderer, getter);
+					// Verifico che la data dell'evento sia posteriore alla creazione
+					if (acquiredDate.before(new Date())) {
+						renderer.renderError("Inserire una data futura");
+					} else if (CommonField.isAfterStartingDate(acquiredDate, partialValues)) {
+						renderer.renderError("Termine ultimo d'iscrizione posteriore alla data d'inizio dell'evento");
+					} else if (CommonField.isAfterEndingDate(acquiredDate, partialValues)) {
+						renderer.renderError("Termine ultimo d'iscrizione precedente alla data di conclusione dell'evento");
+					} else {
+						okFlag = true;
+					}
+				} while (!okFlag);
+				return acquiredDate;
+			}
 			),
 	
 	NUMERO_DI_PARTECIPANTI (
@@ -69,7 +126,7 @@ public enum CommonField implements Field, Serializable {
 			"Numero di persone da coinvolgere nell'evento",
 			true,
 			IntegerFieldValue.class,
-			(renderer, getter) -> {
+			(renderer, getter, partialValues) -> {
 				renderer.renderText("Inserisci il numero di partecipanti (almeno 2)");
 				return new IntegerFieldValue(getter.getInteger(2, Integer.MAX_VALUE));
 			}
@@ -80,7 +137,7 @@ public enum CommonField implements Field, Serializable {
 			"La spesa che ogni partecipante dovrà sostenere per l'evento",
 			true,
 			MoneyAmountFieldValue.class,
-			(renderer, getter) -> {
+			(renderer, getter, partialValues) -> {
 				renderer.renderText("Inserisci il costo di partecipazione");
 				return new MoneyAmountFieldValue(getter.getFloat(0, Float.MAX_VALUE));
 			}
@@ -91,7 +148,9 @@ public enum CommonField implements Field, Serializable {
 			"Lista delle voci di spesa comprese nella quota di partecipazione",
 			false,
 			StringFieldValue.class,
-			StringFieldValue::acquireValue
+			(renderer, getter, partialValues) -> {
+				return StringFieldValue.acquireValue(renderer, getter);
+			}
 			),
 	
 	NOTE (
@@ -99,7 +158,9 @@ public enum CommonField implements Field, Serializable {
 			"Note aggiuntive sull'evento",
 			false,
 			StringFieldValue.class,
-			StringFieldValue::acquireValue
+			(renderer, getter, partialValues) -> {
+				return StringFieldValue.acquireValue(renderer, getter);
+			}
 			)
 	
 	;
@@ -197,7 +258,7 @@ public enum CommonField implements Field, Serializable {
 	 * @return L'oggetto che rappresenta il valore del campo
 	 */
 	@Override
-	public FieldValue acquireFieldValue(UIRenderer renderer, InputGetter getter) {
+	public FieldValue acquireFieldValue(UIRenderer renderer, InputGetter getter, Map<Field, FieldValue> partialValues) {
 		renderer.renderLineSpace();
 		renderer.renderText(String.format(
 				" ### %-35s",
@@ -206,7 +267,7 @@ public enum CommonField implements Field, Serializable {
 				" ### %s",
 				this.description));
 		renderer.renderLineSpace();
-		return this.valueAcquirer.acquireFieldValue(renderer, getter);
+		return this.valueAcquirer.acquireFieldValue(renderer, getter, partialValues);
 	}
 
 	/**
@@ -227,6 +288,34 @@ public enum CommonField implements Field, Serializable {
 						OPTIONAL_TAG
 				);
 		return str;
+	}
+	
+	private static boolean isAfterEndingDate(Date date, Map<Field, FieldValue> partialValues) {
+		return (
+				partialValues.get(DATA_E_ORA_CONCLUSIVE) != null && 
+				date.after((Date) partialValues.get(DATA_E_ORA_CONCLUSIVE))
+				);
+	}
+
+	private static boolean isAfterStartingDate(Date date, Map<Field, FieldValue> partialValues) {
+		return (
+				partialValues.get(DATA_E_ORA) != null && 
+				date.after((Date) partialValues.get(DATA_E_ORA))
+				);
+	}
+	
+	private static boolean isBeforeStartingDate(Date date, Map<Field, FieldValue> partialValues) {
+		return (
+				partialValues.get(DATA_E_ORA) != null && 
+				date.before((Date) partialValues.get(DATA_E_ORA))
+				);
+	}
+	
+	private static boolean isBeforeSubscriptionDate(Date date, Map<Field, FieldValue> partialValues) {
+		return (
+				partialValues.get(TERMINE_ULTIMO_DI_ISCRIZIONE) != null && 
+				date.before((Date) partialValues.get(TERMINE_ULTIMO_DI_ISCRIZIONE))
+				);
 	}
 
 }

@@ -11,7 +11,7 @@ public class TextRenderer implements UIRenderer {
 	private static final String CLI_PROMPT = ">> ";
 	private static final String ENTRY_NUM_SEPARATOR = " - ";
 	private static final char FRAME_CHAR = '=';
-	private static final String ERROR_PREFIX = "ERRORE: \t";
+	private static final String ERROR_PREFIX = "ERRORE: ";
 
 	@Override
 	public void renderMenu(Menu menu) {

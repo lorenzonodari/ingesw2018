@@ -1,5 +1,7 @@
 package it.unibs.ingesw.dpn.model.fields;
 
+import java.util.Map;
+
 import it.unibs.ingesw.dpn.model.fields.Field.FieldValueAcquirer;
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.GenderEnumFieldValue;
@@ -15,7 +17,7 @@ public enum SoccerMatchField implements Field {
 			"Il genere dei giocatori che partecipano alla partita",
 			true,
 			GenderEnumFieldValue.class,
-			(renderer, getter) -> {
+			(renderer, getter, partialValues) -> {
 				GenderEnumFieldValue [] values = GenderEnumFieldValue.values();
 				int i = 1;
 				for (GenderEnumFieldValue gender : values) {
@@ -32,7 +34,7 @@ public enum SoccerMatchField implements Field {
 			"L'intervallo in cui sono comprese le età accettate dei giocatori",
 			true,
 			IntegerFieldValue.class,
-			(renderer, getter) -> {
+			(renderer, getter, partialValues) -> {
 
 				IntegerIntervalFieldValue value = null;
 				boolean check = false;
@@ -128,7 +130,7 @@ public enum SoccerMatchField implements Field {
 	 * @return L'oggetto che rappresenta il valore del campo
 	 */
 	@Override
-	public FieldValue acquireFieldValue(UIRenderer renderer, InputGetter getter) {
+	public FieldValue acquireFieldValue(UIRenderer renderer, InputGetter getter, Map<Field, FieldValue> partialValues) {
 		renderer.renderLineSpace();
 		renderer.renderText(String.format(
 				" ### %-35s",
@@ -137,7 +139,7 @@ public enum SoccerMatchField implements Field {
 				" ### %s",
 				this.description));
 		renderer.renderLineSpace();
-		return this.valueAcquirer.acquireFieldValue(renderer, getter);
+		return this.valueAcquirer.acquireFieldValue(renderer, getter, partialValues);
 	}
 
 	/**
