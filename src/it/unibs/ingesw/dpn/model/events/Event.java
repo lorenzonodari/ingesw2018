@@ -110,11 +110,6 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		// ID univoco dell'evento
 		this.id = id_counter++;
 		
-		// Imposto il creatore dell'evento
-		this.creator = creator;
-		// Iscrivo il creatore all'evento
-		this.subscribe(this.creator);
-		
 		// Inizializzo gli attributi della classe
 		this.category = category;
 		this.valuesMap = fieldValues;
@@ -132,6 +127,11 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		if (this.valuesMap.get(CommonField.TITOLO) == null) {
 			this.valuesMap.put(CommonField.TITOLO, new StringFieldValue(String.format("Event_%04d", this.id)));
 		}
+
+		// Imposto il creatore dell'evento
+		this.creator = creator;
+		// Iscrivo il creatore all'evento
+		this.subscribe(this.creator);
 		
 	}
 	
