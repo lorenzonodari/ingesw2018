@@ -35,17 +35,5 @@ public class SoccerMatchEvent extends Event {
 	SoccerMatchEvent(User creator, Map<Field, FieldValue> fieldValues) {
 		super(creator, CategoryEnum.PARTITA_DI_CALCIO, fieldValues);
 	}
-
-	@Override
-	public void renderEvent(UIRenderer renderer) {
-		renderer.renderTextInFrame("Evento : Partita di calcio");
-		Category cat = CategoryProvider.getProvider().getCategory(CategoryEnum.PARTITA_DI_CALCIO);
-		for (Field f : cat.getFields()) {
-			renderer.renderText(String.format(" | %-35s : %s",
-					f.getName(),
-					this.getFieldValue(f).toString()));
-		}
-		renderer.renderLineSpace();
-	}
 	
 }

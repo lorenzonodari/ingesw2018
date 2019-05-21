@@ -422,7 +422,5 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		return thisTitle.compareTo(otherTitle);
 	}
 	
-	
-	public abstract void renderEvent(UIRenderer renderer);
-	
+	public abstract String toString();
 }

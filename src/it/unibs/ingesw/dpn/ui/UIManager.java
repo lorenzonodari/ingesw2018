@@ -366,7 +366,7 @@ public class UIManager {
 			
 		};
 		
-		Menu eventMenu = new Menu("Azioni su evento", event.getFieldValue(CommonField.TITOLO).toString(), Menu.BACK_ENTRY_TITLE, backAction);
+		Menu eventMenu = new Menu("Azioni su evento", event.toString(), Menu.BACK_ENTRY_TITLE, backAction);
 		if(model.getEventBoard().verifySubscription(event, model.getUsersManager().getCurrentUser()))
 			eventMenu.addEntry("Iscriviti all'evento", subscriptionAction);
 		
