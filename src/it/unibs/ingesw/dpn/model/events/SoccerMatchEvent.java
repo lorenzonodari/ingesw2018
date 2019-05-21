@@ -8,7 +8,6 @@ import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 import it.unibs.ingesw.dpn.model.users.User;
-import it.unibs.ingesw.dpn.ui.UIRenderer;
 
 /**
  * Classe che rappresenta concettualmente il tipo di categoria "Partita di calcio".
@@ -35,5 +34,17 @@ public class SoccerMatchEvent extends Event {
 	SoccerMatchEvent(User creator, Map<Field, FieldValue> fieldValues) {
 		super(creator, CategoryEnum.PARTITA_DI_CALCIO, fieldValues);
 	}
-	
+
+	@Override
+	public String toString() {
+		StringBuffer exit = new StringBuffer();;
+		exit.append("Evento : Partita di calcio");
+		Category cat = CategoryProvider.getProvider().getCategory(CategoryEnum.PARTITA_DI_CALCIO);
+		for (Field f : cat.getFields()) {
+			exit.append(String.format(" | %-35s : %s",
+					f.getName(),
+					this.getFieldValue(f).toString()));
+		}
+		return exit.toString();
+	}
 }
