@@ -477,6 +477,9 @@ public class UIManager {
 		
 	}
 	
+	/**
+	 * Permette la selezione di una categoria per la creazione di un evento.
+	 */
 	public void categorySelectorMenu() {
 		
 		// Callback indietro

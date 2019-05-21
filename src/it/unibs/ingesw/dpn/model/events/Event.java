@@ -14,6 +14,7 @@ import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
 import it.unibs.ingesw.dpn.model.users.Mailbox;
 import it.unibs.ingesw.dpn.model.users.Notification;
 import it.unibs.ingesw.dpn.model.users.User;
+import it.unibs.ingesw.dpn.ui.UIRenderer;
 
 /**
  * Classe astratta che rappresenta in maniera concettuale un evento generico gestito dal programma.
@@ -66,7 +67,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	
 	private final long id;
 	
-	private User creator = null;
+	private final User creator;
 	
 	private final CategoryEnum category;
 	
@@ -77,49 +78,6 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	private final EventHistory history;
 	
 	private final List<Mailbox> mailingList;
-	
-	/**
-	 * Crea un nuovo evento con la relativa categoria.
-	 * Tale costruttore (o meglio, i costruttori delle classi figlie che fanno affidamento su
-	 * questo costruttore di Event) dovrà essere chiamato da una classe apposita, la cui responsabilità 
-	 * principale sarà creare gli eventi nella maniera prevista dal programma.
-	 * 
-	 * Precondizione: la lista di coppie (campo, valore) devono essere istanziate correttamente e devono 
-	 * rispettare i campi previsti dalla categoria. L'unica classe abilitata a fare ciò è la classe {@link EventFactory}.
-	 * 
-	 * Precondizione: i valori dei campi devono essere uguali come numero e come tipo ai campi
-	 * previsti dalla categoria. Questo viene garantito dalla classe adibita alla creazione degli eventi.
-	 * 
-	 * @param category la categoria prescelta
-	 * @param fieldValues le coppie (campo-valore) dell'evento
-	 */
-	@Deprecated 
-	public Event(CategoryEnum category, Map<Field, FieldValue> fieldValues) {
-		if (category == null || fieldValues == null) {
-			throw new IllegalArgumentException(NULL_ARGUMENT_EXCEPTION);
-		}
-		
-		// ID univoco dell'evento
-		this.id = id_counter++;
-		
-		// Inizializzo gli attributi della classe
-		this.category = category;
-		this.valuesMap = fieldValues;
-		
-		// Preparo l'oggetto EventHistory che terrà traccia dei cambiamenti di stato
-		this.history = new EventHistory();
-		
-		// Inizializzo la lista di sottoscrittori della mailing list
-		this.mailingList = new LinkedList<>();
-		
-		// A questo punto posso settare lo stato come "valido".
-		this.setState(new ValidState());
-		
-		// Fornisco all'evento un Titolo di default, se non è presente un altro titolo
-		if (this.valuesMap.get(CommonField.TITOLO) == null) {
-			this.valuesMap.put(CommonField.TITOLO, new StringFieldValue(String.format("Event_%04d", this.id)));
-		}
-	}
 	
 	/**
 	 * Crea un nuovo evento con la relativa categoria.
@@ -144,16 +102,37 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * @param fieldValues le coppie (campo-valore) dell'evento
 	 */
 	public Event(User creator, CategoryEnum category, Map<Field, FieldValue> fieldValues) {
-		this(category, fieldValues);
+		
+		if (creator == null || category == null || fieldValues == null) {
+			throw new IllegalArgumentException(NULL_ARGUMENT_EXCEPTION);
+		}
+		
+		// ID univoco dell'evento
+		this.id = id_counter++;
 		
 		// Imposto il creatore dell'evento
-		if (creator == null) {
-			throw new IllegalArgumentException(NULL_ARGUMENT_EXCEPTION);
-		} else {
-			this.creator = creator;
-			// Iscrivo il creatore all'evento
-			this.subscribe(this.creator);
+		this.creator = creator;
+		// Iscrivo il creatore all'evento
+		this.subscribe(this.creator);
+		
+		// Inizializzo gli attributi della classe
+		this.category = category;
+		this.valuesMap = fieldValues;
+		
+		// Preparo l'oggetto EventHistory che terrà traccia dei cambiamenti di stato
+		this.history = new EventHistory();
+		
+		// Inizializzo la lista di sottoscrittori della mailing list
+		this.mailingList = new LinkedList<>();
+		
+		// A questo punto posso settare lo stato come "valido".
+		this.setState(new ValidState());
+		
+		// Fornisco all'evento un Titolo di default, se non è presente un altro titolo
+		if (this.valuesMap.get(CommonField.TITOLO) == null) {
+			this.valuesMap.put(CommonField.TITOLO, new StringFieldValue(String.format("Event_%04d", this.id)));
 		}
+		
 	}
 	
 	/**
@@ -442,5 +421,8 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		String otherTitle = e.valuesMap.get(CommonField.TITOLO).toString();
 		return thisTitle.compareTo(otherTitle);
 	}
-
+	
+	
+	public abstract void renderEvent(UIRenderer renderer);
+	
 }
