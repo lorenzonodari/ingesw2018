@@ -6,7 +6,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import it.unibs.ingesw.dpn.model.categories.Category;
 import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
+import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
 import it.unibs.ingesw.dpn.model.fields.CommonField;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
@@ -40,7 +42,6 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * 
 	 */
 	private static final long serialVersionUID = 6018235806371842633L;
-	private static long id_counter = 0;
 	
 	/** Eccezioni */
 	private static final String NULL_ARGUMENT_EXCEPTION = "Impossibile creare un evento con parametri nulli";
@@ -55,18 +56,15 @@ public abstract class Event implements Serializable, Comparable<Event> {
 
 	/** Strategie per il confronto di eventi */
 	public enum ComparingMethod {
-		BY_ID,
 		BY_DATE,
 		BY_TITLE
 	};
 	
 	/** Strategia di default, comune a tutti gli Event */
-	private static ComparingMethod comparingMethod = ComparingMethod.BY_ID;
+	private static ComparingMethod comparingMethod = ComparingMethod.BY_DATE;
 	
 	/** Attributi d'istanza */
-	
-	private final long id;
-	
+		
 	private final User creator;
 	
 	private final CategoryEnum category;
@@ -107,16 +105,20 @@ public abstract class Event implements Serializable, Comparable<Event> {
 			throw new IllegalArgumentException(NULL_ARGUMENT_EXCEPTION);
 		}
 		
-		// ID univoco dell'evento
-		this.id = id_counter++;
-		
 		// Inizializzo gli attributi della classe
 		this.category = category;
 		this.valuesMap = fieldValues;
 		
 		// Fornisco all'evento un Titolo di default, se non è presente un altro titolo
 		if (this.valuesMap.get(CommonField.TITOLO) == null) {
-			this.valuesMap.put(CommonField.TITOLO, new StringFieldValue(String.format("Event_%04d", this.id)));
+			StringBuilder title = new StringBuilder();
+			Category eventCategory = CategoryProvider.getProvider().getCategory(this.category);
+			
+			title.append(eventCategory.getName());
+			title.append(" del ");
+			title.append(this.valuesMap.get(CommonField.DATA_E_ORA));
+			
+			this.valuesMap.put(CommonField.TITOLO, new StringFieldValue(title.toString()));
 		}
 		
 		// Preparo l'oggetto EventHistory che terrà traccia dei cambiamenti di stato
@@ -137,15 +139,6 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		// Iscrivo il creatore all'evento
 		this.subscribe(this.creator);
 		
-	}
-	
-	/**
-	 * Restituisce l'ID univoco dell'evento.
-	 * 
-	 * @return L'ID univoco dell'evento
-	 */
-	public long getId() {
-		return this.id;
 	}
 	
 	/**
@@ -360,32 +353,10 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		switch (Event.comparingMethod) {
 		case BY_DATE: 
 			return this.compareByEventDateTo(e);
-		case BY_ID:
-			return this.compareByIdTo(e);
 		case BY_TITLE:
 			return this.compareByTitleTo(e);
 		default:
 			throw new IllegalStateException(ILLEGAL_COMPARING_METHOD_EXCEPTION);
-		}
-	}
-	
-	/**
-	 * Confronta due eventi in base al loro ID.
-	 * 
-	 * @param e L'evento con cui effettuare il confronto
-	 * @return Un valore numerico per capire l'ordinamento dei due eventi
-	 */
-	public int compareByIdTo(Event e) {
-		// Se l'evento corrente è più recente come data di creazione dell'evento passato come parametro
-		if (this.id > e.id) {
-			return +1;
-		// Se l'evento corrente è meno recente dell'evento passato come parametro
-		} else if (this.id < e.id) {
-			return -1;
-		// Se i due eventi sono lo stesso evento
-		// (L'unico caso in cui i due ID sono uguali)
-		} else {
-			return 0;
 		}
 	}
 	
@@ -427,4 +398,5 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	}
 	
 	public abstract String toString();
+
 }
