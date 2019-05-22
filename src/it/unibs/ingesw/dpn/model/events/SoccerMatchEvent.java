@@ -10,7 +10,7 @@ import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 import it.unibs.ingesw.dpn.model.users.User;
 
 /**
- * Classe che rappresenta concettualmente il tipo di categoria "Partita di calcio".
+ * Classe che rappresenta concettualmente il tipo di evento "Partita di calcio".
  * 
  * @author Michele Dusi, Emanuele Poggi, Lorenzo Nodari
  * 

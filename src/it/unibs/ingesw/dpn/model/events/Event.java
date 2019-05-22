@@ -14,7 +14,6 @@ import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
 import it.unibs.ingesw.dpn.model.users.Mailbox;
 import it.unibs.ingesw.dpn.model.users.Notification;
 import it.unibs.ingesw.dpn.model.users.User;
-import it.unibs.ingesw.dpn.ui.UIRenderer;
 
 /**
  * Classe astratta che rappresenta in maniera concettuale un evento generico gestito dal programma.
