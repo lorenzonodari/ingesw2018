@@ -29,12 +29,17 @@ public class EventBoard implements Serializable {
 	 * Precondizione : evento non deve essere un null 
 	 * @param Evento da aggiungere alla bacheca
 	 */
-	public void addEvent(Event event) {
+	public void addEvent(Event event, User creator) {
 		// verifica precondizione
 		if (event == null) {
 			throw new IllegalStateException();
 		}
-		eventMap.put(event, new ArrayList<User>());
+		
+		ArrayList<User> subscribers = new ArrayList<>();
+		subscribers.add(creator);
+		
+		eventMap.put(event, subscribers);
+		
 		// Comunica all'evento che è stato pubblicato
 		event.publish();
 		
@@ -123,14 +128,15 @@ public class EventBoard implements Serializable {
 	/**
 	 * Metodo che verifica se in un determinato evento si è già inscritto un utente
 	 * 
-	 * @return  true se l'utente non è già iscritto all'evento, false altrimenti 
+	 * @return true se l'utente non è già iscritto all'evento, false altrimenti 
 	 */
-	public boolean verifySubscription(Event event, User subscription) {
+	public boolean verifySubscription(Event event, User subscriber) {
 		// verifica precondizione
-		if (event == null || subscription == null ) {
+		if (event == null || subscriber == null ) {
 			throw new IllegalStateException();
 		}
-		return  !eventMap.get(event).contains(subscription);
+		return !eventMap.get(event).contains(subscriber);
+		
 		
 	}
 	

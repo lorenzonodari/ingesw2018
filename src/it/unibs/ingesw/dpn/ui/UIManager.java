@@ -454,7 +454,7 @@ public class UIManager {
 				EventFactory factory = EventFactory.getFactory();
 				Event newEvent = factory.createEvent(this.users.getCurrentUser(), category, fieldValues);
 				
-				this.model.getEventBoard().addEvent(newEvent);
+				this.model.getEventBoard().addEvent(newEvent, users.getCurrentUser());
 				
 				MenuAction toHomeAction = () -> {this.mainMenu();};
 				this.dialog("Evento creato correttamente", "Torna al menu principale", toHomeAction);
