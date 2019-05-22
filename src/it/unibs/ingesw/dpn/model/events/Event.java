@@ -50,6 +50,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	/** Messaggi di Log o di notifica */
 	private static final String STATE_CHANGE_LOG = "L'evento \"%s\" ha cambiato il suo stato in: %s";
 	private static final String EVENT_SUBSCRIPTION_MESSAGE = "Ti sei iscritto/a all'evento \"%s\"";
+	private static final String EVENT_CREATION_MESSAGE = "Hai creato l'evento \"%s\"";
 	private static final String EVENT_STATE_CHANGE_MESSAGE = "L'evento \"%s\" a cui sei iscritto/a ha cambiato il suo stato in: %s";
 
 	/** Strategie per il confronto di eventi */
@@ -129,6 +130,10 @@ public abstract class Event implements Serializable, Comparable<Event> {
 
 		// Imposto il creatore dell'evento
 		this.creator = creator;
+		// Comunico all'utente che ha creato l'evento
+		this.creator.getMailbox().deliver(new Notification(
+				String.format(EVENT_CREATION_MESSAGE, this.valuesMap.get(CommonField.TITOLO))
+				));
 		// Iscrivo il creatore all'evento
 		this.subscribe(this.creator);
 		
