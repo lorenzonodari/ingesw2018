@@ -12,6 +12,7 @@ import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
 import it.unibs.ingesw.dpn.model.fields.CommonField;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
+import it.unibs.ingesw.dpn.model.fieldvalues.IntegerFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
 import it.unibs.ingesw.dpn.model.users.Mailbox;
 import it.unibs.ingesw.dpn.model.users.Notification;
@@ -101,26 +102,18 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * @param fieldValues le coppie (campo-valore) dell'evento
 	 */
 	public Event(User creator, CategoryEnum category, Map<Field, FieldValue> fieldValues) {
-		
+		// Verifico che i parametri non siano nulli
 		if (creator == null || category == null || fieldValues == null) {
 			throw new IllegalArgumentException(NULL_ARGUMENT_EXCEPTION);
 		}
 		
 		// Inizializzo gli attributi della classe
+		this.creator = creator;
 		this.category = category;
 		this.valuesMap = fieldValues;
 		
-		// Fornisco all'evento un Titolo di default, se non è presente un altro titolo
-		if (this.valuesMap.get(CommonField.TITOLO) == null) {
-			StringBuilder title = new StringBuilder();
-			Category eventCategory = CategoryProvider.getProvider().getCategory(this.category);
-			
-			title.append(eventCategory.getName());
-			title.append(" del ");
-			title.append(this.valuesMap.get(CommonField.DATA_E_ORA));
-			
-			this.valuesMap.put(CommonField.TITOLO, new StringFieldValue(title.toString()));
-		}
+		// Imposto i valori di default per alcuni campi che non sono stati inizializzati
+		this.setDefaultFieldValues();
 		
 		// Preparo l'oggetto EventHistory che terrà traccia dei cambiamenti di stato
 		this.history = new EventHistory();
@@ -131,14 +124,46 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		// A questo punto posso settare lo stato come "valido".
 		this.setState(new ValidState());
 
-		// Imposto il creatore dell'evento
-		this.creator = creator;
 		// Comunico all'utente che ha creato l'evento
 		this.creator.getMailbox().deliver(new Notification(
 				String.format(EVENT_CREATION_MESSAGE, this.valuesMap.get(CommonField.TITOLO))
 				));
 		// Iscrivo il creatore all'evento
 		this.subscribe(this.creator);
+		
+	}
+	
+	/**
+	 * Imposta il valore id default di alcuni campi.
+	 * Questo metodo viene chiamato dal costruttore e racchiude tutte le procedure che impostano
+	 * i valori dei campi facoltativi utilizzati nel programma.
+	 */
+	private void setDefaultFieldValues() {
+
+		// TITOLO
+		// Valore di default = "<nomeCategoria> del <dataEvento>"
+		if (this.valuesMap.get(CommonField.TITOLO) == null) {
+			Category eventCategory = CategoryProvider.getProvider().getCategory(this.category);
+			this.valuesMap.put(CommonField.TITOLO, new StringFieldValue(String.format(
+					"%s del %s",
+					eventCategory.getName(),
+					this.valuesMap.get(CommonField.DATA_E_ORA))));
+		}
+		
+		// TOLLERANZA NUMERO DI PARTECIPANTI
+		// Valore di default = 0
+		if (this.valuesMap.get(CommonField.TOLLERANZA_NUMERO_DI_PARTECIPANTI) == null) {
+			this.valuesMap.put(CommonField.TOLLERANZA_NUMERO_DI_PARTECIPANTI, new IntegerFieldValue(0));
+		}
+		
+		// TERMINE ULTIMO DI RITIRO ISCRIZIONE
+		// Valore di default = Termine ultimo di iscrizione
+		if (this.valuesMap.get(CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE) == null) {
+			this.valuesMap.put(
+					CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE, 
+					this.valuesMap.get(CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE)
+					);
+		}
 		
 	}
 	
@@ -326,26 +351,28 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * @return true se il partecipante viene aggiunto, false altrimenti.
 	 */
 	public boolean subscribe(User subscriber) {
-		// Aggiunge l'utente alla mailbox SE non è già iscritto
+		// Verifica che l'utente non sia già iscritto
 		if (this.mailingList.contains(subscriber.getMailbox())) {
 			return false;
 		}
+		
+		// Provo ad aggiungere un iscritto, demandando allo stato dell'evento il comportamento adeguato
+		try {
+			this.state.onSubscription(this);
+		}
+		catch (IllegalStateException e) {
+			// In caso di eccezioni, l'iscrizione non può essere effettuata
+			return false;
+		}
+		
+		// Aggiungo l'iscritto
 		this.mailingList.add(subscriber.getMailbox());
 
 		// Notifica l'utente che l'iscrizione è andata a buon fine
 		subscriber.getMailbox().deliver(new Notification(
 				String.format(EVENT_SUBSCRIPTION_MESSAGE, this.valuesMap.get(CommonField.TITOLO))
 				));
-		
-		// Effettua un eventuale cambiamento di stato
-		try {
-			
-			this.state.onSubscription(this);
-			return true;
-		}
-		catch (IllegalStateException e) {
-			return false;
-		}
+		return true;
 	}
 	
 	/**
@@ -365,25 +392,29 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * @return true se il partecipante viene rimosso dalle iscrizioni, false altrimenti.
 	 */
 	public boolean unsubscribe(User unsubscriber) {
-		// Rimuovo l'utente dalla mailbox SE è già iscritto
+		// Verifico che l'utente sia già iscritto
 		if (!this.mailingList.contains(unsubscriber.getMailbox())) {
 			return false;
 		}
-		this.mailingList.remove(unsubscriber.getMailbox());
 		
 		// Comunica allo stato che c'è stata una disiscrizione
 		try {
-			
 			this.state.onUnsubscription(this);
-			// Comunica all'utente che la disiscrizione è andata a buon fine
-			unsubscriber.getMailbox().deliver(new Notification(
-					String.format(EVENT_UNSUBSCRIPTION_MESSAGE, this.valuesMap.get(CommonField.TITOLO))
-					));
-			return true;
 		}
 		catch (IllegalStateException e) {
+			// In caso si verifichino eccezioni, la disiscrizione non può essere effettuata
+			// Esempio: è scaduta la data "Termine ultimo di ritiro iscrizione"
 			return false;
 		}
+
+		// Rimuove l'iscritto dalla mailing list
+		this.mailingList.remove(unsubscriber.getMailbox());
+		
+		// Notifica l'utente che la disiscrizione è andata a buon fine
+		unsubscriber.getMailbox().deliver(new Notification(
+				String.format(EVENT_UNSUBSCRIPTION_MESSAGE, this.valuesMap.get(CommonField.TITOLO))
+				));
+		return true;
 	}
 	
 	/**

@@ -442,7 +442,7 @@ public class UIManager {
 			
 			// Creo la entry
 			String entryTitle = String.format(
-					"%-35s : %s",
+					"%-50s : %s",
 					f.getName() + ((f.isMandatory()) ? " (*)" : ""),
 					fieldValueString);
 			createEventMenu.addEntry(entryTitle, fieldAction);
