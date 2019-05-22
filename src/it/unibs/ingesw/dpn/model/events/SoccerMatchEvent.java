@@ -25,7 +25,6 @@ public class SoccerMatchEvent extends Event {
 	/**
 	 * Costruttore della classe SoccerMatch, che verrà invocato da una classe
 	 * apposita la cui responsabilità principale sarà creare eventi.
-	 * 
 	 * Precondizione: i valori dei campi devono essere uguali come numero e come tipo ai campi
 	 * previsti dalla categoria. Questo viene garantito dalla classe adibita alla creazione degli eventi.
 	 * 
@@ -38,12 +37,16 @@ public class SoccerMatchEvent extends Event {
 	@Override
 	public String toString() {
 		StringBuffer exit = new StringBuffer();;
-		exit.append("Evento : Partita di calcio");
+		exit.append("Evento : Partita di calcio")
+		.append("\n");
 		Category cat = CategoryProvider.getProvider().getCategory(CategoryEnum.PARTITA_DI_CALCIO);
 		for (Field f : cat.getFields()) {
+			if(!(this.getFieldValue(f) == null)) {
 			exit.append(String.format(" | %-35s : %s",
 					f.getName(),
-					this.getFieldValue(f).toString()));
+					this.getFieldValue(f).toString()))
+				.append("\n");
+			}
 		}
 		return exit.toString();
 	}
