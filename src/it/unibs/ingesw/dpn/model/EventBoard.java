@@ -63,6 +63,7 @@ public class EventBoard implements Serializable {
 			throw new IllegalStateException();
 		}
 		eventMap.remove(event);
+		event.withdraw();
 	}
 	
 	/**
@@ -88,7 +89,13 @@ public class EventBoard implements Serializable {
 				.filter(event -> event.getState() == stateName)
 				.collect(Collectors.toCollection(ArrayList::new));
 	}
-	
+	public List<Event> getEventsByAuthor(User author) {
+		return eventMap
+				.keySet()
+				.stream()
+				.filter(event -> event.getCreator() == author)
+				.collect(Collectors.toCollection(ArrayList::new));
+	}
 	/**
 	 * restituisce la scritta degli iscritti a un evento 
 	 * 
@@ -115,8 +122,10 @@ public class EventBoard implements Serializable {
 	 * 				  
 	 * @param event -> Evento in cui iscrivere un utente 
 	 * @param subscription -> L'utente da iscrivere
+	 *
+	 * @return restituisce true se l'operazione è andata buon fine, altrimenti false
 	 */
-	public void addSubscription(Event event, User subscription) {
+	public boolean addSubscription(Event event, User subscription) {
 		// verifica precondizione
 		if (event == null || subscription == null ) {
 			throw new IllegalStateException();
@@ -124,14 +133,15 @@ public class EventBoard implements Serializable {
 
 		if (event.subscribe(subscription)) {		
 			eventMap.get(event).add(subscription);
+			return true;
 		} else {
-			throw new IllegalStateException("Impossibile effettuare l'iscrizione");
+			return false;
 		}
 
 	}
 	
 	/**
-	 * Metodo che verifica se in un determinato evento si è già inscritto un utente
+	 * Metodo che verifica se in un determinato evento si è già iscritto un utente
 	 * 
 	 * @return true se l'utente non è già iscritto all'evento, false altrimenti 
 	 */
@@ -152,14 +162,21 @@ public class EventBoard implements Serializable {
 	 * 
 	 * @param evento a cui si vuole disiscrivere l'utente
 	 * @param Utente da rimuovere dalla lista degli iscritti 
+	 * @return restituisce true se l'operazione è andata buon fine, altrimenti false
 	 */
-	public void removeSubscription(Event event, User toRemove) {
+	public boolean removeSubscription(Event event, User toRemove) {
 
 		// verifica precondizione
 		if (event == null || toRemove == null) {
 			throw new IllegalStateException();
 		}
-		eventMap.get(event).remove(toRemove);
+		if(eventMap.get(event).remove(toRemove)){
+			event.unsubscribe(toRemove);
+			return true;
+		} else {
+			return false;
+		}
+		
 	}
 	
 }

@@ -387,7 +387,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 */
 	public boolean unsubscribe(User unsubscriber) {
 		// Verifico che l'utente sia già iscritto
-		if (!this.mailingList.contains(unsubscriber.getMailbox())) {
+		if (!this.mailingList.contains(unsubscriber.getMailbox()) || (this.creator == unsubscriber)) {
 			return false;
 		}
 		
