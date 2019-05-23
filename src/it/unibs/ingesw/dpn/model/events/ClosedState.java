@@ -49,7 +49,7 @@ public class ClosedState implements EventState, Serializable {
 		
 		MoneyAmountFieldValue quota = (MoneyAmountFieldValue) e.getFieldValue(CommonField.QUOTA_INDIVIDUALE);
 		if (quota.getValue() > 0.0f) {
-			message.append(String.format(MEMO_NOTIFICATION_MONEY, quota.getValue()));
+			message.append(String.format(MEMO_NOTIFICATION_MONEY, quota));
 		}
 		
 		e.notifySubscribers(message.toString());
