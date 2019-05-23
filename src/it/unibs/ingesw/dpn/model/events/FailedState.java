@@ -1,6 +1,8 @@
 package it.unibs.ingesw.dpn.model.events;
 
 import java.io.Serializable;
+
+import it.unibs.ingesw.dpn.model.fields.CommonField;
 /**
  * Classe che modellizza il comportamento di un evento {@link Event} nello stato FAILED.
  * 
@@ -17,6 +19,15 @@ public class FailedState implements EventState, Serializable {
 	@Override
 	public String getStateName() {
 		return EventState.FAILED;
+	}
+	
+	@Override
+	public void onEntry(Event event) {
+		
+		// Avviso gli iscritti che la proposta e' fallita
+		String message = String.format("L'evento %s, al quale eri iscritto, e' fallito per mancanza di partecipanti", event.getFieldValue(CommonField.TITOLO));
+		event.notifySubscribers(message);
+		
 	}
 
 }
