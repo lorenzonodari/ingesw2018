@@ -25,8 +25,9 @@ public class FailedState implements EventState, Serializable {
 	public void onEntry(Event event) {
 		
 		// Avviso gli iscritti che la proposta e' fallita
-		String message = String.format("L'evento %s, al quale eri iscritto, e' fallito per mancanza di partecipanti", event.getFieldValue(CommonField.TITOLO));
-		event.notifySubscribers(message);
+		event.notifySubscribers(String.format(
+				"L'evento %s, al quale eri iscritto/a, è fallito per mancanza di partecipanti", 
+				event.getFieldValue(CommonField.TITOLO)));
 		
 	}
 
