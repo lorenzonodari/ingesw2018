@@ -23,8 +23,8 @@ public class ClosedState implements EventState, Serializable {
 	private static final long serialVersionUID = 1343313668189070063L;
 	
 	private static final String TIMER_NAME = "EndingTimer_";
-	private static final String MEMO_NOTIFICATION_MESSAGE = "PROMEMORIA: %s, %s";
-	private static final String MEMO_NOTIFICATION_MONEY = " - Importo dovuto: %s";
+	private static final String MEMO_NOTIFICATION_MESSAGE = "PROMEMORIA: L'evento %s si terra' in data %s";
+	private static final String MEMO_NOTIFICATION_MONEY = "; Importo dovuto: %s";
 
 	private transient Timer endingTimer;
 	
@@ -44,7 +44,7 @@ public class ClosedState implements EventState, Serializable {
 		
 		// Invia promemoria agli iscritti
 		StringBuilder message = new StringBuilder(String.format(MEMO_NOTIFICATION_MESSAGE, 
-									   							CategoryProvider.getProvider().getCategory(e.getCategory()).getName(),
+									   							e.getFieldValue(CommonField.TITOLO),
 									   							e.getFieldValue(CommonField.DATA_E_ORA)));
 		
 		MoneyAmountFieldValue quota = (MoneyAmountFieldValue) e.getFieldValue(CommonField.QUOTA_INDIVIDUALE);
