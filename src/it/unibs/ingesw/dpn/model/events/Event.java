@@ -186,7 +186,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * 
 	 * @param message Il messaggio da inviare agli iscritti
 	 */
-	private void notifySubscribers(String message) {
+	 void notifySubscribers(String message) {
 		// Cicla su tutte le mailbox
 		for (Mailbox mb : this.mailingList) {
 			// Recapita il messaggio impostato
@@ -221,12 +221,6 @@ public abstract class Event implements Serializable, Comparable<Event> {
 				this.state.getStateName().toUpperCase());
 		this.history.addLog(message_log);
 		
-		// Avviso tutti gli iscritti tramite le relative Mailbox
-		String message_notification = String.format(
-				EVENT_STATE_CHANGE_MESSAGE, 
-				titolo,
-				this.state.getStateName().toUpperCase());
-		this.notifySubscribers(message_notification);
 	}
 	
 	/**

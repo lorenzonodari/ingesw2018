@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Timer;
 
+import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
 import it.unibs.ingesw.dpn.model.fields.CommonField;
 
 /**
@@ -20,6 +21,7 @@ public class ClosedState implements EventState, Serializable {
 	private static final long serialVersionUID = 1343313668189070063L;
 	
 	private static final String TIMER_NAME = "EndingTimer_";
+	private static final String MEMO_NOTIFICATION_MESSAGE = "PROMEMORIA: %s, %s\nImporto dovuto: %s";
 
 	private transient Timer endingTimer;
 	
@@ -35,7 +37,16 @@ public class ClosedState implements EventState, Serializable {
 	 * @param e L'evento a cui si fa riferimento
 	 */
 	@Override
-	public void onEntry(Event e) {	
+	public void onEntry(Event e) {
+		
+		// Invia promemoria agli iscritti
+		String message = String.format(MEMO_NOTIFICATION_MESSAGE, 
+									   CategoryProvider.getProvider().getCategory(e.getCategory()).getName(),
+									   e.getFieldValue(CommonField.DATA_E_ORA),
+									   e.getFieldValue(CommonField.QUOTA_INDIVIDUALE));
+		e.notifySubscribers(message);
+		
+		
 		// Preparo il timer di scadenza della conclusione dell'evento
 		// Lo configuro in modo che venga eseguito come daemon (grazie al parametro con valore true).
 		this.endingTimer = new Timer(TIMER_NAME + e.hashCode(), true);
