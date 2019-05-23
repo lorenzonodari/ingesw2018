@@ -1,4 +1,4 @@
-package it.unibs.ingesw.dpn.model.events;
+package it.unibs.ingesw.dpn.ui;
 
 import java.util.HashMap;
 import java.util.List;
@@ -7,11 +7,11 @@ import java.util.Map;
 import it.unibs.ingesw.dpn.model.categories.Category;
 import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
 import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
+import it.unibs.ingesw.dpn.model.events.Event;
+import it.unibs.ingesw.dpn.model.events.SoccerMatchEvent;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 import it.unibs.ingesw.dpn.model.users.User;
-import it.unibs.ingesw.dpn.ui.InputGetter;
-import it.unibs.ingesw.dpn.ui.UIRenderer;
 
 /**
  * Classe che permette la creazione di eventi in maniera "controllata", secondo il pattern "Factory" e
@@ -245,6 +245,7 @@ public class EventFactory {
 				
 		case PARTITA_DI_CALCIO:
 			newEvent = new SoccerMatchEvent(this.provisionalCreator, this.provisionalFieldValues);
+			break;
 				
 		}
 		
@@ -259,32 +260,6 @@ public class EventFactory {
 		
 		// Restituisco l'evento
 		return newEvent;
-	}
-	
-	/**
-	 * Metodo che si occupa della creazione di un evento di una precisa categoria indicata.
-	 * 
-	 * @param creator L'utente che ha creato l'evento
-	 * @param category La categoria dell'evento
-	 * @param fieldValues I campi dell'evento
-	 * @return l'istanza di {@link Event} creata
-	 */
-	@Deprecated
-	public Event createEvent(User creator, CategoryEnum category, Map<Field, FieldValue> fieldValues) {
-		
-		if (category == null) {
-			throw new IllegalArgumentException("Impossibile creare un Evento con categoria \"null\"");
-		}
-		
-		// Creo l'evento secondo l'apposita categoria
-		switch (category) {
-		
-		case PARTITA_DI_CALCIO:
-			return new SoccerMatchEvent(creator, fieldValues);
-				
-		}
-		
-		return null;
 	}
 	
 }

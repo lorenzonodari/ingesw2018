@@ -30,7 +30,7 @@ public class SoccerMatchEvent extends Event {
 	 * 
 	 * @param fieldValues i valori dei campi dell'evento di tipo "Partita di calcio"
 	 */
-	SoccerMatchEvent(User creator, Map<Field, FieldValue> fieldValues) {
+	public SoccerMatchEvent(User creator, Map<Field, FieldValue> fieldValues) {
 		super(creator, CategoryEnum.PARTITA_DI_CALCIO, fieldValues);
 	}
 
