@@ -2,6 +2,8 @@ package it.unibs.ingesw.dpn.model.events;
 
 import java.io.Serializable;
 
+import it.unibs.ingesw.dpn.model.fields.CommonField;
+
 /**
  * Classe che modellizza il comportamento di un evento {@link Event} nello stato ENDED.
  * 
@@ -18,6 +20,14 @@ public class EndedState implements EventState, Serializable {
 	@Override
 	public String getStateName() {
 		return EventState.ENDED;
+	}
+	
+	public void onEntry(Event e) {
+		
+		// Notifico gli iscritti della conclusione dell'evento
+		String message = String.format("L'evento %s e' concluso", e.getFieldValue(CommonField.TITOLO));
+		e.notifySubscribers(message);
+		
 	}
 
 }
