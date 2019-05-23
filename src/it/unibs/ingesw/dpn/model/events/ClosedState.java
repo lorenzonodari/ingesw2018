@@ -5,7 +5,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Timer;
 
-import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
 import it.unibs.ingesw.dpn.model.fields.CommonField;
 import it.unibs.ingesw.dpn.model.fieldvalues.MoneyAmountFieldValue;
 
