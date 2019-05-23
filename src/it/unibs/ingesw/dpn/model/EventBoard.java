@@ -47,7 +47,11 @@ public class EventBoard implements Serializable {
 		// Iscrive il creatore dell'evento
 		this.addSubscription(event, creator);
 		
+<<<<<<< HEAD
 }
+=======
+	}
+>>>>>>> version3
 	
 	/**
 	 * Metodo che rimuove un evento dalla bacheca
@@ -121,12 +125,19 @@ public class EventBoard implements Serializable {
 		if (event == null || subscription == null ) {
 			throw new IllegalStateException();
 		}
+<<<<<<< HEAD
 
 		if (event.subscribe(subscription)) {		
 			eventMap.get(event).add(subscription);
 		} else {
 			throw new IllegalStateException("Impossibile effettuare l'iscrizione");
 		}
+=======
+		
+		eventMap.get(event).add(subscription);
+		event.subscribe(subscription);
+		
+>>>>>>> version3
 	}
 	
 	/**

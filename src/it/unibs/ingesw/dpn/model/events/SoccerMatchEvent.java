@@ -36,18 +36,19 @@ public class SoccerMatchEvent extends Event {
 
 	@Override
 	public String toString() {
-		StringBuffer exit = new StringBuffer();;
-		exit.append("Evento : Partita di calcio")
+		StringBuffer description = new StringBuffer();
+		description.append("Evento    : Partita di calcio")
 		.append("\n");
+		description.append(String.format("Creato da : %s\n", this.getCreator().getUsername()));
 		Category cat = CategoryProvider.getProvider().getCategory(CategoryEnum.PARTITA_DI_CALCIO);
 		for (Field f : cat.getFields()) {
 			if(!(this.getFieldValue(f) == null)) {
-			exit.append(String.format(" | %-35s : %s",
+			description.append(String.format(" | %-50s : %s",
 					f.getName(),
 					this.getFieldValue(f).toString()))
 				.append("\n");
 			}
 		}
-		return exit.toString();
+		return description.toString();
 	}
 }

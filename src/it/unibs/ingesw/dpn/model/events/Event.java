@@ -12,6 +12,7 @@ import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
 import it.unibs.ingesw.dpn.model.fields.CommonField;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
+import it.unibs.ingesw.dpn.model.fieldvalues.IntegerFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
 import it.unibs.ingesw.dpn.model.users.Mailbox;
 import it.unibs.ingesw.dpn.model.users.Notification;
@@ -50,7 +51,8 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	
 	/** Messaggi di Log o di notifica */
 	private static final String STATE_CHANGE_LOG = "L'evento \"%s\" ha cambiato il suo stato in: %s";
-	private static final String EVENT_SUBSCRIPTION_MESSAGE = "Ti sei iscritto/a all'evento \"%s\"";
+	private static final String EVENT_SUBSCRIPTION_MESSAGE = "Ti sei iscritto/a correttamente all'evento \"%s\"";
+	private static final String EVENT_UNSUBSCRIPTION_MESSAGE = "Ti sei disiscritto/a correttamente dall'evento \"%s\"";
 	private static final String EVENT_CREATION_MESSAGE = "Hai creato l'evento \"%s\"";
 	
 	/** Strategie per il confronto di eventi */
@@ -124,7 +126,11 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		this.creator.getMailbox().deliver(new Notification(
 				String.format(EVENT_CREATION_MESSAGE, this.valuesMap.get(CommonField.TITOLO))
 				));		
+<<<<<<< HEAD
 }
+=======
+	}
+>>>>>>> version3
 	
 	/**
 	 * Imposta il valore id default di alcuni campi.
@@ -143,11 +149,27 @@ public abstract class Event implements Serializable, Comparable<Event> {
 					this.valuesMap.get(CommonField.DATA_E_ORA))));
 		}
 		
+<<<<<<< HEAD
 		// DATA E ORA CONCLUSIVE
 		// Valore di default = valore di "DATA E ORA"
 		if (this.valuesMap.get(CommonField.DATA_E_ORA_CONCLUSIVE) == null) {
 			FieldValue defaultvalue = this.valuesMap.get(CommonField.DATA_E_ORA);
 			this.valuesMap.put(CommonField.DATA_E_ORA_CONCLUSIVE, defaultvalue);
+=======
+		// TOLLERANZA NUMERO DI PARTECIPANTI
+		// Valore di default = 0
+		if (this.valuesMap.get(CommonField.TOLLERANZA_NUMERO_DI_PARTECIPANTI) == null) {
+			this.valuesMap.put(CommonField.TOLLERANZA_NUMERO_DI_PARTECIPANTI, new IntegerFieldValue(0));
+		}
+		
+		// TERMINE ULTIMO DI RITIRO ISCRIZIONE
+		// Valore di default = Termine ultimo di iscrizione
+		if (this.valuesMap.get(CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE) == null) {
+			this.valuesMap.put(
+					CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE, 
+					this.valuesMap.get(CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE)
+					);
+>>>>>>> version3
 		}
 		
 	}
@@ -257,12 +279,13 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * comporta il passaggio di stato da VALID a OPEN, se ci si trova nello stato corretto.
 	 * 
 	 * Precondizione: l'evento deve essere nello stato VALID. Se questa non è soddisfatta, il metodo 
-	 * non esegue il passaggio di stato e restituisce false.
+	 * non esegue il passaggio di stato e restituisce false. La verifica della condizione è effettuata
+	 * mediante il pattern "state" e l'utilizzo di metodi di default nell'interfaccia {@link EventState}.
 	 * 
 	 * Postcondizione: l'evento sarà nello stato OPEN. Questa postcondizione non può essere garantita se l'evento,
 	 * al momento della chiamata del metodo, non si trova nello stato VALID.
 	 * Si noti che, in caso venga chiamato il metodo quando si è già nello stato OPEN, lo stato non verrà modificato
-	 * e sarà restituito il valore false.
+	 * e sarà restituito il valore false. Questo metodo è pertanto idempotente per eventi nello stato OPEN.
 	 * 
 	 * @return true se l'evento viene pubblicato, false altrimenti.
 	 */
@@ -276,13 +299,41 @@ public abstract class Event implements Serializable, Comparable<Event> {
 			return false;
 		}
 	}
-	
+
+	/**
+	 * Su decisione dell'utente, questo metodo permette di "ritirare l'evento".
+	 * La bacheca si occuperà di revocare agli utenti la possibilità di visionare l'evento,
+	 * mentre l'esecuzione di questo metodo comporta il passaggio di stato da OPEN a WITHDRAWN,
+	 * se ci si trova nello stato corretto.
+	 * 
+	 * Precondizione: l'evento deve essere nello stato OPEN. Se questa non è soddisfatta, il metodo 
+	 * non esegue il passaggio di stato e restituisce false. La verifica della condizione è effettuata
+	 * mediante il pattern "state" e l'utilizzo di metodi di default nell'interfaccia {@link EventState}.
+	 * 
+	 * Postcondizione: l'evento sarà nello stato WITHDRAWN. Questa postcondizione non può essere garantita se l'evento,
+	 * al momento della chiamata del metodo, non si trova nello stato OPEN.
+	 * Si noti che, in caso venga chiamato il metodo quando si è già nello stato WITHDRAWN, lo stato non verrà modificato
+	 * e sarà restituito il valore false. Questo metodo è pertanto idempotente per eventi nello stato WITHDRAWN.
+	 * 
+	 * @return true se l'evento viene ritirato, false altrimenti.
+	 */
+	public boolean withdraw() {
+		// TODO Eventuali azioni aggiuntive al ritiro di un evento
+		try {
+			this.state.onWithdrawal(this);
+			return true;
+		}
+		catch (IllegalStateException e) {
+			return false;
+		}
+	}
+
 	/**
 	 * Metodo che aggiunge la partecipazione di un utente all'evento.
 	 * La sua funzione non è memorizzare gli utenti iscritti (compito della bacheca), ma tenere traccia
 	 * delle {@link Mailbox} a cui inviare i messaggi di cambiamento di stato dell'evento stesso.
-	 * Questo metodo comporta il cambiamento di stato da OPEN a CLOSED se viene raggiunto il numero massimo di
-	 * partecipanti consentito all'evento.
+	 * Questo metodo può scatenare il cambiamento di stato da OPEN a CLOSED se viene raggiunto il numero massimo di
+	 * partecipanti consentito all'evento entro il tempo ultimo di iscrizione.
 	 * 
 	 * Precondizione: l'evento deve essere nello stato OPEN. Non è possibile accettare iscrizioni se non si è in
 	 * tale stato. In questo caso il metodo restituirà false.
@@ -290,32 +341,86 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * Precondizione: l'utente non è ancora iscritto all'evento. In caso si cerchi di iscrivere un utente
 	 * già iscritto, il metodo restituisce false.
 	 * 
-	 * Postcondizione: l'evento sarà nello stato CLOSED se e solo se l'aggiunta del partecipante permette
-	 * di raggiungere il numero massimo di partecipanti. 
+	 * Postcondizione: l'evento sarà nello stato CLOSED in due casi:
+	 * - l'aggiunta del partecipante permette di raggiungere il numero massimo di partecipanti (dato dal numero
+	 *   minimo di partecipanti + la tolleranza).
+	 * - l'aggiunta del partecipante permette di raggiungere il numero minimo di partecipanti e SUCCESSIVAMENTE
+	 *   scade la data "Termine ultimo di iscrizione", anche se non si è raggiunto il numero massimo.
 	 * Questa postcondizione non può essere garantita se l'evento, al momento della chiamata del metodo, 
 	 * non si trova nello stato OPEN.
 	 * 
 	 * @return true se il partecipante viene aggiunto, false altrimenti.
 	 */
-	public boolean subscribe(User newSubscriber) {
-		// Aggiunge l'utente alla mailbox SE non è già iscritto
-		if (this.mailingList.contains(newSubscriber.getMailbox())) {
+	public boolean subscribe(User subscriber) {
+		// Verifica che l'utente non sia già iscritto
+		if (this.mailingList.contains(subscriber.getMailbox())) {
 			return false;
 		}
-		this.mailingList.add(newSubscriber.getMailbox());
-		// Comunica all'utente la nuova sottoscrizione
-		newSubscriber.getMailbox().deliver(new Notification(
-				String.format(EVENT_SUBSCRIPTION_MESSAGE, this.valuesMap.get(CommonField.TITOLO))
-				));
 		
-		// Effettua un eventuale cambiamento di stato
+		// Aggiungo l'iscritto
+			/* Questa operazione va fatta preventivamente, poiché il cambio di stato poco sotto potrebbe provocare 
+			 * l'invio di alcune notifiche. Tali notifiche verrebbero perse se aggiungessi l'utente alla
+			 * mailing list troppo tardi.
+			 */ 
+		this.mailingList.add(subscriber.getMailbox());
+		
+		// Provo ad aggiungere un iscritto, demandando allo stato dell'evento il comportamento adeguato
 		try {
-			this.state.onNewParticipant(this);
-			return true;
+			this.state.onSubscription(this);
 		}
 		catch (IllegalStateException e) {
+			// In caso di eccezioni, l'iscrizione non può essere effettuata
+			this.mailingList.remove(subscriber.getMailbox());
 			return false;
 		}
+
+		// Notifica l'utente che l'iscrizione è andata a buon fine
+		subscriber.getMailbox().deliver(new Notification(
+				String.format(EVENT_SUBSCRIPTION_MESSAGE, this.valuesMap.get(CommonField.TITOLO))
+				));
+		return true;
+	}
+	
+	/**
+	 * Metodo che revoca la partecipazione di un utente all'evento.
+	 * L'esecuzione di questo metodo rimuove la mailbox dell'utente che intende disiscriversi dalla lista
+	 * delle mailbox degli iscritti. In questo modo l'utente non riceverà più notifiche di aggiornamento sull'evento.
+	 * La disiscrizione di un utente non scatena alcun cambiamento di stato all'interno dell'evento. Tuttavia, se
+	 * si dovesse retrocedere dalla soglia del numero minimo di partecipanti e SUCCESSIVAMENTE scadesse la data del
+	 * "Termine ultimo di iscrizione", allora l'evento passerà nello stato FAILED.
+	 * 
+	 * Precondizione: l'evento deve essere nello stato OPEN. Non è possibile revocare iscrizioni se non si è in
+	 * tale stato. In questo caso il metodo restituirà false.
+	 * 
+	 * Precondizione: l'utente deve essere già iscritto all'evento. In caso si cerchi di revocare l'iscrizione
+	 * di un utente NON iscritto, il metodo restituisce false.
+	 * 
+	 * @return true se il partecipante viene rimosso dalle iscrizioni, false altrimenti.
+	 */
+	public boolean unsubscribe(User unsubscriber) {
+		// Verifico che l'utente sia già iscritto
+		if (!this.mailingList.contains(unsubscriber.getMailbox())) {
+			return false;
+		}
+		
+		// Comunica allo stato che c'è stata una disiscrizione
+		try {
+			this.state.onUnsubscription(this);
+		}
+		catch (IllegalStateException e) {
+			// In caso si verifichino eccezioni, la disiscrizione non può essere effettuata
+			// Esempio: è scaduta la data "Termine ultimo di ritiro iscrizione"
+			return false;
+		}
+
+		// Rimuove l'iscritto dalla mailing list
+		this.mailingList.remove(unsubscriber.getMailbox());
+		
+		// Notifica l'utente che la disiscrizione è andata a buon fine
+		unsubscriber.getMailbox().deliver(new Notification(
+				String.format(EVENT_UNSUBSCRIPTION_MESSAGE, this.valuesMap.get(CommonField.TITOLO))
+				));
+		return true;
 	}
 	
 	/**

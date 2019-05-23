@@ -50,8 +50,10 @@ public enum CommonField implements Field, Serializable {
 						renderer.renderError("Inserire una data futura");
 					} else if (isAfterEndingDate(acquiredDate, partialValues)) {
 						renderer.renderError("Data d'inizio posteriore alla data conclusiva dell'evento");
-					} else if (isBeforeSubscriptionDate(acquiredDate, partialValues)) {
+					} else if (isBeforeSubscriptionTimeoutDate(acquiredDate, partialValues)) {
 						renderer.renderError("Data d'inizio precedente al termine ultimo di iscrizione");
+					} else if (isBeforeUnsubscriptionTimeoutDate(acquiredDate, partialValues)) {
+						renderer.renderError("Data d'inizio precedente al termine ultimo di ritiro iscrizione");
 					} else {
 						okFlag = true;
 					}
@@ -75,8 +77,10 @@ public enum CommonField implements Field, Serializable {
 						renderer.renderError("Inserire una data futura");
 					} else if (isBeforeStartingDate(acquiredDate, partialValues)) {
 						renderer.renderError("Data di conclusione precedente alla data d'inizio dell'evento");
-					} else if (isBeforeSubscriptionDate(acquiredDate, partialValues)) {
+					} else if (isBeforeSubscriptionTimeoutDate(acquiredDate, partialValues)) {
 						renderer.renderError("Data di conclusione precedente al termine ultimo di iscrizione");
+					} else if (isBeforeUnsubscriptionTimeoutDate(acquiredDate, partialValues)) {
+						renderer.renderError("Data di conclusione precedente al termine ultimo di ritiro iscrizione");
 					} else {
 						okFlag = true;
 					}
@@ -95,7 +99,7 @@ public enum CommonField implements Field, Serializable {
 				return new IntegerFieldValue(getter.getInteger(0, Integer.MAX_VALUE));
 			}
 			),
-	
+
 	TERMINE_ULTIMO_DI_ISCRIZIONE (
 			"Termine ultimo di iscrizione",
 			"Ultimo giorno utile per iscriversi all'evento",
@@ -112,7 +116,36 @@ public enum CommonField implements Field, Serializable {
 					} else if (CommonField.isAfterStartingDate(acquiredDate, partialValues)) {
 						renderer.renderError("Termine ultimo d'iscrizione posteriore alla data d'inizio dell'evento");
 					} else if (CommonField.isAfterEndingDate(acquiredDate, partialValues)) {
-						renderer.renderError("Termine ultimo d'iscrizione precedente alla data di conclusione dell'evento");
+						renderer.renderError("Termine ultimo d'iscrizione posteriore alla data di conclusione dell'evento");
+					} else if (isBeforeUnsubscriptionTimeoutDate(acquiredDate, partialValues)) {
+						renderer.renderError("Termine ultimo d'iscrizione precedente al termine ultimo di ritiro iscrizione");
+					} else {
+						okFlag = true;
+					}
+				} while (!okFlag);
+				return acquiredDate;
+			}
+			),
+	
+	TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE (
+			"Termine ultimo di ritiro dell'iscrizione",
+			"L'ultima data utile entro cui è concesso ritirare la propria iscrizione all'evento",
+			false,
+			DateFieldValue.class,
+			(renderer, getter, partialValues) -> {
+				boolean okFlag = false;
+				DateFieldValue acquiredDate = null;
+				do {
+					acquiredDate = DateFieldValue.acquireValue(renderer, getter);
+					// Verifico che la data dell'evento sia posteriore alla creazione
+					if (acquiredDate.before(new Date())) {
+						renderer.renderError("Inserire una data futura");
+					} else if (CommonField.isAfterStartingDate(acquiredDate, partialValues)) {
+						renderer.renderError("Termine ultimo di ritiro iscrizione posteriore alla data d'inizio dell'evento");
+					} else if (CommonField.isAfterEndingDate(acquiredDate, partialValues)) {
+						renderer.renderError("Termine ultimo di ritiro iscrizione posteriore alla data di conclusione dell'evento");
+					} else if (CommonField.isAfterSubscriptionTimeoutDate(acquiredDate, partialValues)) {
+						renderer.renderError("Termine ultimo di ritiro iscrizione posteriore al termine ultimo d'iscrizione");
 					} else {
 						okFlag = true;
 					}
@@ -129,6 +162,17 @@ public enum CommonField implements Field, Serializable {
 			(renderer, getter, partialValues) -> {
 				renderer.renderText("Inserisci il numero di partecipanti (almeno 2)");
 				return new IntegerFieldValue(getter.getInteger(2, Integer.MAX_VALUE));
+			}
+			),
+	
+	TOLLERANZA_NUMERO_DI_PARTECIPANTI (
+			"Tolleranza sul numero di partecipanti",
+			"Numero di persone eventualmente accettabili in esubero rispetto al \"numero di partecipanti\"",
+			false,
+			IntegerFieldValue.class,
+			(renderer, getter, partialValues) -> {
+				renderer.renderText("Inserisci la tolleranza massima sul numero di partecipanti");
+				return new IntegerFieldValue(getter.getInteger(0, Integer.MAX_VALUE));
 			}
 			),
 	
@@ -310,11 +354,25 @@ public enum CommonField implements Field, Serializable {
 				date.before((Date) partialValues.get(DATA_E_ORA))
 				);
 	}
-	
-	private static boolean isBeforeSubscriptionDate(Date date, Map<Field, FieldValue> partialValues) {
+
+	private static boolean isBeforeSubscriptionTimeoutDate(Date date, Map<Field, FieldValue> partialValues) {
 		return (
 				partialValues.get(TERMINE_ULTIMO_DI_ISCRIZIONE) != null && 
 				date.before((Date) partialValues.get(TERMINE_ULTIMO_DI_ISCRIZIONE))
+				);
+	}
+
+	private static boolean isAfterSubscriptionTimeoutDate(Date date, Map<Field, FieldValue> partialValues) {
+		return (
+				partialValues.get(TERMINE_ULTIMO_DI_ISCRIZIONE) != null && 
+				date.after((Date) partialValues.get(TERMINE_ULTIMO_DI_ISCRIZIONE))
+				);
+	}
+	
+	private static boolean isBeforeUnsubscriptionTimeoutDate(Date date, Map<Field, FieldValue> partialValues) {
+		return (
+				partialValues.get(TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE) != null && 
+				date.before((Date) partialValues.get(TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE))
 				);
 	}
 

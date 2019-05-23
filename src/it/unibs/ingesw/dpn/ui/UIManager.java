@@ -368,7 +368,7 @@ public class UIManager {
 			
 		};
 		
-		Menu eventMenu = new Menu("Azioni su evento", event.toString(), Menu.BACK_ENTRY_TITLE, backAction);
+		Menu eventMenu = new Menu("Visualizzazione evento", event.toString(), Menu.BACK_ENTRY_TITLE, backAction);
 		if(model.getEventBoard().verifySubscription(event, model.getUsersManager().getCurrentUser()))
 			eventMenu.addEntry("Iscriviti all'evento", subscriptionAction);
 		
@@ -444,7 +444,7 @@ public class UIManager {
 			
 			// Creo la entry
 			String entryTitle = String.format(
-					"%-35s : %s",
+					"%-50s : %s",
 					f.getName() + ((f.isMandatory()) ? " (*)" : ""),
 					fieldValueString);
 			createEventMenu.addEntry(entryTitle, fieldAction);

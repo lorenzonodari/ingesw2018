@@ -21,11 +21,15 @@ public class ClosedState implements EventState, Serializable {
 	 */
 	private static final long serialVersionUID = 1343313668189070063L;
 	
+<<<<<<< HEAD
 	private static final String TIMER_NAME = "EndingTimer_";
 	private static final String MEMO_NOTIFICATION_MESSAGE = "PROMEMORIA: L'evento %s si terra' in data %s";
 	private static final String MEMO_NOTIFICATION_MONEY = "; Importo dovuto: %s";
+=======
+	private static final String TIMER_NAME = "OngoingTimer_";
+>>>>>>> version3
 
-	private transient Timer endingTimer;
+	private transient Timer ongoingTimer;
 	
 	@Override
 	public String getStateName() {
@@ -34,7 +38,10 @@ public class ClosedState implements EventState, Serializable {
 	
 	/**
 	 * All'entrata nel nuovo stato, viene schedulato un timer programmato per scadere a conclusione dell'evento.
-	 * Il timer scatenerà il passaggio di stato da CLOSED a ENDED.
+	 * Se l'evento prevede un'orario e una data conclusiva, la scadenza del timer scatena il passaggio da CLOSED a ONGOING,
+	 * nel momento in cui l'evento inizia.
+	 * Se invece l'evento è "istantaneo" e non presenta una data di conclusione, la scadenza del timer scatena
+	 * il passaggio da CLOSED a ENDED in maniera diretta.
 	 * 
 	 * @param e L'evento a cui si fa riferimento
 	 */
@@ -56,8 +63,9 @@ public class ClosedState implements EventState, Serializable {
 		
 		// Preparo il timer di scadenza della conclusione dell'evento
 		// Lo configuro in modo che venga eseguito come daemon (grazie al parametro con valore true).
-		this.endingTimer = new Timer(TIMER_NAME + e.hashCode(), true);
+		this.ongoingTimer = new Timer(TIMER_NAME + e.hashCode(), true);
 		
+<<<<<<< HEAD
 		// Ricavo la data della conclusione dell'evento
 		// La data deve essere quella del giorno successivo, allo scoccare della mezzanotte
 		Date endingDate = (Date) e.getFieldValue(CommonField.DATA_E_ORA_CONCLUSIVE);
@@ -70,6 +78,23 @@ public class ClosedState implements EventState, Serializable {
 		
 		// Schedulo il cambiamento di stato da CLOSED a ENDED
 		EventState.scheduleStateChange(e, EventState.ENDED, endingTimer, timerDate);
+=======
+		// Ricavo la data di inizio dell'evento
+		Date ongoingDate = (Date) e.getFieldValue(CommonField.DATA_E_ORA);
+		
+		// Verifico se effettuare il passaggio a ONGOING o a ENDED
+		if (e.getFieldValue(CommonField.DATA_E_ORA_CONCLUSIVE) != null) {
+
+			// Schedulo il cambiamento di stato da CLOSED a ONGOING
+			EventState.scheduleStateChange(e, EventState.ONGOING, ongoingTimer, ongoingDate);
+			
+		} else {
+		
+			// Schedulo il cambiamento di stato da CLOSED a ENDED
+			EventState.scheduleStateChange(e, EventState.ENDED, ongoingTimer, ongoingDate);
+			
+		}
+>>>>>>> version3
 		
 	}
 

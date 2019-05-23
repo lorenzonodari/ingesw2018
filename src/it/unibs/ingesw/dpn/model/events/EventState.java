@@ -23,7 +23,9 @@ public interface EventState {
 	String VALID = "Valido";
 	String OPEN = "Aperto";
 	String CLOSED = "Chiuso";
+	String ONGOING = "In corso";
 	String ENDED = "Concluso";
+	String WITHDRAWN = "Ritirato";
 	String FAILED = "Fallito";
 	
 	String STATE_EXCEPTION = "Impossibile eseguire questo metodo nello stato \"%s\"";
@@ -57,12 +59,33 @@ public interface EventState {
 	
 	/**
 	 * Metodo di default.
+	 * Nel caso si tenti di ritirare un evento in uno stato in cui non è permesso, viene lanciata un'eccezione.
+	 * 
+	 * @param e L'evento a cui si fa riferimento
+	 */
+	public default void onWithdrawal(Event e) {
+		throw new IllegalStateException(String.format(STATE_EXCEPTION, this.getStateName().toUpperCase()));
+	}
+
+	/**
+	 * Metodo di default.
 	 * Nel caso si tenti di aggiungere un partecipante in uno stato in cui non è permesso,
 	 * viene lanciata un'eccezione.
 	 * 
 	 * @param e L'evento a cui si fa riferimento
 	 */
-	public default void onNewParticipant(Event e) {
+	public default void onSubscription(Event e) {
+		throw new IllegalStateException(String.format(STATE_EXCEPTION, this.getStateName().toUpperCase()));
+	}
+
+	/**
+	 * Metodo di default.
+	 * Nel caso si tenti di rimuovere un partecipante in uno stato in cui non è permesso,
+	 * viene lanciata un'eccezione.
+	 * 
+	 * @param e L'evento a cui si fa riferimento
+	 */
+	public default void onUnsubscription(Event e) {
 		throw new IllegalStateException(String.format(STATE_EXCEPTION, this.getStateName().toUpperCase()));
 	}
 
@@ -87,13 +110,21 @@ public interface EventState {
 			case EventState.OPEN:
 				newState = new OpenState();
 				break;
-				
+
 			case EventState.CLOSED:
 				newState = new ClosedState();
 				break;
 				
+			case EventState.ONGOING:
+				newState = new OngoingState();
+				break;
+				
 			case EventState.FAILED:
 				newState = new FailedState();
+				break;
+
+			case EventState.WITHDRAWN:
+				newState = new WithdrawnState();
 				break;
 				
 			case EventState.ENDED:
