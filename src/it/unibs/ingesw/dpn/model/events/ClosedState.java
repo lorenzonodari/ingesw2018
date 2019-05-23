@@ -1,7 +1,6 @@
 package it.unibs.ingesw.dpn.model.events;
 
 import java.io.Serializable;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Timer;
 
@@ -21,13 +20,9 @@ public class ClosedState implements EventState, Serializable {
 	 */
 	private static final long serialVersionUID = 1343313668189070063L;
 	
-<<<<<<< HEAD
-	private static final String TIMER_NAME = "EndingTimer_";
 	private static final String MEMO_NOTIFICATION_MESSAGE = "PROMEMORIA: L'evento %s si terra' in data %s";
 	private static final String MEMO_NOTIFICATION_MONEY = "; Importo dovuto: %s";
-=======
 	private static final String TIMER_NAME = "OngoingTimer_";
->>>>>>> version3
 
 	private transient Timer ongoingTimer;
 	
@@ -65,20 +60,6 @@ public class ClosedState implements EventState, Serializable {
 		// Lo configuro in modo che venga eseguito come daemon (grazie al parametro con valore true).
 		this.ongoingTimer = new Timer(TIMER_NAME + e.hashCode(), true);
 		
-<<<<<<< HEAD
-		// Ricavo la data della conclusione dell'evento
-		// La data deve essere quella del giorno successivo, allo scoccare della mezzanotte
-		Date endingDate = (Date) e.getFieldValue(CommonField.DATA_E_ORA_CONCLUSIVE);
-		Calendar cal = Calendar.getInstance();
-        cal.setTime(endingDate);
-        cal.add(Calendar.DATE, 1); 		// Aggiungo un giorno alla data
-        cal.set(Calendar.HOUR, 0); 		// Imposto la data a mezzanotte
-        cal.set(Calendar.MINUTE, 0); 	// Imposto la data a mezzanotte
-        Date timerDate = cal.getTime();
-		
-		// Schedulo il cambiamento di stato da CLOSED a ENDED
-		EventState.scheduleStateChange(e, EventState.ENDED, endingTimer, timerDate);
-=======
 		// Ricavo la data di inizio dell'evento
 		Date ongoingDate = (Date) e.getFieldValue(CommonField.DATA_E_ORA);
 		
@@ -94,7 +75,6 @@ public class ClosedState implements EventState, Serializable {
 			EventState.scheduleStateChange(e, EventState.ENDED, ongoingTimer, ongoingDate);
 			
 		}
->>>>>>> version3
 		
 	}
 

@@ -126,11 +126,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		this.creator.getMailbox().deliver(new Notification(
 				String.format(EVENT_CREATION_MESSAGE, this.valuesMap.get(CommonField.TITOLO))
 				));		
-<<<<<<< HEAD
-}
-=======
 	}
->>>>>>> version3
 	
 	/**
 	 * Imposta il valore id default di alcuni campi.
@@ -148,14 +144,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 					eventCategory.getName(),
 					this.valuesMap.get(CommonField.DATA_E_ORA))));
 		}
-		
-<<<<<<< HEAD
-		// DATA E ORA CONCLUSIVE
-		// Valore di default = valore di "DATA E ORA"
-		if (this.valuesMap.get(CommonField.DATA_E_ORA_CONCLUSIVE) == null) {
-			FieldValue defaultvalue = this.valuesMap.get(CommonField.DATA_E_ORA);
-			this.valuesMap.put(CommonField.DATA_E_ORA_CONCLUSIVE, defaultvalue);
-=======
+
 		// TOLLERANZA NUMERO DI PARTECIPANTI
 		// Valore di default = 0
 		if (this.valuesMap.get(CommonField.TOLLERANZA_NUMERO_DI_PARTECIPANTI) == null) {
@@ -169,7 +158,6 @@ public abstract class Event implements Serializable, Comparable<Event> {
 					CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE, 
 					this.valuesMap.get(CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE)
 					);
->>>>>>> version3
 		}
 		
 	}
