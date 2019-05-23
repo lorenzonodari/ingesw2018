@@ -7,6 +7,7 @@ import java.util.Timer;
 
 import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
 import it.unibs.ingesw.dpn.model.fields.CommonField;
+import it.unibs.ingesw.dpn.model.fieldvalues.MoneyAmountFieldValue;
 
 /**
  * Classe che modellizza il comportamento di un evento {@link Event} nello stato CLOSED.
@@ -22,7 +23,8 @@ public class ClosedState implements EventState, Serializable {
 	private static final long serialVersionUID = 1343313668189070063L;
 	
 	private static final String TIMER_NAME = "EndingTimer_";
-	private static final String MEMO_NOTIFICATION_MESSAGE = "PROMEMORIA: %s, %s\nImporto dovuto: %s";
+	private static final String MEMO_NOTIFICATION_MESSAGE = "PROMEMORIA: %s, %s";
+	private static final String MEMO_NOTIFICATION_MONEY = " - Importo dovuto: %s";
 
 	private transient Timer endingTimer;
 	
@@ -41,11 +43,16 @@ public class ClosedState implements EventState, Serializable {
 	public void onEntry(Event e) {
 		
 		// Invia promemoria agli iscritti
-		String message = String.format(MEMO_NOTIFICATION_MESSAGE, 
-									   CategoryProvider.getProvider().getCategory(e.getCategory()).getName(),
-									   e.getFieldValue(CommonField.DATA_E_ORA),
-									   e.getFieldValue(CommonField.QUOTA_INDIVIDUALE));
-		e.notifySubscribers(message);
+		StringBuilder message = new StringBuilder(String.format(MEMO_NOTIFICATION_MESSAGE, 
+									   							CategoryProvider.getProvider().getCategory(e.getCategory()).getName(),
+									   							e.getFieldValue(CommonField.DATA_E_ORA)));
+		
+		MoneyAmountFieldValue quota = (MoneyAmountFieldValue) e.getFieldValue(CommonField.QUOTA_INDIVIDUALE);
+		if (quota.getValue() > 0.0f) {
+			message.append(String.format(MEMO_NOTIFICATION_MONEY, quota.getValue()));
+		}
+		
+		e.notifySubscribers(message.toString());
 		
 		
 		// Preparo il timer di scadenza della conclusione dell'evento

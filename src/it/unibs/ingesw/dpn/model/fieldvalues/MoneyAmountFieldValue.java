@@ -19,5 +19,9 @@ public class MoneyAmountFieldValue implements FieldValue, Serializable {
 	public String toString() {
 		return String.format("%.2f €", this.value);
 	}
+	
+	public float getValue() {
+		return this.value;
+	}
 
 }
