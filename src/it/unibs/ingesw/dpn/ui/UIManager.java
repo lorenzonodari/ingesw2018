@@ -1,8 +1,6 @@
 package it.unibs.ingesw.dpn.ui;
 
 import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
 import it.unibs.ingesw.dpn.Main;
 import it.unibs.ingesw.dpn.model.ModelManager;
 import it.unibs.ingesw.dpn.model.users.UsersManager;
@@ -16,7 +14,6 @@ import it.unibs.ingesw.dpn.model.events.EventState;
 import it.unibs.ingesw.dpn.model.events.EventFactory;
 import it.unibs.ingesw.dpn.model.fields.CommonField;
 import it.unibs.ingesw.dpn.model.fields.Field;
-import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 
 /**
  * Classe adibita alla gestione dell'interfaccia utente. In particolare, alle istanze
@@ -34,8 +31,7 @@ public class UIManager {
 	private ModelManager model;
 	private UsersManager users;
 	private Menu currentMenu;
-	
-	private FieldValue temporaryFieldValue = null;
+	private EventFactory eventFactory;
 		
 	/**
 	 * Crea un nuovo UIManager utilizzando il renderer dato per la creazione
@@ -57,6 +53,7 @@ public class UIManager {
 		this.model = model;
 		this.users = model.getUsersManager();
 		this.currentMenu = null;
+		this.eventFactory = new EventFactory(renderer, inputManager);
 		
 	}
 	
@@ -397,88 +394,7 @@ public class UIManager {
 		this.currentMenu = eventView;
 			
 	}
-	
-	/**
-	 * Crea il menu per la creazione dell'evento.
-	 * 
-	 * @param category La categoria dell'evento
-	 * @param fieldValues Le coppie <Campo, Valore> inizializzate finora.
-	 */
-	public void createEventMenu(CategoryEnum category, Map<Field, FieldValue> fieldValues) {
-		
-		// Callback per abortire la creazione dell'evento
-		MenuAction abortAction = () -> {this.boardMenu();};
-		
-		String title = String.format("Creazione di un evento: %s", CategoryProvider.getProvider().getCategory(category).getName());
-		Menu createEventMenu = new Menu(title, "Seleziona i campi dell'evento che vuoi impostare. \nI campi contrassegnati dall'asterisco (*) sono obbligatori.\nQuando avrai completato tutti i campi obbligatori seleziona \"Conferma\".", "Annulla la creazione e torna al menu principale", abortAction);
-		
-		// Verifico se tutti i campi obbligatori sono stati compilati
-		boolean checkMandatoryFieldsFlag = true;
-		
-		List<Field> fields = CategoryProvider.getProvider().getCategory(category).getFields();
-		
-		for (Field f : fields) {
-			
-			/* Azione relativa ad un'opzione */
-			MenuAction fieldAction = () -> {
-				// Acquisisco il campo
-				acquireFieldValueSubmenu(f, fieldValues);
-				// Salvo il nuovo valore nella mappa
-				fieldValues.put(f, this.temporaryFieldValue);
-				// Creo il nuovo menu aggiornato
-				this.createEventMenu(category, fieldValues);
-				};
-			
-			/* Stringa relativa ad un'opzione */
-			String fieldValueString;
-			if (fieldValues.get(f) != null) {
-				fieldValueString = fieldValues.get(f).toString();
-			} else {
-				fieldValueString = "- - - - -";
-				
-				// Inoltre, setto il controllo del completamento di tutti i campi obbligatori a "false"
-				if (f.isMandatory()) {
-					checkMandatoryFieldsFlag = false;
-				}
-			}
-			
-			// Creo la entry
-			String entryTitle = String.format(
-					"%-50s : %s",
-					f.getName() + ((f.isMandatory()) ? " (*)" : ""),
-					fieldValueString);
-			createEventMenu.addEntry(entryTitle, fieldAction);
-			
-		}
-		
-		if (checkMandatoryFieldsFlag) {
-			createEventMenu.addEntry("Crea e pubblica l'evento", () -> {
-				EventFactory factory = EventFactory.getFactory();
-				Event newEvent = factory.createEvent(this.users.getCurrentUser(), category, fieldValues);
-				
-				this.model.getEventBoard().addEvent(newEvent, users.getCurrentUser());
-				
-				MenuAction toHomeAction = () -> {this.mainMenu();};
-				this.dialog("Pubblicazione completata", "L'evento è stato creato e pubblicato correttamente.\nSei stato iscritto/a in automatico al tuo evento.", "Torna al menu principale", toHomeAction);
-			});
-		}
-		
-		this.currentMenu = createEventMenu;
-	}
-	
-	/**
-	 * Crea il sottomenu del menu di creazione di un evento utilizzato per acquisire il valore di 
-	 * un dato Field di un evento, lo presenta all'utente e memorizza il dato acquisito all'interno 
-	 * dell'attributo "temporaryFieldValue".
-	 *
-	 * @param field Il campo di cui si vuole acquisire il valore
-	 */
-	private void acquireFieldValueSubmenu(Field field, Map<Field, FieldValue> partialValues) {
-		
-		this.temporaryFieldValue = (FieldValue) field.acquireFieldValue(renderer, inputManager, partialValues);
-		
-	}
-	
+
 	/**
 	 * Permette la selezione di una categoria per la creazione di un evento.
 	 */
@@ -487,26 +403,84 @@ public class UIManager {
 		// Callback indietro
 		MenuAction backAction = () -> {this.boardMenu();};
 		
-		Menu categorySelector = new Menu("Selezione della categoria", "Seleziona la categoria, fra quelle disponibili, in cui rientra l'evento che vuoi creare", Menu.BACK_ENTRY_TITLE, backAction);
+		Menu categorySelector = new Menu(
+				"Selezione della categoria", 
+				"Seleziona la categoria, fra quelle disponibili, in cui rientra l'evento che vuoi creare", 
+				Menu.BACK_ENTRY_TITLE, 
+				backAction);
 		
 		// Callback categorie
 		for (CategoryEnum category : CategoryEnum.values()) {
 			
 			Category completeCategory = CategoryProvider.getProvider().getCategory(category);
 			
-			HashMap<Field, FieldValue> map = new HashMap<>();
+			// Per ciascuna categoria, l'azione corrispondente consiste nell'attivazione della factory
+			// (Con il creatore e la categoria opportuni) e nell'invocazione di "createEventMenu"
 			MenuAction categorySelectionAction = () -> {
-				// Preparo una Map vuota per memorizzare i parametri di creazione dell'evento
-				for (Field f : completeCategory.getFields()) {
-					map.put(f, null);
+				this.eventFactory.startCreation(this.users.getCurrentUser(), category);
+				this.createEventMenu();
 				};
-				this.createEventMenu(category, map);};
+				
 			categorySelector.addEntry(completeCategory.getName(), categorySelectionAction);
 			
 		}
 				
 		this.currentMenu = categorySelector;
 		
+	}
+	
+	/**
+	 * Crea il menu per la creazione dell'evento.
+	 * Il menu è composto da varie entries, ciascuna delle quali permette l'acquisizione di un campo 
+	 * relativo all'evento che si intende creare.
+	 */
+	public void createEventMenu() {
+		
+		// Callback per abortire la creazione dell'evento
+		MenuAction abortAction = () -> {this.boardMenu();};
+		
+		String title = String.format("Creazione di un evento: %s", this.eventFactory.getProvisionalCategoryName());
+		Menu createEventMenu = new Menu(title, "Seleziona i campi dell'evento che vuoi impostare. \nI campi contrassegnati dall'asterisco (*) sono obbligatori.\nQuando avrai completato tutti i campi obbligatori seleziona \"Conferma\".", "Annulla la creazione e torna al menu principale", abortAction);
+				
+		// Ciclo su tutti i campi previsti per la categoria dell'evento che voglio creare
+		for (Field f : this.eventFactory.getProvisionalCategoryFields()) {
+			
+			/* Azione relativa ad un'opzione */
+			MenuAction fieldAction = () -> {
+				this.eventFactory.acquireFieldValue(f);
+				// Creo il nuovo menu aggiornato
+				this.createEventMenu();
+				};
+			
+			// Creo la entry
+			String entryTitle = String.format(
+					"%-50s : %s",
+					f.getName() + ((f.isMandatory()) ? " (*)" : ""),
+					this.eventFactory.getProvisionalFieldValueString(f));
+			createEventMenu.addEntry(entryTitle, fieldAction);
+			
+		}
+		
+		// Verifico che tutti i campi obbligatori siano stati acquisiti
+		if (this.eventFactory.verifyMandatoryFields()) {
+			createEventMenu.addEntry("Crea e pubblica l'evento", () -> {
+				
+				// Termino la creazione dell'evento
+				Event newEvent = this.eventFactory.finalizeCreation();
+				
+				// Aggiungo l'evento alla bacheca
+				this.model.getEventBoard().addEvent(newEvent, users.getCurrentUser());
+				
+				MenuAction toHomeAction = () -> {this.mainMenu();};
+				this.dialog(
+						"Pubblicazione completata", 
+						"L'evento è stato creato e pubblicato correttamente.\nSei stato iscritto/a in automatico al tuo evento.", 
+						"Torna al menu principale", 
+						toHomeAction);
+			});
+		}
+		
+		this.currentMenu = createEventMenu;
 	}
 	
 }
