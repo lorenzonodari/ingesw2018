@@ -52,8 +52,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	private static final String STATE_CHANGE_LOG = "L'evento \"%s\" ha cambiato il suo stato in: %s";
 	private static final String EVENT_SUBSCRIPTION_MESSAGE = "Ti sei iscritto/a all'evento \"%s\"";
 	private static final String EVENT_CREATION_MESSAGE = "Hai creato l'evento \"%s\"";
-	private static final String EVENT_STATE_CHANGE_MESSAGE = "L'evento \"%s\" a cui sei iscritto/a ha cambiato il suo stato in: %s";
-
+	
 	/** Strategie per il confronto di eventi */
 	public enum ComparingMethod {
 		BY_DATE,
@@ -82,7 +81,6 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * Tale costruttore (o meglio, i costruttori delle classi figlie che fanno affidamento su
 	 * questo costruttore di Event) dovrà essere chiamato da una classe apposita, la cui responsabilità 
 	 * principale sarà creare gli eventi nella maniera prevista dal programma.
-	 * L'utente creatore dell'evento è iscritto automaticamente all'evento e alla relativa mailing list.
 	 * 
 	 * Precondizione: il creatore dell'evento non deve essere un valore nullo. In questo caso verrebbe lanciata un'eccezione.
 	 * 
@@ -92,15 +90,15 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * Precondizione: i valori dei campi devono essere uguali come numero e come tipo ai campi
 	 * previsti dalla categoria. Questo viene garantito dalla classe adibita alla creazione degli eventi.
 	 * 
-	 * Postcondizione: il creatore dell'evento è iscritto automaticamente alla mailing list dell'evento.
-	 * Da questo momento riceverà in automatico i messaggi di aggiornamento sull'evento.
+	 * Postcondizione: il creatore dell'evento NON è iscritto automaticamente alla mailing list dell'evento.
+	 * E' necessario chiamare il metodo "subscribe" per confermare l'iscrizione, ma solamente DOPO aver pubblicato l'evento.
 	 * 
 	 * @param creator L'utente {@link User} creatore dell'evento
 	 * @param category la categoria prescelta
 	 * @param fieldValues le coppie (campo-valore) dell'evento
 	 */
 	public Event(User creator, CategoryEnum category, Map<Field, FieldValue> fieldValues) {
-		
+		// Verifico che i parametri non siano nulli
 		if (creator == null || category == null || fieldValues == null) {
 			throw new IllegalArgumentException(NULL_ARGUMENT_EXCEPTION);
 		}
@@ -110,7 +108,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		this.category = category;
 		this.valuesMap = fieldValues;
 		
-		// Inizializzo alcuni campi a valori di default
+		// Imposto i valori di default per alcuni campi che non sono stati inizializzati
 		this.setDefaultFieldValues();
 		
 		// Preparo l'oggetto EventHistory che terrà traccia dei cambiamenti di stato
@@ -125,11 +123,8 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		// Comunico all'utente che ha creato l'evento
 		this.creator.getMailbox().deliver(new Notification(
 				String.format(EVENT_CREATION_MESSAGE, this.valuesMap.get(CommonField.TITOLO))
-				));
-		// Iscrivo il creatore all'evento
-		this.subscribe(this.creator);
-		
-	}
+				));		
+}
 	
 	/**
 	 * Imposta il valore id default di alcuni campi.
