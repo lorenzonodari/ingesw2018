@@ -24,24 +24,28 @@ public class EventBoard implements Serializable {
 	private HashMap<Event, List<User>> eventMap = new HashMap<Event, List<User>>();
 	
 	/**
-	 * Aggiunge un evento alla lista della bacheca 
+	 * Aggiunge un evento alla lista della bacheca, pubblicandolo e rendendolo visibile a tutti.
+	 * Inoltre, iscrive all'evento lo stesso creatore in maniera automatica.
 	 * 
-	 * Precondizione : evento non deve essere un null 
-	 * @param Evento da aggiungere alla bacheca
+	 * Precondizione : L' evento non deve essere nullo. 
+	 * 
+	 * @param event L'evento da aggiungere alla bacheca
+	 * @param creator Il creatore dell'evento
 	 */
 	public void addEvent(Event event, User creator) {
 		// verifica precondizione
 		if (event == null) {
 			throw new IllegalStateException();
 		}
-		
+		// Prepara la lista di iscritti per il nuovo evento
 		ArrayList<User> subscribers = new ArrayList<>();
-		subscribers.add(creator);
-		
 		eventMap.put(event, subscribers);
 		
 		// Comunica all'evento che è stato pubblicato
 		event.publish();
+		
+		// Iscrive il creatore dell'evento
+		this.addSubscription(event, creator);
 		
 	}
 	
@@ -119,10 +123,6 @@ public class EventBoard implements Serializable {
 		
 		eventMap.get(event).add(subscription);
 		event.subscribe(subscription);
-		
-		// TODO 
-		// Aggiungere utente alla mailbox
-//		event.subscribe(subscription);
 		
 	}
 	/**

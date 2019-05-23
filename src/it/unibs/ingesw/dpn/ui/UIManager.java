@@ -337,13 +337,14 @@ public class UIManager {
 	 * Crea un generico menu di dialogo e lo rende il menu corrente. Tali menu sono utilizzati
 	 * per presentare semplici messaggi di conferma o avviso all'utente
 	 * 
-	 * @param dialog Il messaggio da presentare all'utente
-	 * @param backTitle Il nome dell'opzione di uscita
+	 * @param dialogTitle Il messaggio da presentare all'utente, o il titolo del messaggio se questo è più lungo
+	 * @param dialogDescription La descrizione (facoltativa) del menu di dialogo
+	 * @param backOption Il nome dell'opzione di uscita
 	 * @param backAction L'azione da compiere all'uscita dal menu
 	 */
-	public void dialog(String dialog, String backTitle, MenuAction backAction) {
+	public void dialog(String dialogTitle, String dialogDescription, String backOption, MenuAction backAction) {
 		
-		Menu dialogMenu = new Menu (dialog, null, backTitle, backAction);
+		Menu dialogMenu = new Menu (dialogTitle, dialogDescription, backOption, backAction);
 		this.currentMenu = dialogMenu;
 			
 	}
@@ -362,11 +363,11 @@ public class UIManager {
 		MenuAction subscriptionAction = () -> {
 			MenuAction dialogBackAction = () -> {this.eventMenu(event);};
 			model.getEventBoard().addSubscription(event, model.getUsersManager().getCurrentUser());
-			this.dialog("Iscrizione effettuata correttamente", Menu.BACK_ENTRY_TITLE, dialogBackAction);
+			this.dialog("Iscrizione effettuata correttamente", null, Menu.BACK_ENTRY_TITLE, dialogBackAction);
 			
 		};
 		
-		Menu eventMenu = new Menu("Azioni su evento", event.toString(), Menu.BACK_ENTRY_TITLE, backAction);
+		Menu eventMenu = new Menu("Visualizzazione evento", event.toString(), Menu.BACK_ENTRY_TITLE, backAction);
 		if(model.getEventBoard().verifySubscription(event, model.getUsersManager().getCurrentUser()))
 			eventMenu.addEntry("Iscriviti all'evento", subscriptionAction);
 		
@@ -450,14 +451,14 @@ public class UIManager {
 		}
 		
 		if (checkMandatoryFieldsFlag) {
-			createEventMenu.addEntry("Conferma", () -> {
+			createEventMenu.addEntry("Crea e pubblica l'evento", () -> {
 				EventFactory factory = EventFactory.getFactory();
 				Event newEvent = factory.createEvent(this.users.getCurrentUser(), category, fieldValues);
 				
 				this.model.getEventBoard().addEvent(newEvent, users.getCurrentUser());
 				
 				MenuAction toHomeAction = () -> {this.mainMenu();};
-				this.dialog("Evento creato correttamente", "Torna al menu principale", toHomeAction);
+				this.dialog("Pubblicazione completata", "L'evento è stato creato e pubblicato correttamente.\nSei stato iscritto/a in automatico al tuo evento.", "Torna al menu principale", toHomeAction);
 			});
 		}
 		
