@@ -1,6 +1,7 @@
 package it.unibs.ingesw.dpn.model.events;
 
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Timer;
 
@@ -41,10 +42,17 @@ public class ClosedState implements EventState, Serializable {
 		this.endingTimer = new Timer(TIMER_NAME + e.hashCode(), true);
 		
 		// Ricavo la data della conclusione dell'evento
+		// La data deve essere quella del giorno successivo, allo scoccare della mezzanotte
 		Date endingDate = (Date) e.getFieldValue(CommonField.DATA_E_ORA_CONCLUSIVE);
+		Calendar cal = Calendar.getInstance();
+        cal.setTime(endingDate);
+        cal.add(Calendar.DATE, 1); 		// Aggiungo un giorno alla data
+        cal.set(Calendar.HOUR, 0); 		// Imposto la data a mezzanotte
+        cal.set(Calendar.MINUTE, 0); 	// Imposto la data a mezzanotte
+        Date timerDate = cal.getTime();
 		
 		// Schedulo il cambiamento di stato da CLOSED a ENDED
-		EventState.scheduleStateChange(e, EventState.ENDED, endingTimer, endingDate);
+		EventState.scheduleStateChange(e, EventState.ENDED, endingTimer, timerDate);
 		
 	}
 

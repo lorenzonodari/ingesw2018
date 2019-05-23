@@ -106,20 +106,12 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		}
 		
 		// Inizializzo gli attributi della classe
+		this.creator = creator;
 		this.category = category;
 		this.valuesMap = fieldValues;
 		
-		// Fornisco all'evento un Titolo di default, se non è presente un altro titolo
-		if (this.valuesMap.get(CommonField.TITOLO) == null) {
-			StringBuilder title = new StringBuilder();
-			Category eventCategory = CategoryProvider.getProvider().getCategory(this.category);
-			
-			title.append(eventCategory.getName());
-			title.append(" del ");
-			title.append(this.valuesMap.get(CommonField.DATA_E_ORA));
-			
-			this.valuesMap.put(CommonField.TITOLO, new StringFieldValue(title.toString()));
-		}
+		// Inizializzo alcuni campi a valori di default
+		this.setDefaultFieldValues();
 		
 		// Preparo l'oggetto EventHistory che terrà traccia dei cambiamenti di stato
 		this.history = new EventHistory();
@@ -130,14 +122,38 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		// A questo punto posso settare lo stato come "valido".
 		this.setState(new ValidState());
 
-		// Imposto il creatore dell'evento
-		this.creator = creator;
 		// Comunico all'utente che ha creato l'evento
 		this.creator.getMailbox().deliver(new Notification(
 				String.format(EVENT_CREATION_MESSAGE, this.valuesMap.get(CommonField.TITOLO))
 				));
 		// Iscrivo il creatore all'evento
 		this.subscribe(this.creator);
+		
+	}
+	
+	/**
+	 * Imposta il valore id default di alcuni campi.
+	 * Questo metodo viene chiamato dal costruttore e racchiude tutte le procedure che impostano
+	 * i valori dei campi facoltativi utilizzati nel programma.
+	 */
+	private void setDefaultFieldValues() {
+
+		// TITOLO
+		// Valore di default = "<nomeCategoria> del <dataEvento>"
+		if (this.valuesMap.get(CommonField.TITOLO) == null) {
+			Category eventCategory = CategoryProvider.getProvider().getCategory(this.category);
+			this.valuesMap.put(CommonField.TITOLO, new StringFieldValue(String.format(
+					"%s del %s",
+					eventCategory.getName(),
+					this.valuesMap.get(CommonField.DATA_E_ORA))));
+		}
+		
+		// DATA E ORA CONCLUSIVE
+		// Valore di default = valore di "DATA E ORA"
+		if (this.valuesMap.get(CommonField.DATA_E_ORA_CONCLUSIVE) == null) {
+			FieldValue defaultvalue = this.valuesMap.get(CommonField.DATA_E_ORA);
+			this.valuesMap.put(CommonField.DATA_E_ORA_CONCLUSIVE, defaultvalue);
+		}
 		
 	}
 	
