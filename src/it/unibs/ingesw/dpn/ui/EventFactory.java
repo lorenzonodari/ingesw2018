@@ -1,5 +1,6 @@
 package it.unibs.ingesw.dpn.ui;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,8 +10,16 @@ import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
 import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
 import it.unibs.ingesw.dpn.model.events.Event;
 import it.unibs.ingesw.dpn.model.events.SoccerMatchEvent;
+import it.unibs.ingesw.dpn.model.fields.CommonField;
 import it.unibs.ingesw.dpn.model.fields.Field;
+import it.unibs.ingesw.dpn.model.fields.SoccerMatchField;
+import it.unibs.ingesw.dpn.model.fieldvalues.DateFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
+import it.unibs.ingesw.dpn.model.fieldvalues.GenderEnumFieldValue;
+import it.unibs.ingesw.dpn.model.fieldvalues.IntegerFieldValue;
+import it.unibs.ingesw.dpn.model.fieldvalues.IntegerIntervalFieldValue;
+import it.unibs.ingesw.dpn.model.fieldvalues.MoneyAmountFieldValue;
+import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
 import it.unibs.ingesw.dpn.model.users.User;
 
 /**
@@ -45,6 +54,7 @@ public class EventFactory {
 	
 	/** Stringhe */
 	private static final String EMPTY_FIELDVALUE_STRING = "- - - - -";
+	private static final String CREATION_MODE_OFF_EXCEPTION = "Impossibile acquisire dati se non è stata inizializzata la creazione di un nuovo evento";
 	
 
 	/**
@@ -114,7 +124,7 @@ public class EventFactory {
 	public void acquireFieldValue(Field field) {
 		// Verifico di essere in modalità "creazione di un nuovo evento"
 		if (!creationOn) {
-			throw new IllegalStateException("Impossibile acquisire dati se non è stata inizializzata la creazione di un nuovo evento");
+			throw new IllegalStateException(CREATION_MODE_OFF_EXCEPTION);
 		}
 		
 		// Verifico che il parametro non sia null
@@ -122,7 +132,40 @@ public class EventFactory {
 			throw new IllegalArgumentException("Parametro nullo: impossibile acquisire un dato senza specificare il campo");
 		}
 		
-		FieldValue value = field.acquireFieldValue(this.renderer, this.getter, this.provisionalFieldValues);
+		// Prompt e interazione con l'utente
+		renderer.renderLineSpace();
+		renderer.renderText(String.format(
+				" ### %-50s",
+				field.getName().toUpperCase()));
+		renderer.renderText(String.format(
+				" ### %s",
+				field.getDescription()));
+		renderer.renderLineSpace();
+		
+		// Acquisizione del dato, basata su Field
+		FieldValue value = null;
+		
+		/*
+		 * Nota: a differenza della versione 2, nella quale viene utilizzato il polimorfismo per
+		 * l'acquisizione dei valori FieldValue, dalla versione 3 si è deciso di rinunciare ad 
+		 * esso in favore di una più netta separazione fra le classi che rappresentano dei "dati" 
+		 * e le classi che si occupano della loro acquisizione o stampa.
+		 */
+		
+		// Campi comuni a tutte le categorie
+		if (field instanceof CommonField) {
+			value = acquireCommonFieldValue((CommonField) field);
+			
+		// Campi esclusivi della categoria "SoccerMatchField"
+		} else if (field instanceof SoccerMatchField) {
+			value = acquireSoccerMatchFieldValue((SoccerMatchField) field);
+			
+		// Campi estranei
+		} else {
+			throw new IllegalArgumentException("Campo \"Field\" non riconosciuto: impossibile acquisire un valore");
+		}
+		
+		// Aggiungo il dato acquisito alla mappa di valori provvisori
 		this.provisionalFieldValues.put(field, value);
 	}
 	
@@ -138,7 +181,7 @@ public class EventFactory {
 	public boolean verifyMandatoryFields() {
 		// Verifico di essere in modalità "creazione di un nuovo evento"
 		if (!creationOn) {
-			throw new IllegalStateException("Impossibile acquisire dati se non è stata inizializzata la creazione di un nuovo evento");
+			throw new IllegalStateException(CREATION_MODE_OFF_EXCEPTION);
 		}
 		
 		// Verifico tutti i campi
@@ -164,16 +207,27 @@ public class EventFactory {
 	public Map<Field, FieldValue> getProvisionalFieldValues() {
 		// Verifico di essere in modalità "creazione di un nuovo evento"
 		if (!creationOn) {
-			throw new IllegalStateException("Impossibile acquisire dati se non è stata inizializzata la creazione di un nuovo evento");
+			throw new IllegalStateException(CREATION_MODE_OFF_EXCEPTION);
 		}
 		
 		return this.provisionalFieldValues;
 	}
 	
+	/**
+	 * Restituisce un valore testuale per la visualizzazione del valore del campo.
+	 * Nel caso in cui il campo non sia ancora stato inizializzato, viene restituita una stringa di 
+	 * default "- - - - -".
+	 * 
+	 * Precondizione: la factory deve essere in modalità "creazione", ossia deve essere stato chiamato in precedenza
+	 * il metodo "startCreation".
+	 * 
+	 * @param f Il campo di cui si vuole ottenere il valore come stringa
+	 * @return Un testo rappresentante il valore del campo richiesto
+	 */
 	public String getProvisionalFieldValueString(Field f) {
 		// Verifico di essere in modalità "creazione di un nuovo evento"
 		if (!creationOn) {
-			throw new IllegalStateException("Impossibile acquisire dati se non è stata inizializzata la creazione di un nuovo evento");
+			throw new IllegalStateException(CREATION_MODE_OFF_EXCEPTION);
 		}
 		
 		FieldValue value = this.provisionalFieldValues.get(f);
@@ -197,7 +251,7 @@ public class EventFactory {
 	public String getProvisionalCategoryName() {
 		// Verifico di essere in modalità "creazione di un nuovo evento"
 		if (!creationOn) {
-			throw new IllegalStateException("Impossibile acquisire dati se non è stata inizializzata la creazione di un nuovo evento");
+			throw new IllegalStateException(CREATION_MODE_OFF_EXCEPTION);
 		}
 		
 		return this.provisionalCategoryName;
@@ -216,7 +270,7 @@ public class EventFactory {
 	public List<Field> getProvisionalCategoryFields() {
 		// Verifico di essere in modalità "creazione di un nuovo evento"
 		if (!creationOn) {
-			throw new IllegalStateException("Impossibile acquisire dati se non è stata inizializzata la creazione di un nuovo evento");
+			throw new IllegalStateException(CREATION_MODE_OFF_EXCEPTION);
 		}
 		
 		return this.provisionalCategoryFields;
@@ -236,7 +290,7 @@ public class EventFactory {
 	public Event finalizeCreation() {
 		// Verifico di essere in modalità "creazione di un nuovo evento"
 		if (!creationOn) {
-			throw new IllegalStateException("Impossibile acquisire dati se non è stata inizializzata la creazione di un nuovo evento");
+			throw new IllegalStateException(CREATION_MODE_OFF_EXCEPTION);
 		}
 		
 		// Creo un nuovo oggetto Event sulla base della categoria
@@ -260,6 +314,258 @@ public class EventFactory {
 		
 		// Restituisco l'evento
 		return newEvent;
+	}
+
+	/* METODI PRIVATI DI UTILITA' */
+
+	/**
+	 * Metodo che acquisisce e restituisce il valore di un campo "CommonField".
+	 * 
+	 * Precondizione: Il campo che si vuole acquisire deve essere contenuto nell'enum {@link CommonField},
+	 * ossia deve essere comune a tutte le categorie.
+	 * 
+	 * @param field Il campo di cui si vuole acquisire il valore
+	 * @return
+	 */
+	private FieldValue acquireCommonFieldValue(CommonField field) {
+		switch (field) {
+		
+		case TITOLO :
+		{
+			return StringFieldValue.acquireValue(renderer, getter);
+		}
+			
+		case LUOGO :
+		{
+			return StringFieldValue.acquireValue(renderer, getter);
+		}
+			
+		case DATA_E_ORA : 
+		{
+			boolean okFlag = false;
+			DateFieldValue acquiredDate = null;
+			do {
+				acquiredDate = DateFieldValue.acquireValue(renderer, getter);
+				// Verifico che la data dell'evento sia posteriore alla creazione
+				if (acquiredDate.before(new Date())) {
+					renderer.renderError("Inserire una data futura");
+				} else if (isAfterOrEqualToDateField(acquiredDate, CommonField.DATA_E_ORA_CONCLUSIVE)) {
+					renderer.renderError("Data d'inizio posteriore alla data conclusiva dell'evento");
+				} else if (isBeforeOrEqualToDateField(acquiredDate, CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE)) {
+					renderer.renderError("Data d'inizio precedente al termine ultimo di iscrizione");
+				} else if (isBeforeOrEqualToDateField(acquiredDate, CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE)) {
+					renderer.renderError("Data d'inizio precedente al termine ultimo di ritiro iscrizione");
+				} else {
+					okFlag = true;
+				}
+			} while (!okFlag);
+			return acquiredDate;
+		}
+			
+		case DATA_E_ORA_CONCLUSIVE : 
+		{
+			boolean okFlag = false;
+			DateFieldValue acquiredDate = null;
+			do {
+				acquiredDate = DateFieldValue.acquireValue(renderer, getter);
+				// Verifico che la data dell'evento sia posteriore alla creazione
+				if (acquiredDate.before(new Date())) {
+					renderer.renderError("Inserire una data futura");
+				} else if (isBeforeOrEqualToDateField(acquiredDate, CommonField.DATA_E_ORA)) {
+					renderer.renderError("Data di conclusione precedente alla data d'inizio dell'evento");
+				} else if (isBeforeOrEqualToDateField(acquiredDate, CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE)) {
+					renderer.renderError("Data di conclusione precedente al termine ultimo di iscrizione");
+				} else if (isBeforeOrEqualToDateField(acquiredDate, CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE)) {
+					renderer.renderError("Data di conclusione precedente al termine ultimo di ritiro iscrizione");
+				} else {
+					okFlag = true;
+				}
+			} while (!okFlag);
+			return acquiredDate;
+		}
+		
+		case DURATA : 
+		{
+			renderer.renderText("Inserisci il valore numerico della durata");
+			return new IntegerFieldValue(getter.getInteger(0, Integer.MAX_VALUE));
+		}
+		
+		case TERMINE_ULTIMO_DI_ISCRIZIONE : 
+		{
+			boolean okFlag = false;
+			DateFieldValue acquiredDate = null;
+			do {
+				acquiredDate = DateFieldValue.acquireValue(renderer, getter);
+				// Verifico che la data dell'evento sia posteriore alla creazione
+				if (acquiredDate.before(new Date())) {
+					renderer.renderError("Inserire una data futura");
+				} else if (isAfterOrEqualToDateField(acquiredDate, CommonField.DATA_E_ORA)) {
+					renderer.renderError("Termine ultimo d'iscrizione posteriore alla data d'inizio dell'evento");
+				} else if (isAfterOrEqualToDateField(acquiredDate, CommonField.DATA_E_ORA_CONCLUSIVE)) {
+					renderer.renderError("Termine ultimo d'iscrizione posteriore alla data di conclusione dell'evento");
+				} else if (isBeforeOrEqualToDateField(acquiredDate, CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE)) {
+					renderer.renderError("Termine ultimo d'iscrizione precedente al termine ultimo di ritiro iscrizione");
+				} else {
+					okFlag = true;
+				}
+			} while (!okFlag);
+			return acquiredDate;
+		}
+		
+		case TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE : 
+		{
+			boolean okFlag = false;
+			DateFieldValue acquiredDate = null;
+			do {
+				acquiredDate = DateFieldValue.acquireValue(renderer, getter);
+				// Verifico che la data dell'evento sia posteriore alla creazione
+				if (acquiredDate.before(new Date())) {
+					renderer.renderError("Inserire una data futura");
+				} else if (isAfterOrEqualToDateField(acquiredDate, CommonField.DATA_E_ORA)) {
+					renderer.renderError("Termine ultimo di ritiro iscrizione posteriore alla data d'inizio dell'evento");
+				} else if (isAfterOrEqualToDateField(acquiredDate, CommonField.DATA_E_ORA_CONCLUSIVE)) {
+					renderer.renderError("Termine ultimo di ritiro iscrizione posteriore alla data di conclusione dell'evento");
+				} else if (isAfterOrEqualToDateField(acquiredDate, CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE)) {
+					renderer.renderError("Termine ultimo di ritiro iscrizione posteriore al termine ultimo d'iscrizione");
+				} else {
+					okFlag = true;
+				}
+			} while (!okFlag);
+			return acquiredDate;
+		}
+		
+		case NUMERO_DI_PARTECIPANTI : 
+		{
+			renderer.renderText("Inserisci il numero di partecipanti (almeno 2)");
+			return new IntegerFieldValue(getter.getInteger(2, Integer.MAX_VALUE));
+		}
+			
+		case TOLLERANZA_NUMERO_DI_PARTECIPANTI : 
+		{
+			renderer.renderText("Inserisci la tolleranza massima sul numero di partecipanti");
+			return new IntegerFieldValue(getter.getInteger(0, Integer.MAX_VALUE));
+		}
+			
+		case QUOTA_INDIVIDUALE : 
+		{
+			renderer.renderText("Inserisci il costo di partecipazione");
+			return new MoneyAmountFieldValue(getter.getFloat(0, Float.MAX_VALUE));
+		}
+			
+		case COMPRESO_NELLA_QUOTA : 
+		{
+			return StringFieldValue.acquireValue(renderer, getter);
+		}
+			
+		case NOTE : 
+		{
+			return StringFieldValue.acquireValue(renderer, getter);
+		}
+
+		}
+		
+		// Se non matcho nulla
+		throw new IllegalArgumentException("Il campo non corrisponde ad alcun campo comune a tutte le categorie");
+	}
+	
+
+	/**
+	 * Metodo che acquisisce e restituisce il valore di un campo "CommonField".
+	 * 
+	 * Precondizione: Il campo che si vuole acquisire deve essere contenuto nell'enum {@link CommonField},
+	 * ossia deve essere comune a tutte le categorie.
+	 * 
+	 * @param field Il campo di cui si vuole acquisire il valore
+	 * @return
+	 */
+	private FieldValue acquireSoccerMatchFieldValue(SoccerMatchField field) {
+		switch (field) {
+		
+		case GENERE :
+		{
+			GenderEnumFieldValue [] values = GenderEnumFieldValue.values();
+			int i = 1;
+			for (GenderEnumFieldValue gender : values) {
+				renderer.renderText(String.format("%3d)\t%s", 
+						i++, gender.toString()));
+			}
+			int input = getter.getInteger(1, values.length);
+			return values[input - 1];
+		}
+			
+		case FASCIA_DI_ETA :
+		{
+
+			IntegerIntervalFieldValue value = null;
+			boolean check = false;
+			do {
+				renderer.renderText("Inserisci il valore minimo");
+				int min = getter.getInteger(0, Integer.MAX_VALUE);
+				renderer.renderText("Inserisci il valore massimo");
+				int max = getter.getInteger(0, Integer.MAX_VALUE);
+				
+				if (min <= max) {
+					value = new IntegerIntervalFieldValue(min, max);
+					check = true;
+				} else {
+					renderer.renderError("Inserire un valore minimo inferiore al valore massimo");
+				}
+			} while (!check);
+			return value;
+		}
+		
+		}
+		
+		// Se non matcho nulla
+		throw new IllegalArgumentException("Il campo non corrisponde ad alcun campo della categoria \"Partita di calcio\"");
+	}
+
+	/**
+	 * Verifica che una certa data sia successiva o al più uguale al valore temporale contenuto in un campo specificato.
+	 * Se il campo non contiene valore, restituisce false.
+	 * Se il campo non ha valore di tipo {@link DateFieldValue}, restituisce un'eccezione.
+	 * (Essendo un metodo privato, è compito della classe stessa assicurarsi che l'eccezione non si verifichi).
+	 * 
+	 * @param date La data da analizzare
+	 * @param comparingDateField Il campo da cui estrarre il valore (di tipo "data") con cui effettuare il confronto
+	 * @return true se il valore del campo ESISTE && se la data è SUCCESSIVA o CONTEMPORANEA.
+	 */
+	private boolean isAfterOrEqualToDateField(DateFieldValue date, Field comparingDateField) {
+		// Verifico che il campo abbia un tipo "data"
+		if (comparingDateField.getType() != DateFieldValue.class) {
+			throw new IllegalArgumentException("Impossibile interpretare il campo come data o istante temporale");
+		}
+		
+		return (
+				// Verifico che il valore del campo di comparazione sia presente
+				this.provisionalFieldValues.get(comparingDateField) != null && 
+				// Verifico che la data da controllare sia successiva o contemporanea al valore del campo
+				date.compareTo((Date) provisionalFieldValues.get(comparingDateField)) >= 0
+				);
+	}
+
+	/**
+	 * Verifica che una certa data sia precendte o al più uguale al valore temporale contenuto in un campo specificato.
+	 * Se il campo non contiene valore, restituisce false.
+	 * Se il campo non ha valore di tipo {@link DateFieldValue}, restituisce un'eccezione.
+	 * (Essendo un metodo privato, è compito della classe stessa assicurarsi che l'eccezione non si verifichi).
+	 * 
+	 * @param date La data da analizzare
+	 * @param comparingDateField Il campo da cui estrarre il valore (di tipo "data") con cui effettuare il confronto
+	 * @return true se il valore del campo ESISTE && se la data è PRECENDENTE o CONTEMPORANEA.
+	 */
+	private boolean isBeforeOrEqualToDateField(DateFieldValue date, Field comparingDateField) {
+		// Verifico che il campo abbia un tipo "data"
+		if (comparingDateField.getType() != DateFieldValue.class) {
+			throw new IllegalArgumentException("Impossibile interpretare il campo come data o istante temporale");
+		}
+		
+		return (
+				// Verifico che il valore del campo di comparazione sia presente
+				this.provisionalFieldValues.get(comparingDateField) != null && 
+				// Verifico che la data da controllare sia successiva o contemporanea al valore del campo
+				date.compareTo((Date) provisionalFieldValues.get(comparingDateField)) <= 0
+				);
 	}
 	
 }

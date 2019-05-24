@@ -1,10 +1,6 @@
 package it.unibs.ingesw.dpn.model.fields;
 
-import java.util.Map;
-
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
-import it.unibs.ingesw.dpn.ui.InputGetter;
-import it.unibs.ingesw.dpn.ui.UIRenderer;
 
 /**
  * L'interfaccia "Field" rappresenta un campo di una categoria all'interno del modello concettuale del progetto.
@@ -14,15 +10,7 @@ import it.unibs.ingesw.dpn.ui.UIRenderer;
  * @author Michele Dusi, Lorenzo Nodari, Emanuele Poggi
  * 
  */
-public interface Field {	
-	
-	/**
-	 * Interfaccia funzionale per acquisire un valore del tipo specifico.
-	 */
-	@FunctionalInterface
-	public interface FieldValueAcquirer {
-		public FieldValue acquireFieldValue(UIRenderer renderer, InputGetter getter, Map<Field, FieldValue> partialValues);
-	};
+public interface Field {
 
 	/**
 	 * Restituisce il nome dell'oggetto Field.
@@ -51,16 +39,5 @@ public interface Field {
 	 * @return il "tipo" del campo
 	 */
 	public Class<? extends FieldValue> getType();
-	
-	/**
-	 * Metodo "controller" che si occupa, attraverso l'interazione con un Renderer ed un Getter,
-	 * di acquisire dall'utente un valore valido per il campo.
-	 * Ad esempio, se il campo avesse come tipo "String", questo metodo acquisisce una stringa dall'utente.
-	 * 
-	 * @param renderer Un'istanza di UIRenderer per visualizzare le informazioni
-	 * @param getter Un'istanza di InputGetter per catturare le informazioni
-	 * @return un valore (formalmente corretto) per il campo
-	 */
-	public FieldValue acquireFieldValue(UIRenderer renderer, InputGetter getter, Map<Field, FieldValue> partialValues);
 	
 }
