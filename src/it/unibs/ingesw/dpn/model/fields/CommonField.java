@@ -6,6 +6,7 @@ import it.unibs.ingesw.dpn.model.fieldvalues.DateFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.IntegerFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.MoneyAmountFieldValue;
+import it.unibs.ingesw.dpn.model.fieldvalues.PeriodFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
 
 public enum CommonField implements Field, Serializable {
@@ -40,9 +41,9 @@ public enum CommonField implements Field, Serializable {
 	
 	DURATA (
 			"Durata",
-			"La durata approssimata, in ore e minuti o in giorni, dell'evento",
+			"La durata dell'evento",
 			false,
-			IntegerFieldValue.class
+			PeriodFieldValue.class
 			),
 
 	TERMINE_ULTIMO_DI_ISCRIZIONE (

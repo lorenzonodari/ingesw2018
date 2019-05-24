@@ -19,6 +19,7 @@ import it.unibs.ingesw.dpn.model.fieldvalues.GenderEnumFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.IntegerFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.IntegerIntervalFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.MoneyAmountFieldValue;
+import it.unibs.ingesw.dpn.model.fieldvalues.PeriodFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
 import it.unibs.ingesw.dpn.model.users.User;
 
@@ -386,8 +387,7 @@ public class EventFactory {
 		
 		case DURATA : 
 		{
-			renderer.renderText("Inserisci il valore numerico della durata");
-			return new IntegerFieldValue(getter.getInteger(0, Integer.MAX_VALUE));
+			return PeriodFieldValue.acquireValue(renderer, getter);
 		}
 		
 		case TERMINE_ULTIMO_DI_ISCRIZIONE : 

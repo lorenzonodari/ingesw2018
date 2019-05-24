@@ -23,15 +23,33 @@ public class DateFieldValue extends Date implements FieldValue, Serializable {
 		super();
 	}
 
+	/**
+	 * Genera un oggetto, dato il numero di millisecondi.
+	 * 
+	 * @param dateLongValue Il numero di millisecondi trascorsi dal 1 gennaio 1970.
+	 */
 	public DateFieldValue(long dateLongValue) {
 		super(dateLongValue);
 	}
 	
+	/**
+	 * Restituisce una descrizione testuale del valore temporale.
+	 * 
+	 * @return una descrizione testuale
+	 */
 	@Override
 	public String toString() {
 		return DATE_FORMAT.format(this);
 	}
 	
+	/**
+	 * Acquisisce un valore, utilizzando i metodi di I/O delle interfacce UIRenderer e InputGetter
+	 * ed effettuando le opportune convalide.
+	 * 
+	 * @param renderer Il renderer
+	 * @param getter Il getter
+	 * @return Il valore acquisito
+	 */
 	public static DateFieldValue acquireValue(UIRenderer renderer, InputGetter getter) {
 		// Anno, mese, giorno
 		renderer.renderText("Inserisci il giorno in formato (GG/MM/AAAA)");
