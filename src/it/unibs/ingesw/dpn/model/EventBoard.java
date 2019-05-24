@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 import it.unibs.ingesw.dpn.model.events.Event;
+import it.unibs.ingesw.dpn.model.events.EventState;
 import it.unibs.ingesw.dpn.model.users.User;
 
 /**
@@ -89,11 +90,31 @@ public class EventBoard implements Serializable {
 				.filter(event -> event.getState() == stateName)
 				.collect(Collectors.toCollection(ArrayList::new));
 	}
+	/**
+	 * restituisce la lista degli eventi proposti da un utente
+	 *  
+	 * 
+	 * @param author : utente su cui si effettua la ricerca
+	 */
 	public List<Event> getEventsByAuthor(User author) {
 		return eventMap
 				.keySet()
 				.stream()
+				.filter(event -> event.getState() == EventState.OPEN)
 				.filter(event -> event.getCreator() == author)
+				.collect(Collectors.toCollection(ArrayList::new));
+	}
+	/**
+	 * Restituisce la lista degli aperti a cui l'utente è iscritto
+	 * 
+	 * @param e : utente su cui avviene la ricerca 
+	 */
+	public List<Event> getUserSubscriptions(User e) {
+		return eventMap
+				.keySet()
+				.stream()
+				.filter(event -> event.getState() == EventState.OPEN)
+				.filter(event -> eventMap.get(event).contains(e))
 				.collect(Collectors.toCollection(ArrayList::new));
 	}
 	/**
