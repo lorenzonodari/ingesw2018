@@ -1,5 +1,6 @@
 package it.unibs.ingesw.dpn.model.fieldvalues;
 
+import java.io.Serializable;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
@@ -20,8 +21,13 @@ import it.unibs.ingesw.dpn.ui.UIRenderer;
  * @author Michele Dusi
  *
  */
-public class TimeAmountFieldValue implements FieldValue {
+public class TimeAmountFieldValue implements FieldValue, Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3259859482858796325L;
+
 	/**
 	 * Classe enum interna che aggrega solamente le unità temporali utilizzate nel software,
 	 * mappando un sottoinsieme dell'enum ChronoUnit.
