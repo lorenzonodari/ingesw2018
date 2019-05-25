@@ -6,6 +6,15 @@ import java.util.Date;
 import it.unibs.ingesw.dpn.ui.InputGetter;
 import it.unibs.ingesw.dpn.ui.UIRenderer;
 
+/**
+ * Classe che rappresenta un valore di un campo di tipo "Data e Ora".
+ * In pratica, fissa un istante temporale definendo anno, mese, giorno, ore e minuti.
+ * La precisione massima consentita che si è deciso di utilizzare sono i minuti, poiché non si 
+ * ritiene necessaria una precisione ulteriore per la gestione di eventi.
+ * 
+ * @author Michele Dusi, Lorenzo Nodari, Emanuele Poggi
+ *
+ */
 public class DateFieldValue extends Date implements FieldValue, Serializable {
 
 	/**

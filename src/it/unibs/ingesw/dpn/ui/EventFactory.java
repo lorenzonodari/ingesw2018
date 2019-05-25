@@ -19,7 +19,7 @@ import it.unibs.ingesw.dpn.model.fieldvalues.GenderEnumFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.IntegerFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.IntegerIntervalFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.MoneyAmountFieldValue;
-import it.unibs.ingesw.dpn.model.fieldvalues.PeriodFieldValue;
+import it.unibs.ingesw.dpn.model.fieldvalues.TimeAmountFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
 import it.unibs.ingesw.dpn.model.users.User;
 
@@ -343,6 +343,7 @@ public class EventFactory {
 			
 		case DATA_E_ORA : 
 		{
+			// Acquisizione del dato
 			boolean okFlag = false;
 			DateFieldValue acquiredDate = null;
 			do {
@@ -360,11 +361,33 @@ public class EventFactory {
 					okFlag = true;
 				}
 			} while (!okFlag);
+
+			// Setup aggiuntivi, derivati da dati già presenti nell'evento
+			if (this.isInitialized(CommonField.DATA_E_ORA_CONCLUSIVE)) {
+				
+				// Setup di "Durata"
+				TimeAmountFieldValue duration = new TimeAmountFieldValue(
+						acquiredDate,
+						((DateFieldValue) this.provisionalFieldValues.get(CommonField.DATA_E_ORA_CONCLUSIVE)));
+				this.provisionalFieldValues.put(CommonField.DURATA, duration);
+				
+			} else if (this.isInitialized(CommonField.DURATA)) {
+				
+				// Setup di "Data e ora conclusive"
+				DateFieldValue dataEOraConclusive = new DateFieldValue(
+						acquiredDate.getTime() +
+						1000 * ((TimeAmountFieldValue) this.provisionalFieldValues.get(CommonField.DURATA)).getSeconds()
+						);
+				this.provisionalFieldValues.put(CommonField.DATA_E_ORA_CONCLUSIVE, dataEOraConclusive);
+			}
+			
+			// Restituzione del valore acquisito
 			return acquiredDate;
 		}
 			
 		case DATA_E_ORA_CONCLUSIVE : 
 		{
+			// Acquisizione del dato
 			boolean okFlag = false;
 			DateFieldValue acquiredDate = null;
 			do {
@@ -382,12 +405,37 @@ public class EventFactory {
 					okFlag = true;
 				}
 			} while (!okFlag);
+
+			// Setup aggiuntivi, derivati da dati già presenti nell'evento
+			if (isInitialized(CommonField.DATA_E_ORA)) {
+				// Setup di "Durata"
+				TimeAmountFieldValue duration = new TimeAmountFieldValue(
+						((DateFieldValue) this.provisionalFieldValues.get(CommonField.DATA_E_ORA)),
+						acquiredDate);
+				this.provisionalFieldValues.put(CommonField.DURATA, duration);
+			}
+			
+			// Restituzione del valore acquisito
 			return acquiredDate;
 		}
 		
 		case DURATA : 
 		{
-			return PeriodFieldValue.acquireValue(renderer, getter);
+			// Acquisizione del dato
+			TimeAmountFieldValue acquiredValue = TimeAmountFieldValue.acquireValue(renderer, getter);
+			
+			// Setup aggiuntivi, derivati da dati già presenti nell'evento
+			if (isInitialized(CommonField.DATA_E_ORA)) {
+				// Setup di "Data e ora conclusive"
+				DateFieldValue dataEOraConclusive = new DateFieldValue(
+						((DateFieldValue) this.provisionalFieldValues.get(CommonField.DATA_E_ORA)).getTime() +
+						1000 * acquiredValue.getSeconds()
+						);
+				this.provisionalFieldValues.put(CommonField.DATA_E_ORA_CONCLUSIVE, dataEOraConclusive);
+			}
+			
+			// Restituzione del valore acquisito
+			return acquiredValue;
 		}
 		
 		case TERMINE_ULTIMO_DI_ISCRIZIONE : 
@@ -566,6 +614,19 @@ public class EventFactory {
 				// Verifico che la data da controllare sia successiva o contemporanea al valore del campo
 				date.compareTo((Date) provisionalFieldValues.get(comparingDateField)) <= 0
 				);
+	}
+	
+	/**
+	 * Restituisce "true" se il campo ha già un valore assegnato.
+	 * 
+	 * Precondizione: il campo deve appartenere alla categoria dell'evento.
+	 * Se ciò non succede, il metood restituisce false.
+	 * 
+	 * @param field Il campo da verificare
+	 * @return La conferma di inizializzazione
+	 */
+	private boolean isInitialized(Field field) {
+		return (this.provisionalFieldValues.containsKey(field) && this.provisionalFieldValues.get(field) != null);
 	}
 	
 }
