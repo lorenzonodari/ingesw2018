@@ -26,7 +26,7 @@ public class EndedState implements EventState, Serializable {
 		
 		// Notifico gli iscritti della conclusione dell'evento
 		String message = String.format("L'evento %s e' concluso", e.getFieldValue(CommonField.TITOLO));
-		e.notifySubscribers(message);
+		e.notifyEveryone(message);
 		
 	}
 

@@ -53,7 +53,7 @@ public class ClosedState implements EventState, Serializable {
 			message.append(String.format(MEMO_NOTIFICATION_MONEY, quota));
 		}
 		
-		e.notifySubscribers(message.toString());
+		e.notifyEveryone(message.toString());
 		
 		
 		// Preparo il timer di scadenza della conclusione dell'evento
