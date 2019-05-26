@@ -51,20 +51,28 @@ public class EventBoard implements Serializable {
 	}
 	
 	/**
-	 * Metodo che rimuove un evento dalla bacheca
+	 * Metodo che rimuove un evento dalla bacheca. Si noti che un evento puo' essere rimosso
+	 * dalla bacheca solo se 
 	 * 
 	 * Precondizione: l'evento deve essere già nella bacheca 
 	 * 
 	 * @param evento da rimuovere dalla bacheca
 	 */
-	public void removeEvent(Event event) {
+	public boolean removeEvent(Event event) {
 
 		// verifica precondizione
 		if (event == null) {
 			throw new IllegalStateException();
 		}
-		eventMap.remove(event);
-		event.withdraw();
+		
+		if (event.withdraw()) {
+			eventMap.remove(event);
+			return true;
+		}
+		else {
+			return false;
+		}
+		
 	}
 	
 	/**
