@@ -124,9 +124,8 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		this.setState(new ValidState());
 
 		// Comunico all'utente che ha creato l'evento
-		this.creator.getMailbox().deliver(new Notification(
-				String.format(EVENT_CREATION_MESSAGE, this.valuesMap.get(CommonField.TITOLO))
-				));		
+		notifyCreator(String.format(EVENT_CREATION_MESSAGE, this.valuesMap.get(CommonField.TITOLO)));	
+		
 	}
 	
 	/**
@@ -201,20 +200,48 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	}
 	
 	/**
-	 * Si occupa di notificare tutti gli iscritti all'evento dei vari cambiamenti che avvengono al
-	 * suo interno.
+	 * Si occupa di notificare tutti gli iscritti all'evento, ovvero sia il creatore che i partecipanti, 
+	 * dei vari cambiamenti che avvengono al suo interno.
 	 * Più nello specifico, invia ad ogni Mailbox una notifica di cambiamento di stato, che potrà essere
-	 * visualizzata dal relativo utente su richiesta.
+	 * visualizzata dal relativo utente su richiesta nella sua area personale.
 	 * 
 	 * @param message Il messaggio da inviare agli iscritti
 	 */
-	 void notifySubscribers(String message) {
+	 void notifyEveryone(String message) {
 		// Cicla su tutte le mailbox
 		for (Mailbox mb : this.mailingList) {
 			// Recapita il messaggio impostato
 			mb.deliver(new Notification(message));
 		}
-	}
+	 }
+	 
+	 
+	 /**
+	  * Invia una notifica al creatore dell'evento
+	  * 
+	  * @param message Il testo della notifica
+	  */
+	 void notifyCreator(String message) {
+		 
+		 creator.getMailbox().deliver(new Notification(message));
+		 
+	 }
+	 
+	 /**
+	  * Invia una notifica a tutti i partecipanti all'evento, tranne che al creatore
+	  * 
+	  * @param message Il testo della notifica
+	  */
+	 void notifyPartecipants(String message) {
+		 
+		 for (Mailbox m : mailingList) {
+			 
+			 if (m == creator.getMailbox()) continue;
+			 
+			 m.deliver(new Notification(message));
+			 
+		 }
+	 }
 	
 	/**
 	 * Modifica lo stato dell'evento, secondo il pattern "State".

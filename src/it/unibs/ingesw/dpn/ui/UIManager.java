@@ -359,14 +359,52 @@ public class UIManager {
 		// Iscriviti azione
 		MenuAction subscriptionAction = () -> {
 			MenuAction dialogBackAction = () -> {this.eventMenu(event);};
-			model.getEventBoard().addSubscription(event, model.getUsersManager().getCurrentUser());
-			this.dialog("Iscrizione effettuata correttamente", null, Menu.BACK_ENTRY_TITLE, dialogBackAction);
+			boolean success = model.getEventBoard().addSubscription(event, users.getCurrentUser());
+			
+			if (success) {
+				this.dialog("Iscrizione effettuata correttamente", null, Menu.BACK_ENTRY_TITLE, dialogBackAction);
+			}
+			else {
+				this.dialog("Non e' stato possibile registrare correttamente l'iscrizione", null, Menu.BACK_ENTRY_TITLE, dialogBackAction); 
+			}
+			
+		};
+		
+		// Callback rimuovi iscrizione
+		MenuAction unsubscribeAction = () -> {
+			
+			MenuAction dialogBackAction = () -> {this.eventMenu(event);};
+			boolean success = model.getEventBoard().removeSubscription(event, model.getUsersManager().getCurrentUser());
+			
+			if (success) {
+				this.dialog("L'iscrizione e' stata rimossa correttamente", null, Menu.BACK_ENTRY_TITLE, dialogBackAction);
+			}
+			else {
+				this.dialog("Non e' stato possibile annullare correttamente l'iscrizione", null, Menu.BACK_ENTRY_TITLE, dialogBackAction); 
+			}
+			
+		};
+		
+		// Callback ritira proposta
+		MenuAction withdrawAction = () -> {
+			
+			MenuAction dialogBackAction = () -> {this.eventView();};
+			model.getEventBoard().removeEvent(event);
+			this.dialog("L'evento e' stato annullato correttamente", null, Menu.BACK_ENTRY_TITLE, dialogBackAction);
 			
 		};
 		
 		Menu eventMenu = new Menu("Visualizzazione evento", event.toString(), Menu.BACK_ENTRY_TITLE, backAction);
-		if(model.getEventBoard().verifySubscription(event, model.getUsersManager().getCurrentUser()))
+		
+		if (users.getCurrentUser() == event.getCreator()) {
+			eventMenu.addEntry("Ritira proposta", withdrawAction);
+		}
+		else if (model.getEventBoard().verifySubscription(event, model.getUsersManager().getCurrentUser())) {
 			eventMenu.addEntry("Iscriviti all'evento", subscriptionAction);
+		}
+		else {
+			eventMenu.addEntry("Ritira iscrizione", unsubscribeAction);
+		}
 		
 		this.currentMenu = eventMenu;
 		
