@@ -87,7 +87,7 @@ public class EventBoard implements Serializable {
 		return eventMap
 				.keySet()
 				.stream()
-				.filter(event -> event.getState() == stateName)
+				.filter(event -> event.getState().equals(stateName))
 				.collect(Collectors.toCollection(ArrayList::new));
 	}
 	/**
@@ -100,7 +100,7 @@ public class EventBoard implements Serializable {
 		return eventMap
 				.keySet()
 				.stream()
-				.filter(event -> event.getState() == EventState.OPEN)
+				.filter(event -> event.getState().equals(EventState.OPEN))
 				.filter(event -> event.getCreator() == author)
 				.collect(Collectors.toCollection(ArrayList::new));
 	}
@@ -113,7 +113,7 @@ public class EventBoard implements Serializable {
 		return eventMap
 				.keySet()
 				.stream()
-				.filter(event -> event.getState() == EventState.OPEN)
+				.filter(event -> event.getState().equals(EventState.OPEN))
 				.filter(event -> eventMap.get(event).contains(e))
 				.collect(Collectors.toCollection(ArrayList::new));
 	}
