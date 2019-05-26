@@ -1,5 +1,6 @@
 package it.unibs.ingesw.dpn.ui;
 
+import java.util.Date;
 import java.util.List;
 import it.unibs.ingesw.dpn.Main;
 import it.unibs.ingesw.dpn.model.ModelManager;
@@ -13,6 +14,7 @@ import it.unibs.ingesw.dpn.model.events.Event;
 import it.unibs.ingesw.dpn.model.events.EventState;
 import it.unibs.ingesw.dpn.model.fields.CommonField;
 import it.unibs.ingesw.dpn.model.fields.Field;
+import it.unibs.ingesw.dpn.model.fieldvalues.DateFieldValue;
 
 /**
  * Classe adibita alla gestione dell'interfaccia utente. In particolare, alle istanze
@@ -389,20 +391,31 @@ public class UIManager {
 		MenuAction withdrawAction = () -> {
 			
 			MenuAction dialogBackAction = () -> {this.eventView();};
-			model.getEventBoard().removeEvent(event);
-			this.dialog("L'evento e' stato annullato correttamente", null, Menu.BACK_ENTRY_TITLE, dialogBackAction);
+			boolean success = model.getEventBoard().removeEvent(event);
+			
+			if (success) {
+				this.dialog("L'evento e' stato annullato correttamente", null, Menu.BACK_ENTRY_TITLE, dialogBackAction);
+			}
+			else {
+				this.dialog("Non e' stato possibile rimuovere l'evento dalla bacheca", null, Menu.BACK_ENTRY_TITLE, dialogBackAction);
+			}
 			
 		};
 		
 		Menu eventMenu = new Menu("Visualizzazione evento", event.toString(), Menu.BACK_ENTRY_TITLE, backAction);
 		
-		if (users.getCurrentUser() == event.getCreator()) {
+		// Le iscrizioni e le proposte possono essere ritirate solamente in data precedente al "Termine ultimo di ritiro iscrizione"
+		Date withdrawLimit = (DateFieldValue) event.getFieldValue(CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE);
+		Date subscriptionLimit = (DateFieldValue) event.getFieldValue(CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE);
+		Date now = new Date();
+		
+		if (users.getCurrentUser() == event.getCreator() && now.before(withdrawLimit)) {
 			eventMenu.addEntry("Ritira proposta", withdrawAction);
 		}
-		else if (model.getEventBoard().verifySubscription(event, model.getUsersManager().getCurrentUser())) {
+		else if (model.getEventBoard().verifySubscription(event, model.getUsersManager().getCurrentUser()) && now.before(subscriptionLimit)) {
 			eventMenu.addEntry("Iscriviti all'evento", subscriptionAction);
 		}
-		else {
+		else if (now.before(withdrawLimit)) {
 			eventMenu.addEntry("Ritira iscrizione", unsubscribeAction);
 		}
 		
