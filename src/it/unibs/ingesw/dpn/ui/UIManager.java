@@ -363,7 +363,7 @@ public class UIManager {
 		// Iscriviti azione
 		MenuAction subscriptionAction = () -> {
 			MenuAction dialogBackAction = () -> {this.eventMenu(event);};
-			boolean success = model.getEventBoard().addSubscription(event, model.getUsersManager().getCurrentUser());
+			boolean success = model.getEventBoard().addSubscription(event, users.getCurrentUser());
 			
 			if (success) {
 				this.dialog("Iscrizione effettuata correttamente", null, Menu.BACK_ENTRY_TITLE, dialogBackAction);
@@ -377,14 +377,24 @@ public class UIManager {
 		// Callback rimuovi iscrizione
 		MenuAction unsubscribeAction = () -> {
 			
+			MenuAction dialogBackAction = () -> {this.eventMenu(event);};
+			boolean success = model.getEventBoard().removeSubscription(event, model.getUsersManager().getCurrentUser());
 			
+			if (success) {
+				this.dialog("L'iscrizione e' stata rimossa correttamente", null, Menu.BACK_ENTRY_TITLE, dialogBackAction);
+			}
+			else {
+				this.dialog("Non e' stato possibile annullare correttamente l'iscrizione", null, Menu.BACK_ENTRY_TITLE, dialogBackAction); 
+			}
 			
 		};
 		
 		// Callback ritira proposta
 		MenuAction withdrawAction = () -> {
 			
-			
+			MenuAction dialogBackAction = () -> {this.eventView();};
+			model.getEventBoard().removeEvent(event);
+			this.dialog("L'evento e' stato annullato correttamente", null, Menu.BACK_ENTRY_TITLE, dialogBackAction);
 			
 		};
 		
