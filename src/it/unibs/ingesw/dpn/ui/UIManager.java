@@ -120,7 +120,8 @@ public class UIManager {
 		
 		// Callback Esci
 		MenuAction quitAction = () -> {
-			this.renderer.renderText("Chiusura del programma...");
+			this.renderer.renderLineSpace();
+			this.renderer.renderText("Programma terminato.");
 			Main.terminate(Main.NO_ERROR_EXIT_CODE);
 			};
 		
