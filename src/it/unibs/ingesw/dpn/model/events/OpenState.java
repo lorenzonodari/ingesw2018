@@ -8,7 +8,6 @@ import java.util.concurrent.Semaphore;
 
 import it.unibs.ingesw.dpn.model.fields.CommonField;
 import it.unibs.ingesw.dpn.model.fieldvalues.IntegerFieldValue;
-import it.unibs.ingesw.dpn.model.users.Notification;
 
 /**
  * Classe che modellizza il comportamento di un evento {@link Event} nello stato OPEN.
