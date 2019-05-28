@@ -43,18 +43,37 @@ public class UsersManager implements Serializable {
 		}
 		
 		return result;
-		
 	}
 	
 	/**
-	 * Effettua il login con lo username dato. Se un utente con tale username non esiste
-	 * esso viene creato, in caso contrario viene utilizzato l'utente gia' esistente.
+	 * Aggiunge un nuovo utente al sistema.
 	 * 
-	 * Precondizione: nessun altro utente deve essere attualmente connesso al sistema
+	 * Precondizione: l'utente non deve essere "null".
+	 * Precondizione: l'utente deve essere effettivamente "nuovo", ossia non deve essere già appartenente al sistema.
+	 * 
+	 * @param newUser Il nuovo utente da aggiungere
+	 */
+	public void addUser(User newUser) {
+		if (newUser == null) {
+			throw new IllegalArgumentException("Impossibile aggiungere un utente nullo");
+		} else if (this.users.contains(newUser)) {
+			throw new IllegalArgumentException("Impossibile aggiungere un utente già presente nel sistema");
+		}
+		this.users.add(newUser);
+	}
+	
+	/**
+	 * Effettua il login con lo username dato.
+	 * Se lo username non è presente all'interno del sistema, il metodo restituisce "false".
+	 * Se invece il login va a buon fine, il metodo restituisce "true".
+	 * 
+	 * Precondizione: nessun altro utente deve essere attualmente connesso al sistema.
 	 * 
 	 * @param user L'utente da connettere al sistema
+	 * 
+	 * @return Un valore booleano che indica se l'utente si è connesso correttamente.
 	 */
-	public void login(String username) {
+	public boolean login(String username) {
 		
 		// Verifica delle precondizioni
 		if (this.currentUser != null) {
@@ -62,15 +81,15 @@ public class UsersManager implements Serializable {
 		}
 		
 		User user = getUser(username);
+		
+		// Verifico se l'utente non esiste
 		if (user == null) {
-			
-			user = new User(username);
-			this.users.add(user);
-			
+			return false;			
 		}
 		
+		// Se invece esiste
 		this.currentUser = user;
-		
+		return true;		
 	}
 	
 	/**
@@ -105,6 +124,22 @@ public class UsersManager implements Serializable {
 		}
 		
 		return this.currentUser;
+	}
+	
+	/**
+	 * Verifica se un utente con il nome passato come parametro è già registrato 
+	 * all'interno del sistema.
+	 * 
+	 * @param username Il nickname da cercare.
+	 * @return "True" se l'utente esiste, "False" altrimenti.
+	 */
+	public boolean isNicknameExisting(String username) {
+		for (User u : this.users) {
+			if (u.getUsername().equals(username)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

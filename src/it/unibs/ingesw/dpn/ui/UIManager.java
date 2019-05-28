@@ -7,6 +7,7 @@ import it.unibs.ingesw.dpn.model.ModelManager;
 import it.unibs.ingesw.dpn.model.users.UsersManager;
 import it.unibs.ingesw.dpn.model.users.Mailbox;
 import it.unibs.ingesw.dpn.model.users.Notification;
+import it.unibs.ingesw.dpn.model.users.User;
 import it.unibs.ingesw.dpn.model.categories.Category;
 import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
 import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
@@ -33,6 +34,7 @@ public class UIManager {
 	private UsersManager users;
 	private Menu currentMenu;
 	private EventFactory eventFactory;
+	private UserFactory userFactory;
 		
 	/**
 	 * Crea un nuovo UIManager utilizzando il renderer dato per la creazione
@@ -55,6 +57,7 @@ public class UIManager {
 		this.users = model.getUsersManager();
 		this.currentMenu = null;
 		this.eventFactory = new EventFactory(renderer, inputManager);
+		this.userFactory = new UserFactory(renderer, inputManager);
 		
 	}
 	
@@ -127,17 +130,89 @@ public class UIManager {
 		
 		// Callback Login
 		MenuAction loginAction = () -> {
+			// Leggo il nuovo nickname da input
 			this.renderer.renderText("Username: ");
-			
 			String username = this.inputManager.getString();
-			this.users.login(username);
-			mainMenu();
+			// Provo a loggare
+			if (this.users.login(username)) {
+				mainMenu();
+			} else {
+				this.userFactory.startCreation();
+				createUserMenu();
+			}
 		};
 		
 		Menu loginMenu = new Menu("SocialNetwork", "Benvenuto/a", "Esci", quitAction);
 		loginMenu.addEntry("Login", loginAction);
 		
 		this.currentMenu = loginMenu;
+	}
+	
+	/**
+	 * Crea il menu associato alla creazione di un utente, con i relativi campi.
+	 */
+	public void createUserMenu() {
+
+		// Callback per abortire la creazione dell'utente
+		MenuAction abortAction = () -> {
+			this.userFactory.cancelCreation();
+			this.loginMenu();
+			};
+
+		// Azione per il setup del nickname
+		MenuAction nicknameAction = () -> {
+			this.userFactory.acquireNickname();
+			this.createUserMenu();
+		};
+		
+		// Azione per il setup della data di nascita
+		MenuAction birthdayAction = () -> {
+			this.userFactory.acquireBirthday();
+			this.createUserMenu();
+		};
+		
+		String title = String.format("Creazione di un nuovo utente");
+		Menu createUserMenu = new Menu(title, 
+				"Seleziona i campi dell'utente che vuoi impostare. \n"
+				+ "Quando avrai completato tutti i campi seleziona \"Conferma\".",
+				"Annulla la creazione e torna al menu principale", abortAction);
+		
+		String entryFormat = "%-30s : %s";
+				
+		// Creo le entries
+		// Nickname
+		String nicknameEntry = String.format(
+				entryFormat,
+				"Nickname",
+				this.userFactory.getProvisionalNicknameString());
+		createUserMenu.addEntry(nicknameEntry, nicknameAction);
+		// Data di nascita
+		String birthdayEntry = String.format(
+				entryFormat,
+				"Data di nascita",
+				this.userFactory.getProvisionalBirthdayString());
+		createUserMenu.addEntry(birthdayEntry, birthdayAction);
+		
+		// Verifico che tutti i campi obbligatori siano stati acquisiti
+		if (this.userFactory.verifyMandatoryFields()) {
+			createUserMenu.addEntry("Conferma la creazione del nuovo utente", () -> {
+				
+				// Termino la creazione dell'utente
+				User newUser = this.userFactory.finalizeCreation();
+				
+				// Aggiungo l'evento alla bacheca
+				this.users.addUser(newUser);
+				
+				MenuAction toHomeAction = () -> {this.loginMenu();};
+				this.dialog(
+						"Creazione completata", 
+						"Ora puoi provare ad effettuare il login con l'utente che hai appena creato.", 
+						"Vai alla pagina iniziale", 
+						toHomeAction);
+			});
+		}
+		
+		this.currentMenu = createUserMenu;
 	}
 	
 	/**
