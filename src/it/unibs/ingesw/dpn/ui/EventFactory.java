@@ -278,6 +278,32 @@ public class EventFactory {
 	}
 	
 	/**
+	 * Metodo che annulla la creazione dell'evento e provoca il reset della fabbrica.
+	 * 
+	 * Precondizione: la factory deve essere in modalità "creazione", ossia deve essere stato chiamato in precedenza
+	 * il metodo "startCreation".
+	 * 
+	 * Postcondizione: al termine della chiamata la factory non è più in modalità creazione.
+	 * Tutti i valori immessi fino a questo momento vengono cancellati.
+	 * 
+	 */
+	public void cancelCreation() {
+		// Verifico di essere in modalità "creazione di un nuovo evento"
+		if (!creationOn) {
+			throw new IllegalStateException(CREATION_MODE_OFF_EXCEPTION);
+		}
+		
+		this.creationOn = false;
+		
+		// Reset di tutte gli attributi
+		this.provisionalCreator = null;
+		this.provisionalCategory = null;
+		this.provisionalFieldValues = null;
+		this.provisionalCategoryName = null;
+		this.provisionalCategoryFields = null;
+	}
+	
+	/**
 	 * Termina la creazione di un evento con tutti i campi acquisiti finora.
 	 * 
 	 * Precondizione: la factory deve essere in modalità "creazione", ossia deve essere stato chiamato in precedenza

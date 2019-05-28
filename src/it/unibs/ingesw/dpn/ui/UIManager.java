@@ -119,7 +119,10 @@ public class UIManager {
 	public void loginMenu() {
 		
 		// Callback Esci
-		MenuAction quitAction = () -> {Main.terminate(Main.NO_ERROR_EXIT_CODE);};
+		MenuAction quitAction = () -> {
+			this.renderer.renderText("Chiusura del programma...");
+			Main.terminate(Main.NO_ERROR_EXIT_CODE);
+			};
 		
 		// Callback Login
 		MenuAction loginAction = () -> {
@@ -130,7 +133,7 @@ public class UIManager {
 			mainMenu();
 		};
 		
-		Menu loginMenu = new Menu("SocialNetwork", "Benvenuto", "Esci", quitAction);
+		Menu loginMenu = new Menu("SocialNetwork", "Benvenuto/a", "Esci", quitAction);
 		loginMenu.addEntry("Login", loginAction);
 		
 		this.currentMenu = loginMenu;
@@ -487,7 +490,10 @@ public class UIManager {
 	public void createEventMenu() {
 		
 		// Callback per abortire la creazione dell'evento
-		MenuAction abortAction = () -> {this.boardMenu();};
+		MenuAction abortAction = () -> {
+			this.eventFactory.cancelCreation();
+			this.boardMenu();
+			};
 		
 		String title = String.format("Creazione di un evento: %s", this.eventFactory.getProvisionalCategoryName());
 		Menu createEventMenu = new Menu(title, "Seleziona i campi dell'evento che vuoi impostare. \nI campi contrassegnati dall'asterisco (*) sono obbligatori.\nQuando avrai completato tutti i campi obbligatori seleziona \"Conferma\".", "Annulla la creazione e torna al menu principale", abortAction);
