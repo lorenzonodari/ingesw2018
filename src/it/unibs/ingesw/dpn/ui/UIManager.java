@@ -148,8 +148,16 @@ public class UIManager {
 		// Callback spazio notifiche
 		MenuAction notificationsAction = () -> {this.notificationsMenu();};
 		
+		// Callback spazio iscrizioni
+		MenuAction subscriptionsAction = () -> {this.subscriptionsMenu();};
+		
+		// Callback spazio proposte
+		MenuAction proposalsAction = () -> {this.proposalsMenu();};
+		
 		Menu personalSpace = new Menu("Spazio personale", backAction);
 		personalSpace.addEntry("Spazio notifiche", notificationsAction);
+		personalSpace.addEntry("Le mie iscrizioni", subscriptionsAction);
+		personalSpace.addEntry("Le mie proposte", proposalsAction);
 		
 		this.currentMenu = personalSpace;
 	}
@@ -349,9 +357,10 @@ public class UIManager {
 	}
 	
 	/**
-	 * Crea il menu dedicato all'evento
+	 * Crea il menu dedicato ad uno specifico evento all'intero della bacheca e lo
+	 * rende il menu corrente.
 	 * 
-	 * @param evento a cui punta il menu
+	 * @param event evento a cui punta il menu
 	 */
 	public void eventMenu(Event event) {
 		
@@ -531,6 +540,136 @@ public class UIManager {
 		}
 		
 		this.currentMenu = createEventMenu;
+	}
+	
+	public void subscriptionsMenu() {
+		
+		// Callback indietro
+		MenuAction backAction = () -> {this.personalSpace();};
+		
+		Menu subscriptionsMenu = new Menu("Le mie iscrizioni",
+										  null,
+										  Menu.BACK_ENTRY_TITLE,
+										  backAction);
+		
+		// Callback per ogni evento al quale l'utente e' iscritto ma del quale non e' creatore
+		List<Event> subscriptions = model.getEventBoard().getUserSubscriptions(users.getCurrentUser());
+		for (Event e : subscriptions) {
+			
+			if (e.getCreator() != users.getCurrentUser()) {
+				
+				MenuAction eventAction = () -> {this.subscribedEventMenu(e);};
+				subscriptionsMenu.addEntry(e.getFieldValue(CommonField.TITOLO).toString(), eventAction);
+				
+			}
+		}
+		
+		this.currentMenu = subscriptionsMenu;
+		
+	}
+	
+	public void proposalsMenu() {
+		
+		// Callback indietro
+		MenuAction backAction = () -> {this.personalSpace();};
+		
+		Menu proposalsMenu = new Menu("Le mie proposte",
+										  null,
+										  Menu.BACK_ENTRY_TITLE,
+										  backAction);
+		
+		// Callback per ogni evento creato dall'utente
+		List<Event> proposals = model.getEventBoard().getEventsByAuthor(users.getCurrentUser());
+		for (Event e : proposals) {
+				
+			MenuAction eventAction = () -> {this.proposedEventMenu(e);};
+			proposalsMenu.addEntry(e.getFieldValue(CommonField.TITOLO).toString(), eventAction);
+				
+		}
+		
+		this.currentMenu = proposalsMenu;		
+		
+	}
+	
+	/**
+	 * Crea il menu dedicato ad uno specifico evento all'intero dell'area personale
+	 * e lo rende il menu corrente. Tale menu permette unicamente la disiscrizione 
+	 * dall'evento dato.
+	 * 
+	 * @param event evento a cui punta il menu
+	 */
+	public void subscribedEventMenu(Event event) {
+		
+		// Callback indietro
+		MenuAction backAction = () -> {this.subscriptionsMenu();};
+		
+		// Callback rimuovi iscrizione
+		MenuAction unsubscribeAction = () -> {
+			
+			MenuAction dialogBackAction = () -> {this.subscriptionsMenu();};
+			boolean success = model.getEventBoard().removeSubscription(event, model.getUsersManager().getCurrentUser());
+			
+			if (success) {
+				this.dialog("L'iscrizione e' stata rimossa correttamente", null, Menu.BACK_ENTRY_TITLE, dialogBackAction);
+			}
+			else {
+				this.dialog("Non e' stato possibile annullare correttamente l'iscrizione", null, Menu.BACK_ENTRY_TITLE, dialogBackAction); 
+			}
+			
+		};
+		
+		Menu eventMenu = new Menu("Dettagli evento", event.toString(), Menu.BACK_ENTRY_TITLE, backAction);
+		
+		// Le iscrizioni e le proposte possono essere ritirate solamente in data precedente al "Termine ultimo di ritiro iscrizione"
+		Date withdrawLimit = (DateFieldValue) event.getFieldValue(CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE);
+		Date now = new Date();
+		
+		if (now.before(withdrawLimit)) {
+			eventMenu.addEntry("Ritira iscrizione", unsubscribeAction);
+		}
+		
+		this.currentMenu = eventMenu;
+		
+	}
+	
+	/**
+	 * Crea il menu dedicato al ritiro di uno specifico evento all'intero dell'area
+	 * personale e lo rende il menu corrente
+	 * 
+	 * @param event evento a cui punta il menu
+	 */
+	public void proposedEventMenu(Event event) {
+		
+		// Callback indietro
+		MenuAction backAction = () -> {this.proposalsMenu();};
+		
+		// Callback ritira proposta
+		MenuAction withdrawAction = () -> {
+			
+			MenuAction dialogBackAction = () -> {this.proposalsMenu();};
+			boolean success = model.getEventBoard().removeEvent(event);
+			
+			if (success) {
+				this.dialog("L'evento e' stato annullato correttamente", null, Menu.BACK_ENTRY_TITLE, dialogBackAction);
+			}
+			else {
+				this.dialog("Non e' stato possibile rimuovere l'evento dalla bacheca", null, Menu.BACK_ENTRY_TITLE, dialogBackAction);
+			}
+			
+		};
+		
+		Menu eventMenu = new Menu("Dettagli evento", event.toString(), Menu.BACK_ENTRY_TITLE, backAction);
+		
+		// Le iscrizioni e le proposte possono essere ritirate solamente in data precedente al "Termine ultimo di ritiro iscrizione"
+		Date withdrawLimit = (DateFieldValue) event.getFieldValue(CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE);
+		Date now = new Date();
+		
+		if (now.before(withdrawLimit)) {
+			eventMenu.addEntry("Ritira proposta", withdrawAction);
+		}
+		
+		this.currentMenu = eventMenu;
+		
 	}
 	
 }
