@@ -1,6 +1,7 @@
 package it.unibs.ingesw.dpn.model.events;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Deque;
 import java.util.Iterator;
@@ -38,7 +39,9 @@ public class EventHistory implements Serializable {
 		private static final long serialVersionUID = -6309804809014983435L;
 		
 		private static final String NULL_MESSAGE_EXCEPTION = "Impossibile creare un Log con un messaggio null";
-		private static final String LOG_FORMAT = "%s - %s";
+		private static final String LOG_FORMAT = " | %s - %s";
+
+		private static final String DATE_FORMAT_STRING = "EEE dd/MM/yyyy, HH:mm:ss";
 		
 		private String message;
 		private Date timestamp;
@@ -81,7 +84,7 @@ public class EventHistory implements Serializable {
 		 * @return la stringa descrittiva del log
 		 */
 		public String toString() {
-			return String.format(LOG_FORMAT, this.getDate().toString(), this.getMessage());
+			return String.format(LOG_FORMAT, (new SimpleDateFormat(DATE_FORMAT_STRING)).format(timestamp), this.getMessage());
 		}
 	}
 	
@@ -207,8 +210,9 @@ public class EventHistory implements Serializable {
 	 */
 	public String toString() {
 		StringBuffer s = new StringBuffer();
-		for (Log l : this.chronology) {
-			s.append(l.toString() + "\n");
+		Iterator<Log> iterator = this.chronology.descendingIterator();
+		while (iterator.hasNext()) {
+			s.append(iterator.next().toString() + "\n");
 		}
 		return s.toString();
 	}

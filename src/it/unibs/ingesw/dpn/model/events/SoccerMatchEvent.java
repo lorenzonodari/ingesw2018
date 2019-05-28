@@ -2,9 +2,7 @@ package it.unibs.ingesw.dpn.model.events;
 
 import java.util.Map;
 
-import it.unibs.ingesw.dpn.model.categories.Category;
 import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
-import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 import it.unibs.ingesw.dpn.model.users.User;
@@ -33,22 +31,5 @@ public class SoccerMatchEvent extends Event {
 	public SoccerMatchEvent(User creator, Map<Field, FieldValue> fieldValues) {
 		super(creator, CategoryEnum.PARTITA_DI_CALCIO, fieldValues);
 	}
-
-	@Override
-	public String toString() {
-		StringBuffer description = new StringBuffer();
-		description.append("Evento    : Partita di calcio")
-		.append("\n");
-		description.append(String.format("Creato da : %s\n", this.getCreator().getUsername()));
-		Category cat = CategoryProvider.getProvider().getCategory(CategoryEnum.PARTITA_DI_CALCIO);
-		for (Field f : cat.getFields()) {
-			if(!(this.getFieldValue(f) == null)) {
-			description.append(String.format(" | %-50s : %s",
-					f.getName(),
-					this.getFieldValue(f).toString()))
-				.append("\n");
-			}
-		}
-		return description.toString();
-	}
+	
 }

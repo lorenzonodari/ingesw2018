@@ -47,11 +47,11 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	
 	/** Eccezioni */
 	private static final String NULL_ARGUMENT_EXCEPTION = "Impossibile creare un evento con parametri nulli";
-	private static final String FIELD_NOT_PRESENT_EXCEPTION = "Il campo %s non appartiene alla categoria prevista dall'evento";
+	private static final String FIELD_NOT_PRESENT_EXCEPTION = "Il campo \"%s\" non appartiene alla categoria prevista dall'evento";
 	private static final String ILLEGAL_COMPARING_METHOD_EXCEPTION = "Metodologia di ordinamento non riconosciuta";
 	
 	/** Messaggi di Log o di notifica */
-	private static final String STATE_CHANGE_LOG = "L'evento \"%s\" ha cambiato il suo stato in: %s";
+	private static final String STATE_CHANGE_LOG = "Cambio di stato in: %s";
 	private static final String EVENT_SUBSCRIPTION_MESSAGE = "Ti sei iscritto/a correttamente all'evento \"%s\"";
 	private static final String EVENT_UNSUBSCRIPTION_MESSAGE = "Ti sei disiscritto/a correttamente dall'evento \"%s\"";
 	private static final String EVENT_CREATION_MESSAGE = "Hai creato l'evento \"%s\"";
@@ -180,6 +180,10 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		return this.category;
 	}
 	
+	public EventHistory getHistory() {
+		return this.history;
+	}
+	
 	/**
 	 * Restituisce il valore caratterizzante l'evento del campo richiesto.
 	 * 
@@ -261,12 +265,9 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		// Effettuo le attività d'entrata nello stato
 		this.state.onEntry(this);
 		
-		String titolo = this.valuesMap.get(CommonField.TITOLO).toString();
-		
 		// Aggiorno la storia
 		String message_log = String.format(
 				STATE_CHANGE_LOG, 
-				titolo,
 				this.state.getStateName().toUpperCase());
 		this.history.addLog(message_log);
 		
@@ -523,6 +524,33 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		return thisTitle.compareTo(otherTitle);
 	}
 	
-	public abstract String toString();
+	/**
+	 * Restituisce una stringa contenente la descrizione completa ma compatta delle caratteristiche
+	 * dell'evento.
+	 * 
+	 * @return Una descrizione testuale dell'evento
+	 */
+	public String toString() {
+		StringBuffer description = new StringBuffer();
+		// Categoria
+		String categoryName = CategoryProvider.getProvider().getCategory(this.category).getName();
+		description.append(String.format("Categoria   : %s\n", categoryName));
+		// Creatore
+		description.append(String.format("Creatore    : %s\n", this.getCreator().getUsername()));
+		// Valori dei campi
+		description.append("Campi       :\n");
+		Category cat = CategoryProvider.getProvider().getCategory(CategoryEnum.PARTITA_DI_CALCIO);
+		for (Field f : cat.getFields()) {
+			if(!(this.getFieldValue(f) == null)) {
+			description.append(String.format(" | %-50s : %s\n",
+					f.getName(),
+					this.getFieldValue(f).toString()));
+			}
+		}
+		// Cronologia/Storia
+		description.append("Cronologia  :\n");
+		description.append(this.history.toString());
+		return description.toString();
+	}
 
 }
