@@ -121,7 +121,6 @@ public class EventBoard implements Serializable {
 		return eventMap
 				.keySet()
 				.stream()
-				.filter(event -> event.getState().equals(EventState.OPEN))
 				.filter(event -> eventMap.get(event).contains(e))
 				.collect(Collectors.toCollection(ArrayList::new));
 	}
