@@ -27,10 +27,10 @@ public class WithdrawnState implements EventState, Serializable {
 		
 		FieldValue eventName = e.getFieldValue(CommonField.TITOLO);
 		
-		String partecipantsMessage = String.format("L'evento %s, al quale eri iscritto, e' stato ritirato", eventName);
+		String partecipantsMessage = String.format("L'evento \"%s\", al quale eri iscritto, e' stato ritirato", eventName);
 		e.notifyPartecipants(partecipantsMessage);
 		
-		String creatorMessage = String.format("Hai ritirato l'evento %s", eventName);
+		String creatorMessage = String.format("Hai ritirato l'evento \"%s\"", eventName);
 		e.notifyCreator(creatorMessage);
 		
 	}
