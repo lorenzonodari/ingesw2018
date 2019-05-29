@@ -125,6 +125,26 @@ public class EventBoard implements Serializable {
 				.collect(Collectors.toCollection(ArrayList::new));
 	}
 	/**
+	 * Funzione che prende in ingresso un utente e restituisce una lista di 
+	 * tutti gli utenti che hanno partecipato a eventi precedentemente creati
+	 * da lui attualmente allo stato di chiusi
+	 * 
+	 * @param user su cui si fa la ricerca	 
+	 */
+	public List<User> getListOfOldSubscribersFromPastEvents(User user) {
+		ArrayList<User> subscribers = new ArrayList<>();
+		for(Event e : eventMap
+				.keySet()
+				.stream()
+				.filter(event -> event.getState().equals(EventState.CLOSED))
+				.filter(event -> event.getCreator() == user)
+				.collect(Collectors.toCollection(ArrayList::new))) {
+			subscribers.addAll(eventMap.get(e));
+			
+		}
+		return subscribers;
+	}
+	/**
 	 * restituisce la scritta degli iscritti a un evento 
 	 * 
 	 * Precondizione: l'evento deve essere esistente
@@ -206,5 +226,6 @@ public class EventBoard implements Serializable {
 		}
 		
 	}
+	
 	
 }
