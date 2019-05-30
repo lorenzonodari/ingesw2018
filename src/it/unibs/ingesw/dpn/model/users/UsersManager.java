@@ -137,7 +137,7 @@ public class UsersManager implements Serializable {
 	 */
 	public boolean isNicknameExisting(String nickname) {
 		for (User u : this.users) {
-			if (u.getFieldValue(UserField.NICKNAME).equals(nickname)) {
+			if (u.getFieldValue(UserField.NICKNAME).toString().equals(nickname)) {
 				return true;
 			}
 		}
