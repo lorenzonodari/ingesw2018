@@ -25,14 +25,6 @@ public interface UIRenderer {
 	 */
 	void renderEmptyPrompt();
 	
-//	/**
-//	 * Metodo adibito al rendering di un componente grafico dedicato alla richiesta
-//	 * di informazioni all'utente.
-//	 * 
-//	 * @param question La richiesta da porre all'utente
-//	 */
-//	void renderPrompt(String question);
-	
 	/**
 	 * Renderizza uno spazio vuoto orizzontale.
 	 * Nelle interfacce testuali stampa una riga vuota.

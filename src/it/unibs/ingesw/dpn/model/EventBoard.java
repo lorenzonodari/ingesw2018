@@ -139,9 +139,9 @@ public class EventBoard implements Serializable {
 				.filter(event -> event.getState().equals(EventState.CLOSED))
 				.filter(event -> event.getCreator() == user)
 				.collect(Collectors.toCollection(ArrayList::new))) {
-			for(User a : eventMap.get(e)) {
-				if(!subscribers.contains(a))
-					subscribers.add(a);
+			for(User u : eventMap.get(e)) {
+				if(!subscribers.contains(u))
+					subscribers.add(u);
 			}			
 		}
 		return subscribers;
