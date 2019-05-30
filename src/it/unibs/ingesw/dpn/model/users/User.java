@@ -29,12 +29,12 @@ public class User implements Serializable {
 	 * Nota: il nickname di un utente non può essere modificato successivamente.
 	 * Gli altri campi, invece, sì. Tuttavia è richiesto almeno un valore valido al momento della creazione.
 	 * 
-	 * Precondizione: i parametri non possono essere nulli.
+	 * Precondizione: lo username non può essere nullo. Tuttavia, è possibile che la data di nascita lo sia.
 	 * 
 	 * @param username Il nome dell'utente da creare
 	 */
 	public User(String username, LocalDate birthday) {
-		if (username == null || birthday == null) {
+		if (username == null) {
 			throw new IllegalArgumentException("Parametri nulli: impossibile creare un nuovo utente");
 		}
 		// Caratteristiche dell'utente
@@ -56,10 +56,17 @@ public class User implements Serializable {
 	/**
 	 * Restituisce la data di nascita dell'utente.
 	 * 
+	 * Precondizione: la data di nascita non deve essere nulla. Se così fosse, il metodo lancia un'eccezione
+	 * segnalando al chiamante che è necessario impostare un valore per questa data di nascita.
+	 * 
 	 * @return La data di nascita dell'utente.
 	 */
 	public LocalDate getBirthday() {
-		return this.birthday;
+		if (this.birthday == null) {
+			throw new IllegalStateException("Questo utente non possiede una data di nascita inizializzata");
+		} else {
+			return this.birthday;
+		}
 	}
 	
 	/**

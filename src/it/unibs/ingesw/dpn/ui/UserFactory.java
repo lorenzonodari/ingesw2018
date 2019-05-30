@@ -13,7 +13,7 @@ import it.unibs.ingesw.dpn.model.users.User;
  * 
  * Per la creazione di un utente è necessario chiamare, nell'ordine:
  * - startCreation(..);
- * - metodi di acquisizione dati (acquireNickname, acquireBirthday, ...)
+ * - metodi di acquisizione dati (acquireUsername, acquireBirthday, ...)
  * - finalizeCreation(..);
  * 
  * @author Michele Dusi, Lorenzo Nodari, Emanuele Poggi
@@ -29,7 +29,7 @@ public class UserFactory {
 	private boolean creationOn = false;
 
 	/** Attributi che aiutano la creazione di un evento */
-	private String provisionalNickname = null;
+	private String provisionalUsername = null;
 	private LocalDate provisionalBirthday = null;
 
 	/** Stringhe */
@@ -57,10 +57,9 @@ public class UserFactory {
 	 * Precondizione: la factory non deve avere altre creazioni in corso. Una factory puà costruire un solo
 	 * evento alla volta, secondo il processo descritto nell'introduzione alla classe.
 	 * 
-	 * @param creator L'utente che ha creato l'evento
-	 * @param category La categoria dell'evento
+	 * @param defaultUsername Il username di default con cui cominciare l'iscrizione
 	 */
-	public void startCreation() {		
+	public void startCreation(String defaultUsername) {		
 		if (this.creationOn) {
 			// E' già in corso la creazione di un evento, non è possibile cominciarne una nuova
 			throw new IllegalStateException("Impossibile cominciare la creazione di un nuovo evento: una creazione di un evento è già in corso");
@@ -70,28 +69,28 @@ public class UserFactory {
 		}
 		
 		// Preparo i campi vuoti, pronti per essere inizializzati
-		this.provisionalNickname = null;
+		this.provisionalUsername = defaultUsername;
 		this.provisionalBirthday = null;
 		
 	}
 
 	/**
-	 * Acquisisce una stringa NON VUOTA come nickname dell'utente che si sta creando.
+	 * Acquisisce una stringa NON VUOTA come username dell'utente che si sta creando.
 	 * 
 	 * Precondizione: la factory deve essere in modalità "creazione", ossia deve essere stato chiamato in precedenza
 	 * il metodo "startCreation".
 	 * 
-	 * TODO Implementare la verifica che il nickname non sia già usato.
+	 * TODO Implementare la verifica che lo username non sia già usato.
 	 */
-	public void acquireNickname() {
+	public void acquireUsername() {
 		// Verifico di essere in modalità "creazione di un nuovo evento"
 		if (!creationOn) {
 			throw new IllegalStateException(CREATION_MODE_OFF_EXCEPTION);
 		}
 		
 		// Prompt e interazione con l'utente
-		renderer.renderText("Inserisci il nickname del nuovo utente:");
-		this.provisionalNickname = getter.getString(); // TODO CONTROLLARE CHE IL NICK SIA DISPONIBILE
+		renderer.renderText("Inserisci il username del nuovo utente:");
+		this.provisionalUsername = getter.getString(); // TODO CONTROLLARE CHE IL NICK SIA DISPONIBILE
 	}
 	
 	/**
@@ -159,7 +158,7 @@ public class UserFactory {
 		}
 		
 		// Verifico tutti i campi
-		if (this.provisionalNickname == null ) {
+		if (this.provisionalUsername == null ) {
 			return false;
 //		} else if (this.provisionalBirthday == null) { 
 //			return false;
@@ -170,23 +169,23 @@ public class UserFactory {
 	}
 
 	/**
-	 * Restituisce un valore testuale per il nickname dell'utente.
-	 * Nel caso in cui il nickname non sia ancora stato inizializzato, viene restituita una stringa di 
+	 * Restituisce un valore testuale per il username dell'utente.
+	 * Nel caso in cui il username non sia ancora stato inizializzato, viene restituita una stringa di 
 	 * default "- - - - -".
 	 * 
 	 * Precondizione: la factory deve essere in modalità "creazione", ossia deve essere stato chiamato in precedenza
 	 * il metodo "startCreation".
 	 * 
-	 * @return Un testo rappresentante il valore del campo nickname
+	 * @return Un testo rappresentante il valore del campo username
 	 */
-	public String getProvisionalNicknameString() {
+	public String getProvisionalUsernameString() {
 		// Verifico di essere in modalità "creazione di un nuovo evento"
 		if (!creationOn) {
 			throw new IllegalStateException(CREATION_MODE_OFF_EXCEPTION);
 		}
 		// Restituisco un valore in base all'inizializzazione
-		return (this.provisionalNickname != null ? 
-				this.provisionalNickname :
+		return (this.provisionalUsername != null ? 
+				this.provisionalUsername :
 					EMPTY_FIELDVALUE_STRING);
 		
 	}
@@ -234,7 +233,7 @@ public class UserFactory {
 		this.creationOn = false;
 		
 		// Reset di tutte gli attributi
-		this.provisionalNickname = null;
+		this.provisionalUsername = null;
 		this.provisionalBirthday = null;
 	}
 	
@@ -256,10 +255,10 @@ public class UserFactory {
 		}
 		
 		// Creo l'effettivo oggetto User
-		User newUser = new User(this.provisionalNickname, this.provisionalBirthday);
+		User newUser = new User(this.provisionalUsername, this.provisionalBirthday);
 		
 		// Azzero i campi provvisori
-		this.provisionalNickname = null;
+		this.provisionalUsername = null;
 		this.provisionalBirthday = null;
 		
 		// Termino la modalità creazione

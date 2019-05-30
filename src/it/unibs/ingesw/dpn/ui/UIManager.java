@@ -137,7 +137,7 @@ public class UIManager {
 			if (this.users.login(username)) {
 				mainMenu();
 			} else {
-				this.userFactory.startCreation();
+				this.userFactory.startCreation(username);
 				createUserMenu();
 			}
 		};
@@ -161,7 +161,7 @@ public class UIManager {
 
 		// Azione per il setup del nickname
 		MenuAction nicknameAction = () -> {
-			this.userFactory.acquireNickname();
+			this.userFactory.acquireUsername();
 			this.createUserMenu();
 		};
 		
@@ -184,7 +184,7 @@ public class UIManager {
 		String nicknameEntry = String.format(
 				entryFormat,
 				"Nickname",
-				this.userFactory.getProvisionalNicknameString());
+				this.userFactory.getProvisionalUsernameString());
 		createUserMenu.addEntry(nicknameEntry, nicknameAction);
 		// Data di nascita
 		String birthdayEntry = String.format(
