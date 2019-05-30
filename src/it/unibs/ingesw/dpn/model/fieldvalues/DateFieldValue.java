@@ -25,7 +25,7 @@ public class DateFieldValue extends Date implements FieldValue, Serializable {
 	private static final long serialVersionUID = 715073002238005354L;
 	
 	private static final String DATE_FORMAT_STRING = "dd/MM/yyyy - HH:mm";
-	public static final String DATE_DELIMITER = "(/|-|,| )";
+	private static final String DATE_DELIMITER = "(/|-|,| )";
 	private static final String HOURS_DELIMITER = "(:|\\.| )";
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(DATE_FORMAT_STRING);
 

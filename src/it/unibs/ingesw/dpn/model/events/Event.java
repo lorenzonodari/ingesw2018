@@ -11,6 +11,7 @@ import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
 import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
 import it.unibs.ingesw.dpn.model.fields.CommonField;
 import it.unibs.ingesw.dpn.model.fields.Field;
+import it.unibs.ingesw.dpn.model.fields.UserField;
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.IntegerFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
@@ -71,6 +72,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	
 	private final CategoryEnum category;
 	
+	/** La mappa dei valori e dei campi che caratterizzano e descrivono l'evento */
 	private final Map<Field, FieldValue> valuesMap;
 	
 	private EventState state;
@@ -97,8 +99,8 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * E' necessario chiamare il metodo "subscribe" per confermare l'iscrizione, ma solamente DOPO aver pubblicato l'evento.
 	 * 
 	 * @param creator L'utente {@link User} creatore dell'evento
-	 * @param category la categoria prescelta
-	 * @param fieldValues le coppie (campo-valore) dell'evento
+	 * @param category La categoria prescelta
+	 * @param fieldValues Le coppie (campo-valore) dell'evento
 	 */
 	public Event(User creator, CategoryEnum category, Map<Field, FieldValue> fieldValues) {
 		// Verifico che i parametri non siano nulli
@@ -180,10 +182,6 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		return this.category;
 	}
 	
-	public EventHistory getHistory() {
-		return this.history;
-	}
-	
 	/**
 	 * Restituisce il valore caratterizzante l'evento del campo richiesto.
 	 * 
@@ -219,31 +217,29 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		}
 	 }
 	 
-	 
 	 /**
-	  * Invia una notifica al creatore dell'evento
+	  * Invia una notifica al creatore dell'evento.
 	  * 
 	  * @param message Il testo della notifica
 	  */
 	 void notifyCreator(String message) {
-		 
 		 creator.getMailbox().deliver(new Notification(message));
-		 
 	 }
 	 
 	 /**
-	  * Invia una notifica a tutti i partecipanti all'evento, tranne che al creatore
+	  * Invia una notifica a tutti i partecipanti all'evento ma NON al creatore.
 	  * 
 	  * @param message Il testo della notifica
 	  */
 	 void notifyPartecipants(String message) {
-		 
 		 for (Mailbox m : mailingList) {
-			 
-			 if (m == creator.getMailbox()) continue;
-			 
+			 // Se incontro la mailbox del creatore
+			 if (m == creator.getMailbox()) {
+				 // Passo alla mailbox successiva
+				 continue;
+			 }
+			 // Invio la notifica
 			 m.deliver(new Notification(message));
-			 
 		 }
 	 }
 	
@@ -536,7 +532,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		String categoryName = CategoryProvider.getProvider().getCategory(this.category).getName();
 		description.append(String.format("Categoria   : %s\n", categoryName));
 		// Creatore
-		description.append(String.format("Creatore    : %s\n", this.getCreator().getUsername()));
+		description.append(String.format("Creatore    : %s\n", this.getCreator().getFieldValue(UserField.NICKNAME)));
 		// Valori dei campi
 		description.append("Campi       :\n");
 		Category cat = CategoryProvider.getProvider().getCategory(CategoryEnum.PARTITA_DI_CALCIO);

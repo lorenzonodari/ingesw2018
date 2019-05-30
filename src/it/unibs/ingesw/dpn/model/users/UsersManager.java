@@ -2,6 +2,8 @@ package it.unibs.ingesw.dpn.model.users;
 
 import java.io.Serializable;
 import java.util.LinkedList;
+
+import it.unibs.ingesw.dpn.model.fields.UserField;
 /**
  * Classe adibita alla gestione dei dati relativi agli utenti e dei login/logout
  */
@@ -26,17 +28,17 @@ public class UsersManager implements Serializable {
 	}
 	
 	/**
-	 * Restituisce l'utente al quale e' associato lo username dato, se esistente. In caso
+	 * Restituisce l'utente al quale e' associato lo nickname dato, se esistente. In caso
 	 * contrario, restituisce null.
 	 * 
-	 * @param username Lo username dell'utente desiderato
+	 * @param nickname Lo nickname dell'utente desiderato
 	 * @return L'utente cercato o null se questo non esiste
 	 */
-	public User getUser(String username) {
+	public User getUser(String nickname) {
 		
 		User result = null;
 		for (User user : this.users) {
-			if (user.getUsername().equals(username)) {
+			if (user.getFieldValue(UserField.NICKNAME).toString().equals(nickname)) {
 				result = user;
 				break;
 			}
@@ -63,8 +65,8 @@ public class UsersManager implements Serializable {
 	}
 	
 	/**
-	 * Effettua il login con lo username dato.
-	 * Se lo username non è presente all'interno del sistema, il metodo restituisce "false".
+	 * Effettua il login con lo nickname dato.
+	 * Se lo nickname non è presente all'interno del sistema, il metodo restituisce "false".
 	 * Se invece il login va a buon fine, il metodo restituisce "true".
 	 * 
 	 * Precondizione: nessun altro utente deve essere attualmente connesso al sistema.
@@ -73,14 +75,14 @@ public class UsersManager implements Serializable {
 	 * 
 	 * @return Un valore booleano che indica se l'utente si è connesso correttamente.
 	 */
-	public boolean login(String username) {
+	public boolean login(String nickname) {
 		
 		// Verifica delle precondizioni
 		if (this.currentUser != null) {
 			throw new IllegalStateException();
 		}
 		
-		User user = getUser(username);
+		User user = getUser(nickname);
 		
 		// Verifico se l'utente non esiste
 		if (user == null) {
@@ -130,12 +132,12 @@ public class UsersManager implements Serializable {
 	 * Verifica se un utente con il nome passato come parametro è già registrato 
 	 * all'interno del sistema.
 	 * 
-	 * @param username Il nickname da cercare.
+	 * @param nickname Il nickname da cercare.
 	 * @return "True" se l'utente esiste, "False" altrimenti.
 	 */
-	public boolean isNicknameExisting(String username) {
+	public boolean isNicknameExisting(String nickname) {
 		for (User u : this.users) {
-			if (u.getUsername().equals(username)) {
+			if (u.getFieldValue(UserField.NICKNAME).equals(nickname)) {
 				return true;
 			}
 		}

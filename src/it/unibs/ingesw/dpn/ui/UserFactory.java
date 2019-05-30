@@ -1,10 +1,14 @@
 package it.unibs.ingesw.dpn.ui;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Scanner;
+import java.util.HashMap;
+import java.util.Map;
 
-import it.unibs.ingesw.dpn.model.fieldvalues.DateFieldValue;
+import it.unibs.ingesw.dpn.model.fields.Field;
+import it.unibs.ingesw.dpn.model.fields.UserField;
+import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
+import it.unibs.ingesw.dpn.model.fieldvalues.LocalDateFieldValue;
+import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
 import it.unibs.ingesw.dpn.model.users.User;
 
 /**
@@ -13,7 +17,7 @@ import it.unibs.ingesw.dpn.model.users.User;
  * 
  * Per la creazione di un utente è necessario chiamare, nell'ordine:
  * - startCreation(..);
- * - metodi di acquisizione dati (acquireUsername, acquireBirthday, ...)
+ * - metodi di acquisizione dati (acquireNickname, acquireBirthday, ...)
  * - finalizeCreation(..);
  * 
  * @author Michele Dusi, Lorenzo Nodari, Emanuele Poggi
@@ -29,12 +33,11 @@ public class UserFactory {
 	private boolean creationOn = false;
 
 	/** Attributi che aiutano la creazione di un evento */
-	private String provisionalUsername = null;
-	private LocalDate provisionalBirthday = null;
+	private Map<Field, FieldValue> provisionalFieldValues = null;
 
 	/** Stringhe */
 	private static final String EMPTY_FIELDVALUE_STRING = "- - - - -";
-	private static final String CREATION_MODE_OFF_EXCEPTION = "Impossibile acquisire dati se non è stata inizializzata la creazione di un nuovo evento";
+	private static final String CREATION_MODE_OFF_EXCEPTION = "Impossibile acquisire dati se non è stata inizializzata la creazione di un nuovo utente";
 	
 	/** Parametri */
 	private static final int AGE_LIMIT = 12;
@@ -57,9 +60,14 @@ public class UserFactory {
 	 * Precondizione: la factory non deve avere altre creazioni in corso. Una factory puà costruire un solo
 	 * evento alla volta, secondo il processo descritto nell'introduzione alla classe.
 	 * 
-	 * @param defaultUsername Il username di default con cui cominciare l'iscrizione
+	 * @param defaultNickname Il nickname di default con cui cominciare l'iscrizione
 	 */
-	public void startCreation(String defaultUsername) {		
+	public void startCreation(String defaultNickname) {		
+		// Verifico che i parametri non siano null
+		if (defaultNickname == null) {
+			throw new IllegalArgumentException("Impossibile creare un evento con creatore o categoria nulli");
+		}
+		
 		if (this.creationOn) {
 			// E' già in corso la creazione di un evento, non è possibile cominciarne una nuova
 			throw new IllegalStateException("Impossibile cominciare la creazione di un nuovo evento: una creazione di un evento è già in corso");
@@ -69,79 +77,65 @@ public class UserFactory {
 		}
 		
 		// Preparo i campi vuoti, pronti per essere inizializzati
-		this.provisionalUsername = defaultUsername;
-		this.provisionalBirthday = null;
+		this.provisionalFieldValues = new HashMap<Field, FieldValue>();
+
+		for (Field f : UserField.values()) {
+			this.provisionalFieldValues.put(f, null);
+		};
 		
+		// Inizializzo già il nickname
+		this.provisionalFieldValues.put(UserField.NICKNAME, new StringFieldValue(defaultNickname));
 	}
 
 	/**
-	 * Acquisisce una stringa NON VUOTA come username dell'utente che si sta creando.
+	 * Gestisce l'acquisizione del dato {@link FieldValue} relativo al campo {@link Field} passato come parametro.
 	 * 
 	 * Precondizione: la factory deve essere in modalità "creazione", ossia deve essere stato chiamato in precedenza
 	 * il metodo "startCreation".
 	 * 
-	 * TODO Implementare la verifica che lo username non sia già usato.
+	 * Precondizione: il campo {@link Field} deve essere un campo previsto per un utente, ossia deve
+	 * essere un campo della classe {@link UserField}. Questa condizione è verificata in automatico poiché il metodo chiamante
+	 * presente in {@link UIManager} ha come valori possibili per i campi soltanto oggetti {@link UserField}.
+	 * 
+	 * @param field Il campo di cui si vuole acquisire il valore
 	 */
-	public void acquireUsername() {
+	public void acquireFieldValue(Field field) {
 		// Verifico di essere in modalità "creazione di un nuovo evento"
 		if (!creationOn) {
 			throw new IllegalStateException(CREATION_MODE_OFF_EXCEPTION);
 		}
 		
-		// Prompt e interazione con l'utente
-		renderer.renderText("Inserisci il username del nuovo utente:");
-		this.provisionalUsername = getter.getString(); // TODO CONTROLLARE CHE IL NICK SIA DISPONIBILE
-	}
-	
-	/**
-	 * Acquisisce la data di nascita dell'utente che si sta creando.
-	 * 
-	 * Precondizione: la factory deve essere in modalità "creazione", ossia deve essere stato chiamato in precedenza
-	 * il metodo "startCreation".
-	 */
-	public void acquireBirthday() {
-		// Verifico di essere in modalità "creazione di un nuovo evento"
-		if (!creationOn) {
-			throw new IllegalStateException(CREATION_MODE_OFF_EXCEPTION);
+		// Verifico che il parametro non sia null
+		if (field == null) {
+			throw new IllegalArgumentException("Parametro nullo: impossibile acquisire un dato senza specificare il campo");
 		}
 		
-		boolean okFlag = false;
-		LocalDate date = null;
 		// Prompt e interazione con l'utente
-		do {
-			renderer.renderText("Inserisci il giorno in formato (GG/MM/AAAA)");
-			String data = getter.getMatchingString(
-					"(0?([1-9])|[1-2][0-9]|3([0-1]))" // Giorno
-					+ DateFieldValue.DATE_DELIMITER // Divisore
-					+ "(0?([1-9])|1([0-2]))" // Mese
-					+ DateFieldValue.DATE_DELIMITER // Divisore
-					+ "(19|20|21)([0-9][0-9])"); // Anno
-			// Estraggo i dati
-			Scanner scanDate = new Scanner(data);
-			scanDate.useDelimiter(DateFieldValue.DATE_DELIMITER);		
-			int giorno = scanDate.nextInt();
-			int mese = scanDate.nextInt();
-			int anno = scanDate.nextInt();
-			scanDate.close();
-			
-			date = LocalDate.of(anno, mese, giorno);
-			
-			// Verifiche
-			if (date.isAfter(LocalDate.now())) {
-				renderer.renderError("Impossibile accettare una data futura");
-			} else if (date.isAfter(LocalDate.now().minusYears(AGE_LIMIT))) {
-				renderer.renderError(String.format(
-						"Per utilizzare questo programma devi avere almeno %d anni.\nInserisci la tua vera data di nascita o termina l'esecuzione del programma.",
-						AGE_LIMIT));
-			} else {
-				okFlag = true;
-			}
-			
-		} while (!okFlag);
+		renderer.renderLineSpace();
+		renderer.renderText(String.format(
+				" ### %-50s",
+				field.getName().toUpperCase()));
+		renderer.renderText(String.format(
+				" ### %s",
+				field.getDescription()));
+		renderer.renderLineSpace();
 		
-		this.provisionalBirthday = date;
+		// Acquisizione del dato, basata su Field
+		FieldValue value = null;
+		
+		// Campi previsti per un utente
+		if (field instanceof UserField) {
+			value = acquireUserFieldValue((UserField) field);
+		
+		// Campi estranei
+		} else {
+			throw new IllegalArgumentException("Campo \"Field\" non riconosciuto: impossibile acquisire un valore");
+		}
+		
+		// Aggiungo il dato acquisito alla mappa di valori provvisori
+		this.provisionalFieldValues.put(field, value);
 	}
-	
+
 	/**
 	 * Metodo che verifica se sono stati compilati TUTTI i campi obbligatori previsti.
 	 * In tal caso restituisce true, altrimenti false.
@@ -158,62 +152,59 @@ public class UserFactory {
 		}
 		
 		// Verifico tutti i campi
-		if (this.provisionalUsername == null ) {
-			return false;
-//		} else if (this.provisionalBirthday == null) { 
-//			return false;
-			/* NOTA : Al momento la compilazione della data NON è obbligatoria */
-		} else {
-			return true;
+		boolean checkMandatoryFieldsFlag = true;
+		for (Field f : this.provisionalFieldValues.keySet()) {
+			if (f.isMandatory() && provisionalFieldValues.get(f) == null) {
+				checkMandatoryFieldsFlag = false;
+				break;
+			}
 		}
+		return checkMandatoryFieldsFlag;
+	
 	}
 
 	/**
-	 * Restituisce un valore testuale per il username dell'utente.
-	 * Nel caso in cui il username non sia ancora stato inizializzato, viene restituita una stringa di 
-	 * default "- - - - -".
+	 * Restituisce i valori parzialmente compilati dell'utente che si sta creando.
 	 * 
 	 * Precondizione: la factory deve essere in modalità "creazione", ossia deve essere stato chiamato in precedenza
 	 * il metodo "startCreation".
 	 * 
-	 * @return Un testo rappresentante il valore del campo username
+	 * @return la mappa <Field, FieldValue> non completa di valori
 	 */
-	public String getProvisionalUsernameString() {
-		// Verifico di essere in modalità "creazione di un nuovo evento"
+	public Map<Field, FieldValue> getProvisionalFieldValues() {
+		// Verifico di essere in modalità "creazione di un nuovo utente"
 		if (!creationOn) {
 			throw new IllegalStateException(CREATION_MODE_OFF_EXCEPTION);
 		}
-		// Restituisco un valore in base all'inizializzazione
-		return (this.provisionalUsername != null ? 
-				this.provisionalUsername :
-					EMPTY_FIELDVALUE_STRING);
 		
+		return this.provisionalFieldValues;
 	}
-	
-	/** Formato della data */
-	private static final String DATE_FORMAT_STRING = "dd/MM/yyyy";
 	
 	/**
-	 * Restituisce un valore testuale per la data di nascita dell'utente.
-	 * Nel caso in cui la data non sia ancora stata inizializzata, viene restituita una stringa di 
+	 * Restituisce un valore testuale per la visualizzazione del valore del campo.
+	 * Nel caso in cui il campo non sia ancora stato inizializzato, viene restituita una stringa di 
 	 * default "- - - - -".
 	 * 
 	 * Precondizione: la factory deve essere in modalità "creazione", ossia deve essere stato chiamato in precedenza
 	 * il metodo "startCreation".
 	 * 
-	 * @return Un testo rappresentante il valore della data di nascita
+	 * @param f Il campo di cui si vuole ottenere il valore come stringa
+	 * @return Un testo rappresentante il valore del campo richiesto
 	 */
-	public String getProvisionalBirthdayString() {
-		// Verifico di essere in modalità "creazione di un nuovo evento"
+	public String getProvisionalFieldValueString(Field f) {
+		// Verifico di essere in modalità "creazione di un nuovo utente"
 		if (!creationOn) {
 			throw new IllegalStateException(CREATION_MODE_OFF_EXCEPTION);
 		}
-		// Restituisco un valore in base all'inizializzazione
-		return (this.provisionalBirthday != null ? 
-				this.provisionalBirthday.format(DateTimeFormatter.ofPattern(DATE_FORMAT_STRING)) :
-					EMPTY_FIELDVALUE_STRING);
+		
+		FieldValue value = this.provisionalFieldValues.get(f);
+		if (value != null) {
+			return value.toString();
+		} else {
+			return EMPTY_FIELDVALUE_STRING;
+		}
 	}
-	
+
 	/**
 	 * Metodo che annulla la creazione dell'utente e provoca il reset della fabbrica.
 	 * 
@@ -225,7 +216,7 @@ public class UserFactory {
 	 * 
 	 */
 	public void cancelCreation() {
-		// Verifico di essere in modalità "creazione di un nuovo evento"
+		// Verifico di essere in modalità "creazione di un nuovo utente"
 		if (!creationOn) {
 			throw new IllegalStateException(CREATION_MODE_OFF_EXCEPTION);
 		}
@@ -233,10 +224,9 @@ public class UserFactory {
 		this.creationOn = false;
 		
 		// Reset di tutte gli attributi
-		this.provisionalUsername = null;
-		this.provisionalBirthday = null;
+		this.provisionalFieldValues = null;
 	}
-	
+
 	/**
 	 * Termina la creazione di un utente con tutti i campi acquisiti finora.
 	 * 
@@ -249,23 +239,72 @@ public class UserFactory {
 	 * @return L'utente creato correttamente
 	 */
 	public User finalizeCreation() {
-		// Verifico di essere in modalità "creazione di un nuovo evento"
+		// Verifico di essere in modalità "creazione di un nuovo utente"
 		if (!creationOn) {
 			throw new IllegalStateException(CREATION_MODE_OFF_EXCEPTION);
 		}
 		
-		// Creo l'effettivo oggetto User
-		User newUser = new User(this.provisionalUsername, this.provisionalBirthday);
+		// Creo un nuovo oggetto User
+		User newUser = new User(this.provisionalFieldValues);
 		
 		// Azzero i campi provvisori
-		this.provisionalUsername = null;
-		this.provisionalBirthday = null;
+		this.provisionalFieldValues = null;
 		
 		// Termino la modalità creazione
 		this.creationOn = false;
 		
 		// Restituisco l'evento
 		return newUser;
+	}
+
+	/* METODI PRIVATI DI UTILITA' */
+
+	/**
+	 * Metodo che acquisisce e restituisce il valore di un campo "UserField".
+	 * 
+	 * Precondizione: Il campo che si vuole acquisire deve essere contenuto nell'enum {@link UserField},
+	 * ossia deve essere uno dei campi previsti per la caratterizzazione di un utente.
+	 * 
+	 * @param field Il campo di cui si vuole acquisire il valore
+	 * @return Il valore acquisito
+	 */
+	private FieldValue acquireUserFieldValue(UserField field) {
+		switch (field) {
+		
+		case NICKNAME :
+		{
+			return StringFieldValue.acquireValue(renderer, getter);
+		}
+			
+		case DATA_DI_NASCITA :
+		{
+			boolean okFlag = false;
+			LocalDateFieldValue date = null;
+			// Prompt e interazione con l'utente
+			do {
+				date = LocalDateFieldValue.acquireValue(renderer, getter);
+				
+				// Verifiche
+				if (date.getLocalDate().isAfter(LocalDate.now())) {
+					renderer.renderError("Impossibile accettare una data futura");
+				} else if (date.getLocalDate().isAfter(LocalDate.now().minusYears(AGE_LIMIT))) {
+					renderer.renderError(String.format(
+							"Per utilizzare questo programma devi avere almeno %d anni.\nInserisci la tua vera data di nascita o termina l'esecuzione del programma.",
+							AGE_LIMIT));
+				} else {
+					okFlag = true;
+				}
+				
+			} while (!okFlag);
+			
+			// Restituzione del valore acquisito
+			return date;
+		}
+		
+		}
+		
+		// Se non matcho nulla
+		throw new IllegalArgumentException("Il campo non corrisponde ad alcun campo della categoria \"Partita di calcio\"");
 	}
 	
 }

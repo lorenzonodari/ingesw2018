@@ -15,6 +15,7 @@ import it.unibs.ingesw.dpn.model.events.Event;
 import it.unibs.ingesw.dpn.model.events.EventState;
 import it.unibs.ingesw.dpn.model.fields.CommonField;
 import it.unibs.ingesw.dpn.model.fields.Field;
+import it.unibs.ingesw.dpn.model.fields.UserField;
 import it.unibs.ingesw.dpn.model.fieldvalues.DateFieldValue;
 
 /**
@@ -27,6 +28,7 @@ public class UIManager {
 	private static final String GENERIC_PROMPT = "Selezionare una voce";
 	private static final String INVALID_CHOICE_PROMPT = "Scelta non valida, riprovare";
 	private static final String LIST_ELEMENT_PREFIX = " * ";
+	private static final String CREATION_ENTRY_FORMAT = "%-50s : %s";
 	
 	private UIRenderer renderer;
 	private InputGetter inputManager;
@@ -131,7 +133,7 @@ public class UIManager {
 		// Callback Login
 		MenuAction loginAction = () -> {
 			// Leggo il nuovo nickname da input
-			this.renderer.renderText("Username: ");
+			this.renderer.renderText("Nickname: ");
 			String username = this.inputManager.getString();
 			// Provo a loggare
 			if (this.users.login(username)) {
@@ -159,39 +161,31 @@ public class UIManager {
 			this.loginMenu();
 			};
 
-		// Azione per il setup del nickname
-		MenuAction nicknameAction = () -> {
-			this.userFactory.acquireUsername();
-			this.createUserMenu();
-		};
-		
-		// Azione per il setup della data di nascita
-		MenuAction birthdayAction = () -> {
-			this.userFactory.acquireBirthday();
-			this.createUserMenu();
-		};
-		
 		String title = String.format("Creazione di un nuovo utente");
 		Menu createUserMenu = new Menu(title, 
 				"Seleziona i campi dell'utente che vuoi impostare. \n"
+				+ "I campi contrassegnati dall'asterisco (*) sono obbligatori.\n"
 				+ "Quando avrai completato tutti i campi seleziona \"Conferma\".",
 				"Annulla la creazione e torna al menu principale", abortAction);
-		
-		String entryFormat = "%-30s : %s";
-				
-		// Creo le entries
-		// Nickname
-		String nicknameEntry = String.format(
-				entryFormat,
-				"Nickname",
-				this.userFactory.getProvisionalUsernameString());
-		createUserMenu.addEntry(nicknameEntry, nicknameAction);
-		// Data di nascita
-		String birthdayEntry = String.format(
-				entryFormat,
-				"Data di nascita",
-				this.userFactory.getProvisionalBirthdayString());
-		createUserMenu.addEntry(birthdayEntry, birthdayAction);
+			
+		// Ciclo su tutti i campi previsti per l'utente
+		for (Field f : UserField.values()) {
+			
+			/* Azione relativa ad un'opzione */
+			MenuAction fieldAction = () -> {
+				this.userFactory.acquireFieldValue(f);
+				// Creo il nuovo menu aggiornato
+				this.createUserMenu();
+				};
+			
+			// Creo la entry
+			String entryTitle = String.format(
+					CREATION_ENTRY_FORMAT,
+					f.getName() + ((f.isMandatory()) ? " (*)" : ""),
+					this.userFactory.getProvisionalFieldValueString(f));
+			createUserMenu.addEntry(entryTitle, fieldAction);
+			
+		}
 		
 		// Verifico che tutti i campi obbligatori siano stati acquisiti
 		if (this.userFactory.verifyMandatoryFields()) {
@@ -581,7 +575,11 @@ public class UIManager {
 			};
 		
 		String title = String.format("Creazione di un evento: %s", this.eventFactory.getProvisionalCategoryName());
-		Menu createEventMenu = new Menu(title, "Seleziona i campi dell'evento che vuoi impostare. \nI campi contrassegnati dall'asterisco (*) sono obbligatori.\nQuando avrai completato tutti i campi obbligatori seleziona \"Conferma\".", "Annulla la creazione e torna al menu principale", abortAction);
+		Menu createEventMenu = new Menu(title, 
+				"Seleziona i campi dell'evento che vuoi impostare. \n"
+				+ "I campi contrassegnati dall'asterisco (*) sono obbligatori.\n"
+				+ "Quando avrai completato tutti i campi obbligatori seleziona \"Conferma\".", 
+				"Annulla la creazione e torna al menu principale", abortAction);
 				
 		// Ciclo su tutti i campi previsti per la categoria dell'evento che voglio creare
 		for (Field f : this.eventFactory.getProvisionalCategoryFields()) {
@@ -595,7 +593,7 @@ public class UIManager {
 			
 			// Creo la entry
 			String entryTitle = String.format(
-					"%-50s : %s",
+					CREATION_ENTRY_FORMAT,
 					f.getName() + ((f.isMandatory()) ? " (*)" : ""),
 					this.eventFactory.getProvisionalFieldValueString(f));
 			createEventMenu.addEntry(entryTitle, fieldAction);

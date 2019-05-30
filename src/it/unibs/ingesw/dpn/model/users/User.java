@@ -1,7 +1,11 @@
 package it.unibs.ingesw.dpn.model.users;
 
 import java.io.Serializable;
-import java.time.LocalDate;
+import java.util.Map;
+
+import it.unibs.ingesw.dpn.model.fields.Field;
+import it.unibs.ingesw.dpn.model.fields.UserField;
+import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 
 /**
  * Classe utilizzata per contenere i dati relativi ad un singolo utente
@@ -12,61 +16,48 @@ public class User implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = -1333193895476185438L;
-
-	/**
-	 * La casella di posta a cui recapitare i messaggi dell'utente.
-	 */
-	private Mailbox mailbox;
 	
-	/** Il nickname dell'utente */
-	private final String username;
-	/** La data di  nascita dell'utente */
-	private LocalDate birthday;
+	/** Eccezioni */
+	private static final String FIELD_NOT_PRESENT_EXCEPTION = "Il campo \"%s\" non appartiene alla categoria prevista dall'evento";
+
+	/** La casella di posta a cui recapitare i messaggi dell'utente */
+	private Mailbox mailbox;
+
+	/** Mappa dei campi che definiscono e caratterizzano l'utente */
+	private final Map<Field, FieldValue> valuesMap;
 	
 	/**
 	 * Crea un nuovo utente con il nome dato. La relativa mailbox e' automaticamente creata, vuota.
 	 * 
-	 * Nota: il nickname di un utente non può essere modificato successivamente.
-	 * Gli altri campi, invece, sì. Tuttavia è richiesto almeno un valore valido al momento della creazione.
+	 * Precondizione: la lista di coppie (campo, valore) devono essere istanziate correttamente e devono 
+	 * rispettare i campi previsti dalla categoria. Questo significa anche che tutti i campi obbligatori
+	 * devono già essere stati inizializzati. L'unica classe abilitata a fare ciò è la classe {@link UserFactory}.
 	 * 
-	 * Precondizione: lo username non può essere nullo. Tuttavia, è possibile che la data di nascita lo sia.
-	 * 
-	 * @param username Il nome dell'utente da creare
+	 * @param fieldValues Le coppie (campo-valore) dell'utente
 	 */
-	public User(String username, LocalDate birthday) {
-		if (username == null) {
+	public User(Map<Field, FieldValue> fieldValues) {
+		// Verifico che i parametri non siano nulli
+		if (fieldValues == null) {
 			throw new IllegalArgumentException("Parametri nulli: impossibile creare un nuovo utente");
 		}
-		// Caratteristiche dell'utente
-		this.username = username;
-		this.birthday = birthday;
 		
+		// Inizializzo gli attributi della classe
+		this.valuesMap = fieldValues;
+		
+		// Imposto i valori di default per alcuni campi che non sono stati inizializzati
+		this.setDefaultFieldValues();
+		
+		// Inizializzo una nuova mailbox
 		this.mailbox = new Mailbox();
 	}
-	
+
 	/**
-	 * Restituisce lo username dell'utente
-	 * 
-	 * @return Lo username dell'utente
+	 * Imposta il valore id default di alcuni campi.
+	 * Questo metodo viene chiamato dal costruttore e racchiude tutte le procedure che impostano
+	 * i valori dei campi facoltativi utilizzati nel programma.
 	 */
-	public String getUsername() {
-		return this.username;
-	}
-	
-	/**
-	 * Restituisce la data di nascita dell'utente.
-	 * 
-	 * Precondizione: la data di nascita non deve essere nulla. Se così fosse, il metodo lancia un'eccezione
-	 * segnalando al chiamante che è necessario impostare un valore per questa data di nascita.
-	 * 
-	 * @return La data di nascita dell'utente.
-	 */
-	public LocalDate getBirthday() {
-		if (this.birthday == null) {
-			throw new IllegalStateException("Questo utente non possiede una data di nascita inizializzata");
-		} else {
-			return this.birthday;
-		}
+	private void setDefaultFieldValues() {
+		// Al momento non esistono campi da impostare in maniera automatica con valori di default
 	}
 	
 	/**
@@ -76,6 +67,45 @@ public class User implements Serializable {
 	 */
 	public Mailbox getMailbox() {
 		return this.mailbox;
+	}
+
+	/**
+	 * Restituisce il valore caratterizzante l'utente del campo richiesto.
+	 * 
+	 * Precondizione: l'oggetto {@link Field} passato come parametro deve essere un campo previsto per un
+	 * utente, ossia deve appartenere all'enumerazione {@link UserField}.
+	 * 
+	 * @param chosenField il campo di cui si vuole conoscere il valore
+	 * @return Il valore del campo
+	 */
+	public FieldValue getFieldValue(Field chosenField) {
+		if (this.valuesMap.containsKey(chosenField)) {
+			return this.valuesMap.get(chosenField);
+		} else {
+			throw new IllegalArgumentException(String.format(
+					FIELD_NOT_PRESENT_EXCEPTION, 
+					chosenField.getName()));
+		}
+	}
+	
+	/**
+	 * Restituisce una stringa contenente la descrizione completa ma compatta delle caratteristiche
+	 * dell'utente.
+	 *  
+	 * @return Una descrizione testuale dell'utente
+	 */
+	public String toString() {
+		StringBuffer description = new StringBuffer();
+		// Valori dei campi
+		description.append("Descrizione dell'utente\n");
+		for (Field f : UserField.values()) {
+			if(!(this.getFieldValue(f) == null)) {
+			description.append(String.format(" | %-50s : %s\n",
+					f.getName(),
+					this.getFieldValue(f).toString()));
+			}
+		}
+		return description.toString();
 	}
 
 }

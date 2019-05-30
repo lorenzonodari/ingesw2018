@@ -352,7 +352,7 @@ public class EventFactory {
 	 * ossia deve essere comune a tutte le categorie.
 	 * 
 	 * @param field Il campo di cui si vuole acquisire il valore
-	 * @return
+	 * @return Il valore acquisito
 	 */
 	private FieldValue acquireCommonFieldValue(CommonField field) {
 		switch (field) {
