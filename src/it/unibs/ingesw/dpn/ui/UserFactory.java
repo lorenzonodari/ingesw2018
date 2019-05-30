@@ -1,7 +1,10 @@
 package it.unibs.ingesw.dpn.ui;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Scanner;
 
+import it.unibs.ingesw.dpn.model.fieldvalues.DateFieldValue;
 import it.unibs.ingesw.dpn.model.users.User;
 
 /**
@@ -109,14 +112,19 @@ public class UserFactory {
 		do {
 			renderer.renderText("Inserisci il giorno in formato (GG/MM/AAAA)");
 			String data = getter.getMatchingString(
-					  "(0([1-9])|[1-2][0-9]|3([0-1]))" // Giorno
-					+ "(/|-)" // Divisore
-					+ "(0([1-9])|1([0-2]))" // Mese
-					+ "(/|-)" // Divisore
+					"(0?([1-9])|[1-2][0-9]|3([0-1]))" // Giorno
+					+ DateFieldValue.DATE_DELIMITER // Divisore
+					+ "(0?([1-9])|1([0-2]))" // Mese
+					+ DateFieldValue.DATE_DELIMITER // Divisore
 					+ "(19|20|21)([0-9][0-9])"); // Anno
-			int giorno = Integer.parseInt(data.substring(0, 2));
-			int mese = Integer.parseInt(data.substring(3, 5));
-			int anno = Integer.parseInt(data.substring(6, 10));
+			// Estraggo i dati
+			Scanner scanDate = new Scanner(data);
+			scanDate.useDelimiter(DateFieldValue.DATE_DELIMITER);		
+			int giorno = scanDate.nextInt();
+			int mese = scanDate.nextInt();
+			int anno = scanDate.nextInt();
+			scanDate.close();
+			
 			date = LocalDate.of(anno, mese, giorno);
 			
 			// Verifiche
@@ -153,8 +161,9 @@ public class UserFactory {
 		// Verifico tutti i campi
 		if (this.provisionalNickname == null ) {
 			return false;
-		} else if (this.provisionalBirthday == null) {
-			return false;
+//		} else if (this.provisionalBirthday == null) { 
+//			return false;
+			/* NOTA : Al momento la compilazione della data NON è obbligatoria */
 		} else {
 			return true;
 		}
@@ -182,6 +191,9 @@ public class UserFactory {
 		
 	}
 	
+	/** Formato della data */
+	private static final String DATE_FORMAT_STRING = "dd/MM/yyyy";
+	
 	/**
 	 * Restituisce un valore testuale per la data di nascita dell'utente.
 	 * Nel caso in cui la data non sia ancora stata inizializzata, viene restituita una stringa di 
@@ -199,7 +211,7 @@ public class UserFactory {
 		}
 		// Restituisco un valore in base all'inizializzazione
 		return (this.provisionalBirthday != null ? 
-				this.provisionalBirthday.toString() :
+				this.provisionalBirthday.format(DateTimeFormatter.ofPattern(DATE_FORMAT_STRING)) :
 					EMPTY_FIELDVALUE_STRING);
 	}
 	

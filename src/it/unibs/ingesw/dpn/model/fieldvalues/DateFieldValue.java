@@ -3,6 +3,8 @@ package it.unibs.ingesw.dpn.model.fieldvalues;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Scanner;
+
 import it.unibs.ingesw.dpn.ui.InputGetter;
 import it.unibs.ingesw.dpn.ui.UIRenderer;
 
@@ -23,6 +25,8 @@ public class DateFieldValue extends Date implements FieldValue, Serializable {
 	private static final long serialVersionUID = 715073002238005354L;
 	
 	private static final String DATE_FORMAT_STRING = "dd/MM/yyyy - HH:mm";
+	public static final String DATE_DELIMITER = "(/|-|,| )";
+	private static final String HOURS_DELIMITER = "(:|\\.| )";
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(DATE_FORMAT_STRING);
 
 	/**
@@ -63,20 +67,31 @@ public class DateFieldValue extends Date implements FieldValue, Serializable {
 		// Anno, mese, giorno
 		renderer.renderText("Inserisci il giorno in formato (GG/MM/AAAA)");
 		String data = getter.getMatchingString(
-				  "(0([1-9])|[1-2][0-9]|3([0-1]))" // Giorno
-				+ "(/|-)" // Divisore
-				+ "(0([1-9])|1([0-2]))" // Mese
-				+ "(/|-)" // Divisore
+				"(0?([1-9])|[1-2][0-9]|3([0-1]))" // Giorno
+				+ DATE_DELIMITER // Divisore
+				+ "(0?([1-9])|1([0-2]))" // Mese
+				+ DATE_DELIMITER // Divisore
 				+ "(19|20|21)([0-9][0-9])"); // Anno
-		int giorno = Integer.parseInt(data.substring(0, 2));
-		int mese = Integer.parseInt(data.substring(3, 5)) - 1;
-		int anno = Integer.parseInt(data.substring(6, 10));							
+		// Estraggo i dati
+		Scanner scanDate = new Scanner(data);
+		scanDate.useDelimiter(DATE_DELIMITER);		
+		int giorno = scanDate.nextInt();
+		int mese = scanDate.nextInt() - 1;
+		int anno = scanDate.nextInt();
+		scanDate.close();
 				
 		// Ora e minuti
 		renderer.renderText("Inserisci l'orario in formato (HH:MM)");
-		String ora = getter.getMatchingString("([0-1][0-9]|2[0-3])(:|\\.)([0-5][0-9])");
-		int ore = Integer.parseInt(ora.substring(0, 2));
-		int minuti = Integer.parseInt(ora.substring(3, 5));
+		String ora = getter.getMatchingString(
+				"([0-1]?[0-9]|2[0-3])" // Ore
+				+ HOURS_DELIMITER // Divisore
+				+ "([0-5][0-9])"); // Minuti
+		// Estraggo i dati
+		Scanner scanHours = new Scanner(ora);
+		scanHours.useDelimiter(HOURS_DELIMITER);	
+		int ore = scanHours.nextInt();
+		int minuti = scanHours.nextInt();
+		scanHours.close();
 		
 		// Creo la data
 		java.util.Calendar cal = java.util.Calendar.getInstance();

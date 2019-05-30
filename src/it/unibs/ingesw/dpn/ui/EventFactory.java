@@ -574,15 +574,15 @@ public class EventFactory {
 			boolean check = false;
 			do {
 				renderer.renderText("Inserisci il valore minimo");
-				int min = getter.getInteger(0, Integer.MAX_VALUE);
+				int min = getter.getInteger(0, 150);
 				renderer.renderText("Inserisci il valore massimo");
-				int max = getter.getInteger(0, Integer.MAX_VALUE);
+				int max = getter.getInteger(0, 150);
 				
-				if (min <= max) {
+				if (min > max) {
+					renderer.renderError("Inserire un valore minimo inferiore al valore massimo");
+				} else {
 					value = new IntegerIntervalFieldValue(min, max);
 					check = true;
-				} else {
-					renderer.renderError("Inserire un valore minimo inferiore al valore massimo");
 				}
 			} while (!check);
 			return value;
