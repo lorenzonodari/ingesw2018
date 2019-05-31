@@ -29,9 +29,9 @@ public class User implements Serializable {
 	/**
 	 * Crea un nuovo utente con il nome dato. La relativa mailbox e' automaticamente creata, vuota.
 	 * 
-	 * Precondizione: la lista di coppie (campo, valore) devono essere istanziate correttamente e devono 
-	 * rispettare i campi previsti dalla categoria. Questo significa anche che tutti i campi obbligatori
-	 * devono già essere stati inizializzati. L'unica classe abilitata a fare ciò è la classe {@link UserFactory}.
+	 * Precondizione: la lista di coppie (campo, valore) devono essere istanziate correttamente.
+	 * Questo significa che tutti i campi obbligatori devono già essere stati inizializzati. 
+	 * L'unica classe abilitata a fare ciò è la classe {@link UserFactory}.
 	 * 
 	 * @param fieldValues Le coppie (campo-valore) dell'utente
 	 */

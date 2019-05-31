@@ -51,16 +51,17 @@ public class EventBoard implements Serializable {
 	}
 	
 	/**
-	 * Metodo che rimuove un evento dalla bacheca. Si noti che un evento puo' essere rimosso
-	 * dalla bacheca solo se 
+	 * Metodo che rimuove un evento dalla bacheca. Si noti che un evento puo' essere
+	 * rimosso dalla bacheca solo se e' rispettato il valore del suo campo "Termine ultimo di 
+	 * ritiro iscrizione".
 	 * 
-	 * Precondizione: l'evento deve essere già nella bacheca 
+	 * Precondizione: l'evento deve essere già nella bacheca
 	 * 
 	 * @param evento da rimuovere dalla bacheca
 	 */
 	public boolean removeEvent(Event event) {
 
-		// verifica precondizione
+		// Verifica precondizione
 		if (event == null) {
 			throw new IllegalStateException();
 		}
@@ -127,9 +128,9 @@ public class EventBoard implements Serializable {
 	/**
 	 * Funzione che prende in ingresso un utente e restituisce una lista di 
 	 * tutti gli utenti che hanno partecipato a eventi precedentemente creati
-	 * da lui attualmente allo stato di chiusi
+	 * da lui e attualmente nello stato "evento chiuso"
 	 * 
-	 * @param user su cui si fa la ricerca	 
+	 * @param user Utente sul quale si conduce la ricerca	 
 	 */
 	public List<User> getListOfOldSubscribersFromPastEvents(User user) {
 		ArrayList<User> subscribers = new ArrayList<>();
@@ -147,7 +148,7 @@ public class EventBoard implements Serializable {
 		return subscribers;
 	}
 	/**
-	 * restituisce la scritta degli iscritti a un evento 
+	 * restituisce la list degli iscritti a un evento 
 	 * 
 	 * Precondizione: l'evento deve essere esistente
 	 * 
