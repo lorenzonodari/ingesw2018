@@ -10,6 +10,7 @@ import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.LocalDateFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
 import it.unibs.ingesw.dpn.model.users.User;
+import it.unibs.ingesw.dpn.model.users.UsersManager;
 
 /**
  * Classe che permette la creazione di utenti in maniera "controllata", secondo il pattern "Factory" e
@@ -29,6 +30,9 @@ public class UserFactory {
 	private final UIRenderer renderer;
 	private final InputGetter getter;
 	
+	/** Classi per recuperare dati ausiliari */
+	private final UsersManager usersManager;
+	
 	/** Flag per mantenere lo stato della factory */
 	private boolean creationOn = false;
 
@@ -45,12 +49,24 @@ public class UserFactory {
 	/**
 	 * Costruttore pubblico.
 	 * 
+	 * Nota: l'oggetto "usersManager" richiesto come parametro è necessario perché la factory
+	 * ha bisgono di sapere quali utenti sono presenti nel sistema e quali nickname sono già utilizzati.
+	 * 
+	 * Precondizione: i parametri non possono ovviamente essere nulli.
+	 * 
 	 * @param renderer Il renderizzatore dei prompt e dei messaggi d'errore
 	 * @param getter L'acquisitore di dati primitivi
+	 * @param usersManager La classe che si occupa della gestione degli utenti.
 	 */
-	public UserFactory(UIRenderer renderer, InputGetter getter) {
+	public UserFactory(UIRenderer renderer, InputGetter getter, UsersManager usersManager) {
+		// verifico la precondizione
+		if (renderer == null || getter == null || usersManager == null) {
+			throw new IllegalArgumentException("impossiile creare un oggetto UserFactory con parametri nulli");
+		}
+		
 		this.renderer = renderer;
 		this.getter = getter;
+		this.usersManager = usersManager;
 	}
 	
 
@@ -273,7 +289,23 @@ public class UserFactory {
 		
 		case NICKNAME :
 		{
-			return StringFieldValue.acquireValue(renderer, getter);
+			boolean okFlag = false;
+			StringFieldValue nick = null;
+			// Prompt e interazione con l'utente
+			do {
+				nick = StringFieldValue.acquireValue(renderer, getter);
+
+				// Verifiche
+				if (this.usersManager.isNicknameExisting(nick.toString())) {
+					renderer.renderError("Questo nickname è già utilizzato, per favore scegli un altro nickname personale.");
+				} else {
+					okFlag = true;
+				}
+			} while (!okFlag);
+
+			// Restituzione del valore acquisito
+			return nick;
+			
 		}
 			
 		case DATA_DI_NASCITA :

@@ -59,7 +59,7 @@ public class UIManager {
 		this.users = model.getUsersManager();
 		this.currentMenu = null;
 		this.eventFactory = new EventFactory(renderer, inputManager);
-		this.userFactory = new UserFactory(renderer, inputManager);
+		this.userFactory = new UserFactory(renderer, inputManager, users);
 		
 	}
 	
