@@ -7,6 +7,7 @@ import it.unibs.ingesw.dpn.model.ModelManager;
 import it.unibs.ingesw.dpn.model.users.User;
 
 public class Inviter {
+	
 	private Event target;
 	private List<User> notInvited;
 	private List<User> invited = new ArrayList<>();
