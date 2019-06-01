@@ -16,12 +16,13 @@ public class Mailbox implements Serializable {
 	private static final long serialVersionUID = 4612332277435632397L;
 	
 	private LinkedList<Notification> notifications;
-	
+	private LinkedList<Invite> invitations;
 	/**
 	 * Crea una nuova mailbox, vuota
 	 */
 	public Mailbox() {
 		this.notifications = new LinkedList<>();
+		this.invitations = new LinkedList<>();
 	}
 	
 	/**
@@ -37,7 +38,7 @@ public class Mailbox implements Serializable {
 	}
 	
 	/**
-	 * Aggiunge la notifica data alla mailbox
+	 * Aggiunge la notifica/invito data alla mailbox
 	 * 
 	 * Precondizione: la notifica data non deve gia' essere contenuta nella mailbox
 	 * Postcondizione: la notifica data non e' piu' presente nella mailbox
@@ -56,9 +57,21 @@ public class Mailbox implements Serializable {
 		assert this.notifications.contains(toAdd);
 		
 	}
+	public void deliver(Invite toAdd) {
+		
+		// Verifica delle precondizioni
+		if (invitations.contains(toAdd)) {
+			throw new IllegalArgumentException();
+		}
+		
+		this.invitations.add(toAdd);
+		
+		assert this.invitations.contains(toAdd);
+		
+	}
 	
 	/**
-	 * Rimuove la notifica data dalla mailbox
+	 * Rimuove la notifica/invito data dalla mailbox
 	 * 
 	 * Precondizione: la notifica data deve essere contenuta nella mailbox
 	 * Postcondizione: la notifica data 
@@ -74,6 +87,17 @@ public class Mailbox implements Serializable {
 		this.notifications.remove(toDelete);
 		
 		assert !this.notifications.contains(toDelete);
+	}
+	public void delete(Invite toDelete) {
+		
+		// Verifica delle precondizioni
+		if (!invitations.contains(toDelete)) {
+			throw new IllegalArgumentException();
+		}
+		
+		this.invitations.remove(toDelete);
+		
+		assert !this.invitations.contains(toDelete);
 	}
 	
 	/**

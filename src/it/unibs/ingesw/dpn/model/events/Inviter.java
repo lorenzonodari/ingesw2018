@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.unibs.ingesw.dpn.model.ModelManager;
+import it.unibs.ingesw.dpn.model.users.Invite;
 import it.unibs.ingesw.dpn.model.users.User;
 
 public class Inviter {
@@ -12,6 +13,7 @@ public class Inviter {
 	private List<User> notInvited;
 	private List<User> invited = new ArrayList<>();
 	
+	private static final String GENERICMSG = "Sei stato invitato all'evento in base ai tuoi interessi o alla tua cronologia delle partecipazioni ";
 	
 	public Inviter(Event target, ModelManager model) {
 		this.target = target;
@@ -58,7 +60,9 @@ public class Inviter {
 		return notInvited;
 	}
 	//TODO
-	public boolean sendInvites() {
-		return true;
+	public void sendInvites() {
+		for(User p : invited) {
+			p.getMailbox().deliver(new Invite(GENERICMSG, this.target));
+		}
 	}
 }
