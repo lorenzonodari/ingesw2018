@@ -3,6 +3,7 @@ package it.unibs.ingesw.dpn.model.fields;
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.LocalDateFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
+import it.unibs.ingesw.dpn.model.fieldvalues.CategoryListFieldValue;;
 
 public enum UserField implements Field {
 	
@@ -18,6 +19,13 @@ public enum UserField implements Field {
 			"La data di nascita (giorno, mese e anno) dell'utente",
 			false,
 			LocalDateFieldValue.class
+			),
+	
+	CATEGORIE_DI_INTERESSE (
+			"Categorie di interesse",
+			"Le categorie di eventi a cui l'utente è interessato e di cui vuole ricevere gli aggiornamenti",
+			false,
+			CategoryListFieldValue.class
 			)
 	
 	;

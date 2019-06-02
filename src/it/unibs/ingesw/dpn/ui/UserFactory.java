@@ -4,8 +4,11 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
+import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
+import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fields.UserField;
+import it.unibs.ingesw.dpn.model.fieldvalues.CategoryListFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.LocalDateFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
@@ -331,6 +334,49 @@ public class UserFactory {
 			
 			// Restituzione del valore acquisito
 			return date;
+		}
+		
+		case CATEGORIE_DI_INTERESSE : 
+		{
+			// Inizializzo le variabili ausiliarie
+			int option = 0;
+			CategoryProvider provider = CategoryProvider.getProvider();
+			CategoryEnum [] categories = CategoryEnum.values();
+			boolean [] checksArray = new boolean[categories.length];
+			// Ciclo di interazione con l'utente
+			do {
+				renderer.renderText("Seleziona le categorie a cui sei interessato/a:");
+				// Per ciascuna categoria creo e visualizzo l'opzione relativa
+				for (int i = 0; i < categories.length; i++) {
+					renderer.renderText(String.format(
+							"%3d) %-50s [%s]",
+							(i + 1),
+							provider.getCategory(categories[i]).getName(),
+							(checksArray[i] ? "X" : " ")
+							));
+				}
+				renderer.renderText(String.format("%3d) %-50s", 0, "Esci e conferma"));
+				renderer.renderLineSpace();
+				option = getter.getInteger(0, categories.length);
+				
+				// Inverto il check dell'opzione selezionata
+				if (option != 0) {
+					checksArray[option - 1] ^= true;
+				}
+				// Continuo finché l'utente non decide di uscire
+			} while (option != 0);
+
+			CategoryListFieldValue list = new CategoryListFieldValue();
+			for (int i = 0; i < categories.length; i++) {
+				if (checksArray[i]) {
+					list.addCategory(categories[i]);
+				} else {
+					// Quest'opzione serve solo nella modifica dell'utente -> TODO
+					list.removeCategory(categories[i]);
+				}
+			}
+			// Restituzione del dato acquisito
+			return list;
 		}
 		
 		}
