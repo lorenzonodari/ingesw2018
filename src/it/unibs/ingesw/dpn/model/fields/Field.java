@@ -34,6 +34,17 @@ public interface Field {
 	public boolean isMandatory();
 	
 	/**
+	 * Restituisce la modificabilità del campo.
+	 * Di default, questo metodo restituisce "false", poiché si è deciso che -a meno di ulteriori specifiche-
+	 * il valore di un campo non possa essere modificato.
+	 * 
+	 * @return true se la modifica del campo è permessa dopo che l'oggetto a cui il campo fa riferimento è già stato creato, false altrimenti
+	 */
+	public default boolean isEditable() {
+		return false;
+	}
+	
+	/**
 	 * Restituisce la classe le cui istanze sono i possibili valori di questo Field.
 	 * 
 	 * @return il "tipo" del campo

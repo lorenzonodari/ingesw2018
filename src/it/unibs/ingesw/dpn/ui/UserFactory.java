@@ -21,7 +21,7 @@ import it.unibs.ingesw.dpn.model.users.UsersManager;
  * 
  * Per la creazione di un utente è necessario chiamare, nell'ordine:
  * - startCreation(..);
- * - metodi di acquisizione dati (acquireNickname, acquireBirthday, ...)
+ * - acquireFieldValue(..);		<- Quante volte si vuole
  * - finalizeCreation(..);
  * 
  * @author Michele Dusi, Lorenzo Nodari, Emanuele Poggi
@@ -385,7 +385,6 @@ public class UserFactory {
 				if (checksArray[i]) {
 					list.addCategory(categories[i]);
 				} else {
-					// Quest'opzione serve solo nella modifica dell'utente -> TODO
 					list.removeCategory(categories[i]);
 				}
 			}
