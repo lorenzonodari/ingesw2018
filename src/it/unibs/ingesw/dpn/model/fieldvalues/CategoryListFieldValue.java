@@ -60,7 +60,7 @@ public class CategoryListFieldValue implements FieldValue {
 	 */
 	public boolean removeCategory(CategoryEnum categoryToRemove) {
 		if (categoryToRemove == null) {
-			throw new IllegalArgumentException("Impossibile aggiungere una categoria nulla: parametro non inizializzato");
+			throw new IllegalArgumentException("Impossibile rimuovere una categoria nulla: parametro non inizializzato");
 		}
 		if (this.categoryList.contains(categoryToRemove)) {
 			return false;
@@ -68,6 +68,22 @@ public class CategoryListFieldValue implements FieldValue {
 			this.categoryList.remove(categoryToRemove);
 			return true;
 		}
+	}
+
+	/**
+	 * Metodo che controlla l'appartenenza di una categoria alla lista.
+	 * 
+	 * Precondizione: il parametro non deve essere "null". In caso sia nullo, il metodo genera un'eccezione.
+	 * 
+	 * @param categoryToCheck La categoria di cui si desidera verificare l'appartenenza
+	 * @return "True" se la categoria appartiene alla lista, false altrimenti.
+	 */
+	public boolean contains(CategoryEnum categoryToCheck) {
+		// Verifica della precondizione
+		if (categoryToCheck == null) {
+			throw new IllegalArgumentException("Impossibile controllare una categoria nulla: parametro non inizializzato");
+		}
+		return this.categoryList.contains(categoryToCheck);
 	}
 	
 	/**
@@ -114,5 +130,4 @@ public class CategoryListFieldValue implements FieldValue {
 		}
 		return s.toString().substring(0, s.length() - 2);
 	}
-
 }

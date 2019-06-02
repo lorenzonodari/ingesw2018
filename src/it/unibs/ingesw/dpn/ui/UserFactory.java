@@ -343,6 +343,21 @@ public class UserFactory {
 			CategoryProvider provider = CategoryProvider.getProvider();
 			CategoryEnum [] categories = CategoryEnum.values();
 			boolean [] checksArray = new boolean[categories.length];
+			
+			// Creo la variabile che conterrà il valore finale del campo
+			CategoryListFieldValue list = (CategoryListFieldValue) this.provisionalFieldValues.get(UserField.CATEGORIE_DI_INTERESSE);
+			
+			// Verifico se ho già un valore inizializzato
+			if (list != null) {
+				for (int i = 0; i < categories.length; i++) {
+					if (list.contains(categories[i])) {
+						checksArray[i] = true;
+					}
+				}
+			} else {
+				list = new CategoryListFieldValue();
+			}
+			
 			// Ciclo di interazione con l'utente
 			do {
 				renderer.renderText("Seleziona le categorie a cui sei interessato/a:");
@@ -366,7 +381,6 @@ public class UserFactory {
 				// Continuo finché l'utente non decide di uscire
 			} while (option != 0);
 
-			CategoryListFieldValue list = new CategoryListFieldValue();
 			for (int i = 0; i < categories.length; i++) {
 				if (checksArray[i]) {
 					list.addCategory(categories[i]);
