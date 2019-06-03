@@ -157,7 +157,7 @@ public class UIManager {
 
 		// Callback per abortire la creazione dell'utente
 		MenuAction abortAction = () -> {
-			this.userFactory.cancelCreation();
+			this.userFactory.cancel();
 			this.loginMenu();
 			};
 
@@ -192,7 +192,7 @@ public class UIManager {
 			createUserMenu.addEntry("Conferma la creazione del nuovo utente", () -> {
 				
 				// Termino la creazione dell'utente
-				User newUser = this.userFactory.finalizeCreation();
+				User newUser = this.userFactory.finalise();
 				
 				// Aggiungo l'evento alla bacheca
 				this.users.addUser(newUser);

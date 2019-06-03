@@ -16,13 +16,20 @@ import it.unibs.ingesw.dpn.model.users.User;
 import it.unibs.ingesw.dpn.model.users.UsersManager;
 
 /**
- * Classe che permette la creazione di utenti in maniera "controllata", secondo il pattern "Factory" e
- * secondo un preciso processo.
+ * Classe che permette la creazione e la modifica di utenti in maniera "controllata", seguendo un preciso processo.
  * 
  * Per la creazione di un utente è necessario chiamare, nell'ordine:
  * - startCreation(..);
- * - acquireFieldValue(..);		<- Quante volte si vuole
- * - finalizeCreation(..);
+ * - acquireFieldValue(..);		<- Quante volte si vuole, permette l'inizializzazione dei valori dei campi
+ * - finalise(..);				<- Restituisce un nuovo User
+ * 
+ * Allo stesso modo, per la modifica di un utente è necessario chiamare, nell'ordine:
+ * - startEditing(..);
+ * - acquireFieldValue(..);		<- Quante volte si vuole, permette la modifica dei campi già presenti
+ * - finalise(..);				<- Restituisce lo User modificato
+ * 
+ * Solo dopo aver chiamato i tre metodi, o eventualmente dopo aver cancellato la creazione
+ * o la modifica con il metodo "cancel", è possibile ricominciare un nuovo processo di creazione o modifica.
  * 
  * @author Michele Dusi, Lorenzo Nodari, Emanuele Poggi
  *
@@ -35,16 +42,18 @@ public class UserFactory {
 	
 	/** Classi per recuperare dati ausiliari */
 	private final UsersManager usersManager;
-	
+
 	/** Flag per mantenere lo stato della factory */
 	private boolean creationOn = false;
+	private boolean editingOn = false;
 
-	/** Attributi che aiutano la creazione di un evento */
+	/** Attributi che aiutano la creazione e la modifica di un evento */
 	private Map<Field, FieldValue> provisionalFieldValues = null;
+	private User currentEditedUser = null;
 
 	/** Stringhe */
 	private static final String EMPTY_FIELDVALUE_STRING = "- - - - -";
-	private static final String CREATION_MODE_OFF_EXCEPTION = "Impossibile acquisire dati se non è stata inizializzata la creazione di un nuovo utente";
+	private static final String ILLEGAL_MODE_EXCEPTION = "Impossibile acquisire dati se non è stata prima avviata la creazione o la modifica di un nuovo utente";
 	
 	/** Parametri */
 	private static final int AGE_LIMIT = 12;
@@ -64,7 +73,7 @@ public class UserFactory {
 	public UserFactory(UIRenderer renderer, InputGetter getter, UsersManager usersManager) {
 		// verifico la precondizione
 		if (renderer == null || getter == null || usersManager == null) {
-			throw new IllegalArgumentException("impossiile creare un oggetto UserFactory con parametri nulli");
+			throw new IllegalArgumentException("impossibile creare un oggetto UserFactory con parametri nulli");
 		}
 		
 		this.renderer = renderer;
@@ -72,26 +81,21 @@ public class UserFactory {
 		this.usersManager = usersManager;
 	}
 	
-
 	/**
 	 * Comincia la creazione di un utente.
 	 * 
-	 * Precondizione: la factory non deve avere altre creazioni in corso. Una factory puà costruire un solo
-	 * evento alla volta, secondo il processo descritto nell'introduzione alla classe.
+	 * Precondizione: la factory non deve avere altre creazioni o modifiche in corso. Una factory può costruire un solo
+	 * utente alla volta, secondo il processo descritto nell'introduzione alla classe.
 	 * 
 	 * @param defaultNickname Il nickname di default con cui cominciare l'iscrizione
 	 */
-	public void startCreation(String defaultNickname) {		
-		// Verifico che i parametri non siano null
-		if (defaultNickname == null) {
-			throw new IllegalArgumentException("Impossibile creare un evento con creatore o categoria nulli");
-		}
-		
-		if (this.creationOn) {
-			// E' già in corso la creazione di un evento, non è possibile cominciarne una nuova
-			throw new IllegalStateException("Impossibile cominciare la creazione di un nuovo evento: una creazione di un evento è già in corso");
+	public void startCreation(String defaultNickname) {
+		// Verifico la precondizione
+		if (this.creationOn || this.editingOn) {
+			// E' già in corso la creazione o la modifica di un utente, non è possibile cominciarne una nuova
+			throw new IllegalStateException("Impossibile cominciare la creazione di un nuovo utente finché non viene terminata quella corrente");
 		} else {
-			// Comincio la creazione di un nuovo evento
+			// Comincio la creazione di un nuovo utente
 			this.creationOn = true;
 		}
 		
@@ -103,30 +107,80 @@ public class UserFactory {
 		};
 		
 		// Inizializzo già il nickname
+		// Nota: se il valore del nickname è nullo, è come se non fosse ancora inizializzato
 		this.provisionalFieldValues.put(UserField.NICKNAME, new StringFieldValue(defaultNickname));
+	}
+
+	/**
+	 * Comincia la modifica di un utente.
+	 * 
+	 * Precondizione: la factory non deve avere altre creazioni o modifiche in corso. Una factory può modificare
+	 * un solo utente alla volta, secondo il processo descritto nell'introduzione alla classe.
+	 * 
+	 * Precondizione: l'utente che si intende modificare non deve essere un parametro nullo.
+	 * 
+	 * @param userToBeEdited L'utente {@link User} che dev'essere modificato
+	 */
+	public void startEditing(User userToBeEdited) {
+		// Verifico che il parametro non sia null
+		if (userToBeEdited == null) {
+			throw new IllegalArgumentException("Impossibile iniziare la modifica di un utente nullo");
+		}
+		
+		if (this.creationOn || this.editingOn) {
+			// E' già in corso la creazione o la modifica di un utente, non è possibile cominciarne una nuova
+			throw new IllegalStateException("Impossibile cominciare la modifica di un nuovo utente finché non viene terminata quella corrente");
+		} else {
+			// Comincio la modifica di un nuovo utente
+			this.editingOn = true;
+		}
+
+		// Preparo gli attributi ausiliari durante il processo
+		this.currentEditedUser = userToBeEdited;
+		this.provisionalFieldValues = this.currentEditedUser.getAllFieldValues();
 	}
 
 	/**
 	 * Gestisce l'acquisizione del dato {@link FieldValue} relativo al campo {@link Field} passato come parametro.
 	 * 
 	 * Precondizione: la factory deve essere in modalità "creazione", ossia deve essere stato chiamato in precedenza
-	 * il metodo "startCreation".
+	 * il metodo "startCreation". OPPURE la factory deve essere in modalità "modifica", ossia deve essere
+	 * stato chiamato in precedenza il metodo "startEditing".
 	 * 
 	 * Precondizione: il campo {@link Field} deve essere un campo previsto per un utente, ossia deve
 	 * essere un campo della classe {@link UserField}. Questa condizione è verificata in automatico poiché il metodo chiamante
 	 * presente in {@link UIManager} ha come valori possibili per i campi soltanto oggetti {@link UserField}.
 	 * 
+	 * Precondizione: nel caso in cui ci si trovi in modalità "modifica" (e non in modalità "creazione")
+	 * è necessario che il campo sia modificabile, ossia che il campo preveda la modifica posteriore alla creazione
+	 * di un oggetto {@link User}. In caso la precondizione non fosse soddisfatta, il metodo si interrompe
+	 * anticipatamente e richiede al renderer la visualizzazione di un messaggio d'errore.
+	 * 
 	 * @param field Il campo di cui si vuole acquisire il valore
 	 */
 	public void acquireFieldValue(Field field) {
-		// Verifico di essere in modalità "creazione di un nuovo evento"
-		if (!creationOn) {
-			throw new IllegalStateException(CREATION_MODE_OFF_EXCEPTION);
+		// Verifico di essere in modalità "creazione di un nuovo utente" o in modalità "modifica di un vecchio utente"
+		if (!creationOn && !editingOn) {
+			throw new IllegalStateException(ILLEGAL_MODE_EXCEPTION);
 		}
+		/* Nota: il caso in cui entrambi i flag siano veri non viene filtrato esplicitamente dall'IF, ma è 
+		 * verificato implicitamente dal momento che per settare uno dei due flag a "true", l'altro deve essere
+		 * "false", e questa cosa è fattibile solo nei metodi "startCreation" e "startEditing".
+		 */
 		
 		// Verifico che il parametro non sia null
 		if (field == null) {
 			throw new IllegalArgumentException("Parametro nullo: impossibile acquisire un dato senza specificare il campo");
+		}
+		
+		// Verifico che, in caso ci si trovi in modalità "editing", il campo sia un campo editabile.
+		if (editingOn && !field.isEditable()) {
+			renderer.renderError(String.format(
+					"Impossibile modificare il campo immutabile \"%s\"", 
+					field.getName()
+					));
+			// Termino forzatamente l'esecuzione del metodo
+			return;
 		}
 		
 		// Prompt e interazione con l'utente
@@ -160,15 +214,20 @@ public class UserFactory {
 	 * In tal caso restituisce true, altrimenti false.
 	 * 
 	 * Precondizione: la factory deve essere in modalità "creazione", ossia deve essere stato chiamato in precedenza
-	 * il metodo "startCreation".
+	 * il metodo "startCreation". OPPURE la factory deve essere in modalità "modifica", ossia deve essere
+	 * stato chiamato in precedenza il metodo "startEditing".
 	 * 
 	 * @return "true" se tutti i campi obbligatori sono stati compilati
 	 */
 	public boolean verifyMandatoryFields() {
-		// Verifico di essere in modalità "creazione di un nuovo evento"
-		if (!creationOn) {
-			throw new IllegalStateException(CREATION_MODE_OFF_EXCEPTION);
+		// Verifico di essere in modalità "creazione di un nuovo utente" o in modalità "modifica di un vecchio utente"
+		if (!creationOn && !editingOn) {
+			throw new IllegalStateException(ILLEGAL_MODE_EXCEPTION);
 		}
+		/* Nota: il caso in cui entrambi i flag siano veri non viene filtrato esplicitamente dall'IF, ma è 
+		 * verificato implicitamente dal momento che per settare uno dei due flag a "true", l'altro deve essere
+		 * "false", e questa cosa è fattibile solo nei metodi "startCreation" e "startEditing".
+		 */
 		
 		// Verifico tutti i campi
 		boolean checkMandatoryFieldsFlag = true;
@@ -183,18 +242,24 @@ public class UserFactory {
 	}
 
 	/**
-	 * Restituisce i valori parzialmente compilati dell'utente che si sta creando.
+	 * Restituisce i valori parzialmente compilati dell'utente che si sta creando o la lista dei valori
+	 * dei campi dell'utente che si sta modificando.
 	 * 
 	 * Precondizione: la factory deve essere in modalità "creazione", ossia deve essere stato chiamato in precedenza
-	 * il metodo "startCreation".
+	 * il metodo "startCreation". OPPURE la factory deve essere in modalità "modifica", ossia deve essere
+	 * stato chiamato in precedenza il metodo "startEditing".
 	 * 
 	 * @return la mappa <Field, FieldValue> non completa di valori
 	 */
 	public Map<Field, FieldValue> getProvisionalFieldValues() {
-		// Verifico di essere in modalità "creazione di un nuovo utente"
-		if (!creationOn) {
-			throw new IllegalStateException(CREATION_MODE_OFF_EXCEPTION);
+		// Verifico di essere in modalità "creazione di un nuovo utente" o in modalità "modifica di un vecchio utente"
+		if (!creationOn && !editingOn) {
+			throw new IllegalStateException(ILLEGAL_MODE_EXCEPTION);
 		}
+		/* Nota: il caso in cui entrambi i flag siano veri non viene filtrato esplicitamente dall'IF, ma è 
+		 * verificato implicitamente dal momento che per settare uno dei due flag a "true", l'altro deve essere
+		 * "false", e questa cosa è fattibile solo nei metodi "startCreation" e "startEditing".
+		 */
 		
 		return this.provisionalFieldValues;
 	}
@@ -205,16 +270,21 @@ public class UserFactory {
 	 * default "- - - - -".
 	 * 
 	 * Precondizione: la factory deve essere in modalità "creazione", ossia deve essere stato chiamato in precedenza
-	 * il metodo "startCreation".
+	 * il metodo "startCreation". OPPURE la factory deve essere in modalità "modifica", ossia deve essere
+	 * stato chiamato in precedenza il metodo "startEditing".
 	 * 
 	 * @param f Il campo di cui si vuole ottenere il valore come stringa
 	 * @return Un testo rappresentante il valore del campo richiesto
 	 */
 	public String getProvisionalFieldValueString(Field f) {
-		// Verifico di essere in modalità "creazione di un nuovo utente"
-		if (!creationOn) {
-			throw new IllegalStateException(CREATION_MODE_OFF_EXCEPTION);
+		// Verifico di essere in modalità "creazione di un nuovo utente" o in modalità "modifica di un vecchio utente"
+		if (!creationOn && !editingOn) {
+			throw new IllegalStateException(ILLEGAL_MODE_EXCEPTION);
 		}
+		/* Nota: il caso in cui entrambi i flag siano veri non viene filtrato esplicitamente dall'IF, ma è 
+		 * verificato implicitamente dal momento che per settare uno dei due flag a "true", l'altro deve essere
+		 * "false", e questa cosa è fattibile nei metodi "startCreation" e "startEditing".
+		 */
 		
 		FieldValue value = this.provisionalFieldValues.get(f);
 		if (value != null) {
@@ -225,55 +295,106 @@ public class UserFactory {
 	}
 
 	/**
-	 * Metodo che annulla la creazione dell'utente e provoca il reset della fabbrica.
+	 * Metodo che annulla la creazione o la modifica dell'utente e provoca il reset della fabbrica.
 	 * 
 	 * Precondizione: la factory deve essere in modalità "creazione", ossia deve essere stato chiamato in precedenza
-	 * il metodo "startCreation".
+	 * il metodo "startCreation". OPPURE la factory deve essere in modalità "modifica", ossia deve essere
+	 * stato chiamato in precedenza il metodo "startEditing".
 	 * 
-	 * Postcondizione: al termine della chiamata la factory non è più in modalità creazione.
-	 * Tutti i valori immessi fino a questo momento vengono cancellati.
+	 * Postcondizione: al termine della chiamata la factory non è più in modalità "creazione" o "modifica".
+	 * Tutti i valori immessi fino a questo momento vengono cancellati, tutte le modifiche fatte fino a
+	 * questo momento vengono annullate. Nel caso di modifica di un utente, l'utente viene ripristinato
+	 * a com'era quando è stato chiamato il metodo "startEditing".
 	 * 
 	 */
-	public void cancelCreation() {
-		// Verifico di essere in modalità "creazione di un nuovo utente"
-		if (!creationOn) {
-			throw new IllegalStateException(CREATION_MODE_OFF_EXCEPTION);
+	public void cancel() {
+		// Verifico di essere in modalità "creazione di un nuovo utente" o in modalità "modifica di un vecchio utente"
+		if (!creationOn && !editingOn) {
+			throw new IllegalStateException(ILLEGAL_MODE_EXCEPTION);
 		}
+		/* Nota: il caso in cui entrambi i flag siano veri non viene filtrato esplicitamente dall'IF, ma è 
+		 * verificato implicitamente dal momento che per settare uno dei due flag a "true", l'altro deve essere
+		 * "false", e questa cosa è fattibile nei metodi "startCreation" e "startEditing".
+		 */
 		
 		this.creationOn = false;
+		this.editingOn = false;
 		
 		// Reset di tutte gli attributi
 		this.provisionalFieldValues = null;
+		this.currentEditedUser = null;
 	}
 
 	/**
-	 * Termina la creazione di un utente con tutti i campi acquisiti finora.
+	 * Termina la creazione o la modifica di un utente con tutti i campi acquisiti finora.
+	 * <ul>
+	 * 		<li> Nel caso in cui sia stata avviata una creazione con il metodo "startCreation", restituisce un nuovo oggetto {@linkplain User}.
+	 * 		<li> Nel caso in cui sia stata avviata una modifica con il metodo "startEditing", restituisce l'utente passato come
+	 * parametro all'inizio, contenente i nuovi valori dei campi.
+	 * </ul> 
 	 * 
-	 * Precondizione: la factory deve essere in modalità "creazione", ossia deve essere stato chiamato in precedenza
-	 * il metodo "startCreation".
+	 * <b>Nota:</b> Il valore di ritorno, in questo secondo caso, non è fondamentale, poiché si tratta solo 
+	 * di una reference ad un oggetto che il metodo o la classe chiamante dovrebbero avere già.
+	 * Volendo, perciò, sarebbe possibile continuare ad usare il riferimento "vecchio" senza sovrascriverlo.
+	 * Si faccia però attenzione ad una cosa: le modifiche operate mediante questa factory non vengono attuate
+	 * sull'oggetto {@link User} se non <emph>dopo</emph> la chiamata di questo metodo. Pertanto:
+	 * <ol>
+	 * 		<li> Non sarà possibile ottenere una modifica dell'oggetto {@link User} in tempo reale.
+	 * 		<li> Qualunque chiamata esterna a metodi propri della classe {@linkplain User} che modifichino i campi dell'utente (esempio: setFieldValue, setAllFieldValues, etc..)
+	 * verranno sovrascritti al momento della chiamata del metodo "finalise()".
+	 * </ol>
 	 * 
-	 * Precondizione: tutti i campi obbligatori devono essere stati inizializzati. Per verificare questa condizione
+	 * <ul>
+	 * 
+	 * <li>Precondizione: la factory deve essere in modalità "creazione", ossia deve essere stato chiamato in precedenza
+	 * il metodo "startCreation". OPPURE la factory deve essere in modalità "modifica", ossia deve essere
+	 * stato chiamato in precedenza il metodo "startEditing".
+	 * </li>
+	 * 
+	 * <li>Precondizione: tutti i campi obbligatori devono essere stati inizializzati. Per verificare questa condizione
 	 * è possibile invocare (cosa che viene fatta anche in questo metodo) il metodo "verifyMandatoryFields".
+	 * </li>
 	 * 
-	 * @return L'utente creato correttamente
+	 * </ul>
+	 * 
+	 * @return Il nuovo utente creato o l'utente modificato.
 	 */
-	public User finalizeCreation() {
-		// Verifico di essere in modalità "creazione di un nuovo utente"
-		if (!creationOn) {
-			throw new IllegalStateException(CREATION_MODE_OFF_EXCEPTION);
+	public User finalise() {
+		// Verifico di essere in modalità "creazione di un nuovo utente" o in modalità "modifica di un vecchio utente"
+		if (!creationOn && !editingOn) {
+			throw new IllegalStateException(ILLEGAL_MODE_EXCEPTION);
 		}
+		/* Nota: il caso in cui entrambi i flag siano veri non viene filtrato esplicitamente dall'IF, ma è 
+		 * verificato implicitamente dal momento che per settare uno dei due flag a "true", l'altro deve essere
+		 * "false", e questa cosa è fattibile nei metodi "startCreation" e "startEditing".
+		 */
 		
-		// Creo un nuovo oggetto User
-		User newUser = new User(this.provisionalFieldValues);
+		User finalisedUser = null;
+		
+		if (creationOn) {
+			// Creo il nuovo oggetto User
+			finalisedUser = new User(this.provisionalFieldValues);
+			
+		} else if (editingOn) {
+			// Modifico l'oggetto User vecchio
+			finalisedUser = this.currentEditedUser;
+			finalisedUser.setAllFieldValues(this.provisionalFieldValues);
+			
+		} else {
+			// WTF
+			throw new IllegalArgumentException("ERROREEEEE"); // Non dovrebbe succedere
+		}
 		
 		// Azzero i campi provvisori
 		this.provisionalFieldValues = null;
+		this.currentEditedUser = null;
 		
-		// Termino la modalità creazione
+		// Termino la modalità creazione o la modalità modifica
 		this.creationOn = false;
+		this.editingOn = false;
 		
 		// Restituisco l'evento
-		return newUser;
+		return finalisedUser;
 	}
 
 	/* METODI PRIVATI DI UTILITA' */
