@@ -5,6 +5,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import it.unibs.ingesw.dpn.model.events.Event;
+import it.unibs.ingesw.dpn.model.fields.CommonField;
+import it.unibs.ingesw.dpn.model.fields.UserField;
 
 public class Invite implements Serializable {
 
@@ -15,7 +17,6 @@ public class Invite implements Serializable {
 
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("d/M - HH:mm");
 
-	private String message;
 	private Date date;
 	private Event event;
 	
@@ -25,28 +26,23 @@ public class Invite implements Serializable {
 	 * 
 	 * @param msg Il messaggio della notifica
 	 */
-	public Invite(String msg, Event event) {
-		this.message = msg;
+	public Invite(Event event) {
 		this.date = new Date();
 		this.event = event;
 	}
-	
-	public String getMessage() {
-		return this.message;
-	}
-	
-	
+		
 	public Date getDate() {
 		return this.date;
 	}
+	
 	public Event getEvent() {
 		return this.event;
 	}
 	
 	/**
-	 * Fornisce una comoda rappresentazione testuale della notifica
+	 * Fornisce una comoda rappresentazione testuale dell'invito
 	 * 
-	 * @return Una rappresentazione testuale della notifica
+	 * @return Una rappresentazione testuale dell'invito
 	 */
 	@Override
 	public String toString() {
@@ -56,8 +52,9 @@ public class Invite implements Serializable {
 		// Formato: giorno/mese - ora:minuti : messaggio
 		buffer.append(DATE_FORMAT.format(this.date));
 		buffer.append(" : ");
-		buffer.append(this.message);
-		
+		buffer.append(String.format("%s ti ha invitato all'evento \"%s\"", 
+				                    event.getCreator().getFieldValue(UserField.NICKNAME),
+				                    event.getFieldValue(CommonField.TITOLO)));
 		
 		return buffer.toString();
 		
