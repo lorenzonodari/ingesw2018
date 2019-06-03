@@ -1,11 +1,17 @@
 package it.unibs.ingesw.dpn.model.users;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import it.unibs.ingesw.dpn.model.events.Event;
 
-public class Invite {
+public class Invite implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1835460544841249957L;
 
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("d/M - HH:mm");
 
