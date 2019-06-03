@@ -8,6 +8,10 @@ import it.unibs.ingesw.dpn.model.events.Event;
 import it.unibs.ingesw.dpn.model.fields.CommonField;
 import it.unibs.ingesw.dpn.model.fields.UserField;
 
+/**
+ * Classe utilizzata per rappresentare gli inviti scambiati tra gli utenti.
+ * Una volta creata, un'instanza di questa classe non puo' essere modificata.
+ */
 public class Invite implements Serializable {
 
 	/**
