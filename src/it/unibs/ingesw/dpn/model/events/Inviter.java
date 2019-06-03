@@ -12,9 +12,7 @@ public class Inviter {
 	private Event target;
 	private List<User> notInvited;
 	private List<User> invited = new ArrayList<>();
-	
-	private static final String GENERICMSG = "Sei stato invitato all'evento in base ai tuoi interessi o alla tua cronologia delle partecipazioni ";
-	
+		
 	public Inviter(Event target, ModelManager model) {
 		this.target = target;
 		notInvited = model.getEventBoard()
@@ -62,7 +60,7 @@ public class Inviter {
 	//TODO
 	public void sendInvites() {
 		for(User p : invited) {
-			p.getMailbox().deliver(new Invite(GENERICMSG, this.target));
+			p.getMailbox().deliver(new Invite(this.target));
 		}
 	}
 }
