@@ -32,10 +32,22 @@ public class Mailbox implements Serializable {
 	 * non sia possibile per classi esterne modificare la mailbox senza utilizzare gli opportuni
 	 * metodi
 	 * 
-	 * @return Una view non modificabile del contenuto della mailbox
+	 * @return Una view non modificabile delle notifiche contenute nella mailbox
 	 */
 	public List<Notification> getEveryNotification() {
 		return Collections.unmodifiableList(this.notifications);
+	}
+	
+	/**
+	 * Restituisce una lista non modificabile degli inviti. L'immutabilita' di tale lista, unita
+	 * all'immutabilita' delle istanze di Invite assicurano che non sia possibile per classi esterne
+	 * modificare la mialbox senza utilizzare gli opportuni metodi.
+	 * 
+	 * 
+	 * @return Una view non modificabile degli inviti contenuti nella mailbox
+	 */
+	public List<Invite> getEveryInvite() {
+		return Collections.unmodifiableList(this.invitations);
 	}
 	
 	/**
@@ -121,13 +133,21 @@ public class Mailbox implements Serializable {
 	}
 	
 	/**
-	 * Restituisc true se la mailbox dell'utente e' attualmente vuota, ovvero
-	 * non contiene nessuna notifica.
+	 * Restituisc true se la mailbox dell'utente contiene almeno una notifica.
 	 * 
-	 * @return true se la mailbox dell'utente e' vuota
+	 * @return true se la mailbox contiene almeno una notifica
 	 */
-	public boolean isEmpty() {
-		return this.notifications.isEmpty();
+	public boolean containsNotifications() {
+		return !this.notifications.isEmpty();
+	}
+	
+	/**
+	 * Restituisce true se la mailbox dell'utente contiene almeno un invito.
+	 * 
+	 * @return true se la mailbox contiene almeno un invito
+	 */
+	public boolean containsInvites() {
+		return !this.invitations.isEmpty();
 	}
 	
 	

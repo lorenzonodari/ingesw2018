@@ -318,7 +318,7 @@ public class UIManager {
 		Mailbox mailbox = users.getCurrentUser().getMailbox();
 		String menuContent = null;
 		
-		if (!mailbox.isEmpty()) {
+		if (mailbox.containsNotifications()) {
 			
 			StringBuffer notifications = new StringBuffer();
 			for (Notification n : mailbox.getEveryNotification()) {
@@ -354,7 +354,7 @@ public class UIManager {
 		
 		Mailbox mailbox = users.getCurrentUser().getMailbox();
 		
-		if (!mailbox.isEmpty()) {
+		if (mailbox.containsNotifications()) {
 			
 			for (Notification n : mailbox.getEveryNotification()) {
 				
