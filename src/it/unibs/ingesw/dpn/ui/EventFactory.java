@@ -30,7 +30,7 @@ import it.unibs.ingesw.dpn.model.users.User;
  * Per la creazione di un evento è necessario chiamare, nell'ordine:
  * - startCreation(..);
  * - acquireFieldValue(..);		<- Quante volte si vuole
- * - finalizeCreation(..);
+ * - finalise(..);
  * 
  * @author Michele Dusi, Lorenzo Nodari, Emanuele Poggi
  *
@@ -287,7 +287,7 @@ public class EventFactory {
 	 * Tutti i valori immessi fino a questo momento vengono cancellati.
 	 * 
 	 */
-	public void cancelCreation() {
+	public void cancel() {
 		// Verifico di essere in modalità "creazione di un nuovo evento"
 		if (!creationOn) {
 			throw new IllegalStateException(CREATION_MODE_OFF_EXCEPTION);
@@ -314,7 +314,7 @@ public class EventFactory {
 	 * 
 	 * @return L'evento creato correttamente
 	 */
-	public Event finalizeCreation() {
+	public Event finalise() {
 		// Verifico di essere in modalità "creazione di un nuovo evento"
 		if (!creationOn) {
 			throw new IllegalStateException(CREATION_MODE_OFF_EXCEPTION);

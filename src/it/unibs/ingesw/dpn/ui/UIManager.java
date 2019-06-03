@@ -570,7 +570,7 @@ public class UIManager {
 		
 		// Callback per abortire la creazione dell'evento
 		MenuAction abortAction = () -> {
-			this.eventFactory.cancelCreation();
+			this.eventFactory.cancel();
 			this.boardMenu();
 			};
 		
@@ -605,7 +605,7 @@ public class UIManager {
 			createEventMenu.addEntry("Crea e pubblica l'evento", () -> {
 				
 				// Termino la creazione dell'evento
-				Event newEvent = this.eventFactory.finalizeCreation();
+				Event newEvent = this.eventFactory.finalise();
 				
 				// Aggiungo l'evento alla bacheca
 				this.model.getEventBoard().addEvent(newEvent, users.getCurrentUser());
