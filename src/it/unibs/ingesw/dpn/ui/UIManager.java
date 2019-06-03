@@ -149,9 +149,12 @@ public class UIManager {
 		
 		this.currentMenu = loginMenu;
 	}
-	
+
 	/**
-	 * Crea il menu associato alla creazione di un utente, con i relativi campi.
+	 * Crea il menu associato al processo di creazione di un utente, visualizzando i vari campi e permettendo
+	 * al fruitore di inizializzarne (sotto opportune ipotesi) i valori.
+	 * Questo metodo si occupa, in altre parole, di fornire un'interfaccia testuale interattiva al processo
+	 * di creazione di un oggetto {@link User} gestito da {@link UserFactory}.
 	 */
 	public void createUserMenu() {
 
@@ -194,7 +197,7 @@ public class UIManager {
 				// Termino la creazione dell'utente
 				User newUser = this.userFactory.finalise();
 				
-				// Aggiungo l'evento alla bacheca
+				// Aggiungo l'utente alla lista di utenti
 				this.users.addUser(newUser);
 				
 				MenuAction toHomeAction = () -> {this.loginMenu();};
@@ -207,6 +210,65 @@ public class UIManager {
 		}
 		
 		this.currentMenu = createUserMenu;
+	}
+	
+	/**
+	 * Crea il menu associato al processo di modifica di un utente, visualizzando i vari campi e permettendo
+	 * al fruitore di modificarne (sotto opportune ipotesi) i valori.
+	 * Questo metodo si occupa, in altre parole, di fornire un'interfaccia testuale interattiva al processo
+	 * di editing di un oggetto {@link User} gestito da {@link UserFactory}.
+	 */
+	public void editUserMenu() {
+
+		// Callback per abortire la modifica dell'utente
+		MenuAction abortAction = () -> {
+			this.userFactory.cancel();
+			this.personalSpace();
+			};
+
+		String title = String.format("Modifica del proprio profilo");
+		Menu editUserMenu = new Menu(title, 
+				"Seleziona i campi del profilo che vuoi modificare. \n"
+				+ "Soltanto i campi contrassegnati dal cancelletto (#) sono modificabili.\n"
+				+ "Quando avrai terminato seleziona \"Conferma\".",
+				"Annulla la modifica e torna allo spazio personale", abortAction);
+			
+		// Ciclo su tutti i campi previsti per l'utente
+		for (Field f : UserField.values()) {
+			
+			/* Azione relativa ad un'opzione */
+			MenuAction fieldAction = () -> {
+				this.userFactory.acquireFieldValue(f);
+				// Creo il nuovo menu aggiornato
+				this.editUserMenu();
+				};
+			
+			// Creo la entry
+			String entryTitle = String.format(
+					CREATION_ENTRY_FORMAT,
+					f.getName() + ((f.isEditable()) ? " (#)" : ""),
+					this.userFactory.getProvisionalFieldValueString(f));
+			editUserMenu.addEntry(entryTitle, fieldAction);
+			
+		}
+		
+		// Verifico che tutti i campi obbligatori siano stati acquisiti
+		if (this.userFactory.verifyMandatoryFields()) {
+			editUserMenu.addEntry("Conferma la modifica del profilo", () -> {
+				
+				// Termino la creazione dell'utente
+				this.userFactory.finalise();
+				
+				MenuAction toHomeAction = () -> {this.personalSpace();};
+				this.dialog(
+						"Modifica completata",
+						null, 
+						"Torna allo spazio personale", 
+						toHomeAction);
+			});
+		}
+		
+		this.currentMenu = editUserMenu;
 	}
 	
 	/**
@@ -227,10 +289,17 @@ public class UIManager {
 		// Callback spazio proposte
 		MenuAction proposalsAction = () -> {this.proposalsMenu();};
 		
+		// Callback modifica utente
+		MenuAction userEditingAction = () -> {
+			this.userFactory.startEditing(users.getCurrentUser());
+			this.editUserMenu();
+			};
+		
 		Menu personalSpace = new Menu("Spazio personale", backAction);
 		personalSpace.addEntry("Spazio notifiche", notificationsAction);
 		personalSpace.addEntry("Le mie iscrizioni", subscriptionsAction);
 		personalSpace.addEntry("Le mie proposte", proposalsAction);
+		personalSpace.addEntry("Modifica profilo", userEditingAction);
 		
 		this.currentMenu = personalSpace;
 	}

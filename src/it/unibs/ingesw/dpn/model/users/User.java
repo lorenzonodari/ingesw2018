@@ -18,8 +18,8 @@ public class User implements Serializable {
 	private static final long serialVersionUID = -1333193895476185438L;
 	
 	/** Eccezioni */
-	private static final String FIELD_NOT_PRESENT_EXCEPTION = "Il campo \"%s\" non appartiene alla categoria prevista dall'evento";
-	private static final String FIELD_NOT_EDITABLE_EXCEPTION = "Il campo \"%s\" non appartiene alla categoria prevista dall'evento";
+	private static final String FIELD_NOT_PRESENT_EXCEPTION = "Il campo \"%s\" non appartiene alla lista dei campi previsti per un utente";
+	private static final String FIELD_NOT_EDITABLE_EXCEPTION = "Il campo \"%s\" non è modificabile";
 	private static final String FIELDVALUE_TYPE_NOT_VALID_EXCEPTION = "Il valore \"%s\" di tipo \"%s\" non è assegnabile al campo \"%s\" che richiede un valore di tipo \"%s\"";
 	private static final String FIELD_NULL_EXCEPTION = "Non è possibile eseguire il metodo con un campo o un valore nullo";
 
@@ -190,8 +190,18 @@ public class User implements Serializable {
 	public void setAllFieldValues(Map<Field, FieldValue> newValuesMap) {
 		// Per tutti i campi che voglio impostare, chiamo il metodo apposta
 		for (Field f : newValuesMap.keySet()) {
-			// Questo metodo opera tutti i controlli necessari
-			this.setFieldValue(f, newValuesMap.get(f));
+			// In caso sia editabile, procedo con la modifica
+			if (f.isEditable()) {
+				// Questo metodo effettuerà poi i controlli necessari
+				this.setFieldValue(f, newValuesMap.get(f));
+			}
+			/* Nota: il metodo "setFieldValue" viene chiamato solo su campi editabili. Questo perchè
+			 * il metodo chiamante di UserFactory passa l'intera lista di campi, compresi quelli non modificabili
+			 * (che NON sono stati modificati grazie ai controlli interni della factory). Per evitare che questi
+			 * generino degli errori con il metodo "setFieldValue", che appunto effettua i controlli opportuni
+			 * sulla modificabilità, evito di chiamare il suddetto metodo.
+			 * Questo mi garantisce, in qualunque caso, che i valori dei campi immutabili non siano sovrascritti.
+			 */
 		}
 	}
 	

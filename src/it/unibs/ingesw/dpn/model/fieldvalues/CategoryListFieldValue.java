@@ -1,5 +1,6 @@
 package it.unibs.ingesw.dpn.model.fieldvalues;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,8 +14,12 @@ import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
  * @author Michele Dusi
  *
  */
-public class CategoryListFieldValue implements FieldValue {
+public class CategoryListFieldValue implements FieldValue, Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3704161654157735866L;
 	private List<CategoryEnum> categoryList;
 	
 	/**
