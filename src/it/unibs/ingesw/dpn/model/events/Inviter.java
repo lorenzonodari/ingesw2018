@@ -3,7 +3,7 @@ package it.unibs.ingesw.dpn.model.events;
 import java.util.ArrayList;
 import java.util.List;
 
-import it.unibs.ingesw.dpn.model.ModelManager;
+import it.unibs.ingesw.dpn.model.EventBoard;
 import it.unibs.ingesw.dpn.model.users.Invite;
 import it.unibs.ingesw.dpn.model.users.User;
 
@@ -13,10 +13,9 @@ public class Inviter {
 	private List<User> notInvited;
 	private List<User> invited = new ArrayList<>();
 		
-	public Inviter(Event target, ModelManager model) {
+	public Inviter(Event target, EventBoard board) {
 		this.target = target;
-		notInvited = model.getEventBoard()
-				.getListOfOldSubscribersFromPastEvents(target.getCreator());
+		notInvited = board.getListOfOldSubscribersFromPastEvents(target.getCreator());
 		
 	}
 	/**
