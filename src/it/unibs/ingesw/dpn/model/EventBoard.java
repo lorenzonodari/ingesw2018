@@ -128,7 +128,7 @@ public class EventBoard implements Serializable {
 	/**
 	 * Funzione che prende in ingresso un utente e restituisce una lista di 
 	 * tutti gli utenti che hanno partecipato a eventi precedentemente creati
-	 * da lui e attualmente nello stato "evento chiuso"
+	 * da lui e attualmente nello stato "evento concluso"
 	 * 
 	 * @param user Utente sul quale si conduce la ricerca	 
 	 */
@@ -137,7 +137,7 @@ public class EventBoard implements Serializable {
 		for(Event e : eventMap
 				.keySet()
 				.stream()
-				.filter(event -> event.getState().equals(EventState.CLOSED))
+				.filter(event -> event.getState().equals(EventState.ENDED))
 				.filter(event -> event.getCreator() == user)
 				.collect(Collectors.toCollection(ArrayList::new))) {
 			for(User u : eventMap.get(e)) {

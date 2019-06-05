@@ -15,7 +15,7 @@ public class Notification implements Serializable {
 	 */
 	private static final long serialVersionUID = -217046894204205232L;
 
-	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("d/M - HH:mm");
+	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy @ HH:mm");
 
 	private String message;
 	private Date date;
