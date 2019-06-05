@@ -75,6 +75,15 @@ public enum SoccerMatchField implements Field {
 	}
 
 	/**
+	 * Metodo che restituisce automaticamente "false".
+	 * Per default, tutti i campi comuni alle categoria NON sono modificabili.
+	 */
+	@Override
+	public boolean isEditable() {
+		return false;
+	}
+
+	/**
 	 * Restituisce la classe le cui istanze sono i possibili valori di questo Field.
 	 * 
 	 * @return il "tipo" del campo

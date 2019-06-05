@@ -167,6 +167,15 @@ public enum CommonField implements Field, Serializable {
 	public boolean isMandatory() {
 		return this.mandatory;
 	}
+	
+	/**
+	 * Metodo che restituisce automaticamente "false".
+	 * Per default, tutti i campi comuni alle categoria NON sono modificabili.
+	 */
+	@Override
+	public boolean isEditable() {
+		return false;
+	}
 
 	/**
 	 * Restituisce la classe le cui istanze sono i possibili valori di questo Field.
@@ -197,5 +206,6 @@ public enum CommonField implements Field, Serializable {
 				);
 		return str;
 	}
+
 
 }
