@@ -709,6 +709,9 @@ public class UIManager {
 					
 				}
 				
+				// Notifico gli utenti che sono interessati alla categoria dell'evento
+				inviter.sendNotifications();
+				
 				this.dialog(
 						"Pubblicazione completata", 
 						dialogDescription.toString(), 

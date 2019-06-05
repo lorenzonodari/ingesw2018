@@ -134,7 +134,7 @@ public class Inviter {
 	/**
 	 * Metodo che invia  notifiche agli utenti che hanno selezionato la categoria dell'evento come categoria di interesse
 	 */
-	public void sendNotification() {
+	public void sendNotifications() {
 		
 		StringBuffer notificationContent = new StringBuffer("Un evento appartenente ad una tua categoria di interesse è appena stato creato: ");
 		notificationContent.append(target.getFieldValue(CommonField.TITOLO));
