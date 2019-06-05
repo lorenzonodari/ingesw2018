@@ -12,13 +12,6 @@ public interface UIRenderer {
 	 * @param menu Il menu da renderizzare
 	 */
 	void renderMenu(Menu menu);
-	
-	/**
-	 * Metodo adibito al rendering di una singola voce del menu
-	 * 
-	 * @param entry La voce del menu' da renderizzare
-	 */
-	void renderMenuEntry(MenuEntry entry);
 
 	/**
 	 * Renderizza un basilare prompt per indicare all'utente l'acquisizione di un dato.
@@ -32,6 +25,14 @@ public interface UIRenderer {
 	void renderLineSpace();
 	
 	/**
+	 * Metodo che visualizza un testo passato come parametro.
+	 * Al termine della visualizzazione va a capo automaticamente.
+	 * 
+	 * @param text Il testo da visualizzare
+	 */
+	void renderText(String text);
+
+	/**
 	 * Renderizza un testo con intorno una cornice.
 	 * Utilizzato solitamente per titoli o testi particolarmente importanti.
 	 * 
@@ -41,14 +42,21 @@ public interface UIRenderer {
 	 * @param text Il testo da renderizzare
 	 */
 	public void renderTextInFrame(String text);
-
+	
 	/**
-	 * Metodo che visualizza un testo passato come parametro.
-	 * Al termine della visualizzazione va a capo automaticamente.
+	 * Renderizza un testo con intorno una cornice.
+	 * Il testo può essere lungo a piacere, può contenere caratteri di "newline" che il metodo
+	 * gestirà in maniera automatica. In caso una riga di testo avesse una lunghezza superiore al valore di 
+	 * "maxLenght", questa verrà spezzata (con "\n") al primo spazio (" ") disponibile.
 	 * 
-	 * @param text Il testo da visualizzare
+	 * Nota: il parametro maxLenght NON indica l'ampiezza massima della cornice, bensì la massima lunghezza 
+	 * (in numero di caratteri) di una singola riga di testo, esclusi appunto i caratteri necessari per la 
+	 * visualizzazione grafica.
+	 * 
+	 * @param text Il testo da renderizzare
+	 * @param maxLenght La massima lunghezza di una riga di testo
 	 */
-	void renderText(String text);
+	public void renderLongTextInFrame(String text, int maxLenght);
 	
 	/**
 	 * Metodo che visualizza un testo di errore passato come parametro.
