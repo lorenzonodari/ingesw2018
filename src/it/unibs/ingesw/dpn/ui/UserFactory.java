@@ -1,5 +1,6 @@
 package it.unibs.ingesw.dpn.ui;
 
+import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
@@ -438,7 +439,13 @@ public class UserFactory {
 			LocalDateFieldValue date = null;
 			// Prompt e interazione con l'utente
 			do {
-				date = LocalDateFieldValue.acquireValue(renderer, getter);
+				try {
+					date = LocalDateFieldValue.acquireValue(renderer, getter);
+				}
+				catch (DateTimeException e) {
+					renderer.renderError("Data non accettabile");
+					continue;
+				}
 				
 				// Verifiche
 				if (date.getLocalDate().isAfter(LocalDate.now())) {
