@@ -33,16 +33,6 @@ public enum UserField implements Field {
 	
 	;
 
-	private static final String TO_STRING =
-			  "Nome:           %s\n"
-			+ "Descrizione:    %s\n"
-			+ "%s\n"
-			+ "%s\n";	
-	private static final String MANDATORY_TAG = "Obbligatorio";
-	private static final String OPTIONAL_TAG = "Facoltativo";
-	private static final String EDITABLE_TAG = "Modificabile";
-	private static final String IMMUTABLE_TAG = "Non modificabile";
-
 	private final String name;
 	private final String description;
 	private final boolean mandatory;
@@ -109,31 +99,6 @@ public enum UserField implements Field {
 	@Override
 	public Class<? extends FieldValue> getType() {
 		return this.type;
-	}
-
-	/**
-	 * Restituisce la stringa per la rappresentazione testuale dell'intero campo.
-	 * 
-	 * Nota: il tipo del campo non viene visualizzato, poiché l'utente riceve tutte 
-	 * le informazioni di cui ha bisogno dal campo descrizione.
-	 * 
-	 * @return la rappresentazione testuale dell'intero campo.
-	 */
-	@Override
-	public String toString() {
-		String str = String.format(TO_STRING, 
-				this.name,
-				this.description,
-				this.mandatory ? 
-						MANDATORY_TAG :
-						OPTIONAL_TAG,
-				this.editable ?
-						EDITABLE_TAG :
-						IMMUTABLE_TAG
-				);
-		return str;
-	}
-	
-	
+	}	
 
 }

@@ -22,13 +22,6 @@ public enum SoccerMatchField implements Field {
 	
 	;
 
-	private static final String TO_STRING =
-			  "Nome:           %s\n"
-			+ "Descrizione:    %s\n"
-			+ "%s\n";	
-	private static final String MANDATORY_TAG = "Obbligatorio";
-	private static final String OPTIONAL_TAG = "Facoltativo";
-
 	private final String name;
 	private final String description;
 	private final boolean mandatory;
@@ -91,26 +84,6 @@ public enum SoccerMatchField implements Field {
 	@Override
 	public Class<? extends FieldValue> getType() {
 		return this.type;
-	}
-
-	/**
-	 * Restituisce la stringa per la rappresentazione testuale dell'intero campo.
-	 * 
-	 * Nota: il tipo del campo non viene visualizzato, poiché l'utente riceve tutte 
-	 * le informazioni di cui ha bisogno dal campo descrizione.
-	 * 
-	 * @return la rappresentazione testuale dell'intero campo.
-	 */
-	@Override
-	public String toString() {
-		String str = String.format(TO_STRING, 
-				this.name,
-				this.description,
-				this.mandatory ? 
-						MANDATORY_TAG :
-						OPTIONAL_TAG
-				);
-		return str;
 	}
 	
 };

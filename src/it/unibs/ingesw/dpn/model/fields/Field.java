@@ -12,6 +12,16 @@ import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
  */
 public interface Field {
 
+	public static final String FIELD_FORMAT_STRING =
+			  "Nome:           %s\n"
+			+ "Descrizione:    %s\n"
+			+ "%s\n"
+			+ "%s\n";	
+	public static final String MANDATORY_TAG = "Obbligatorio";
+	public static final String OPTIONAL_TAG = "Facoltativo";
+	public static final String EDITABLE_TAG = "Modificabile";
+	public static final String IMMUTABLE_TAG = "Non modificabile";
+
 	/**
 	 * Restituisce il nome dell'oggetto Field.
 	 * 
@@ -46,5 +56,28 @@ public interface Field {
 	 * @return il "tipo" del campo
 	 */
 	public Class<? extends FieldValue> getType();
+	
+
+	/**
+	 * Restituisce la stringa per la rappresentazione testuale dell'intero campo.
+	 * 
+	 * Nota: il tipo del campo non viene visualizzato, poiché l'utente riceve tutte 
+	 * le informazioni di cui ha bisogno dal campo descrizione.
+	 * 
+	 * @return la rappresentazione testuale dell'intero campo.
+	 */
+	public default String fieldToString() {
+		String str = String.format(FIELD_FORMAT_STRING, 
+				this.getName(),
+				this.getDescription(),
+				this.isMandatory() ? 
+						MANDATORY_TAG :
+						OPTIONAL_TAG,
+				this.isEditable() ?
+						EDITABLE_TAG :
+						IMMUTABLE_TAG
+				);
+		return str;
+	}
 	
 }

@@ -117,7 +117,7 @@ public class Category {
 				this.description));
 		// Per ciascun campo aggiungo la relativa descrizione alla descrizione della categoria.
 		for (Field f : this.fields) {
-			str.append("\n" + f.toString());
+			str.append("\n" + f.fieldToString());
 		}
 		return str.toString();
 	}
