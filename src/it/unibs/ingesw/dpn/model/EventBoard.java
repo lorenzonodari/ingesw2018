@@ -100,7 +100,7 @@ public class EventBoard implements Serializable {
 				.collect(Collectors.toCollection(ArrayList::new));
 	}
 	/**
-	 * restituisce la lista degli eventi proposti da un utente
+	 * Restituisce la lista degli eventi attualmente aperti proposti da un utente.
 	 *  
 	 * 
 	 * @param author : utente su cui si effettua la ricerca
