@@ -301,7 +301,7 @@ public class UIManager {
 			};
 		
 		Menu personalSpace = new Menu("Spazio personale", backAction);
-		personalSpace.addEntry("Spazio notifiche", notificationsAction);
+		personalSpace.addEntry("Notifiche", notificationsAction);
 		personalSpace.addEntry("Inviti", invitationsAction);
 		personalSpace.addEntry("Le mie iscrizioni", subscriptionsAction);
 		personalSpace.addEntry("Le mie proposte", proposalsAction);
