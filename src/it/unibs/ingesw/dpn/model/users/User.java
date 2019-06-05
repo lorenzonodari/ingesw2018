@@ -191,7 +191,7 @@ public class User implements Serializable {
 		// Per tutti i campi che voglio impostare, chiamo il metodo apposta
 		for (Field f : newValuesMap.keySet()) {
 			// In caso sia editabile, procedo con la modifica
-			if (f.isEditable()) {
+			if (f.isEditable() && newValuesMap.get(f) != null) {
 				// Questo metodo effettuerà poi i controlli necessari
 				this.setFieldValue(f, newValuesMap.get(f));
 			}
