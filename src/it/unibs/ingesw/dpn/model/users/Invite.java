@@ -19,7 +19,7 @@ public class Invite implements Serializable {
 	 */
 	private static final long serialVersionUID = -1835460544841249957L;
 
-	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("d/M - HH:mm");
+	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy @ HH:mm");
 
 	private Date date;
 	private Event event;
