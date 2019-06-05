@@ -5,6 +5,7 @@ import java.util.List;
 import it.unibs.ingesw.dpn.Main;
 import it.unibs.ingesw.dpn.model.ModelManager;
 import it.unibs.ingesw.dpn.model.users.UsersManager;
+import it.unibs.ingesw.dpn.model.users.Invite;
 import it.unibs.ingesw.dpn.model.users.Mailbox;
 import it.unibs.ingesw.dpn.model.users.Notification;
 import it.unibs.ingesw.dpn.model.users.User;
@@ -13,6 +14,7 @@ import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
 import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
 import it.unibs.ingesw.dpn.model.events.Event;
 import it.unibs.ingesw.dpn.model.events.EventState;
+import it.unibs.ingesw.dpn.model.events.Inviter;
 import it.unibs.ingesw.dpn.model.fields.CommonField;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fields.UserField;
@@ -283,6 +285,9 @@ public class UIManager {
 		// Callback spazio notifiche
 		MenuAction notificationsAction = () -> {this.notificationsMenu();};
 		
+		// Callback spazio inviti
+		MenuAction invitationsAction = () -> {this.invitationsMenu();};
+		
 		// Callback spazio iscrizioni
 		MenuAction subscriptionsAction = () -> {this.subscriptionsMenu();};
 		
@@ -297,6 +302,7 @@ public class UIManager {
 		
 		Menu personalSpace = new Menu("Spazio personale", backAction);
 		personalSpace.addEntry("Spazio notifiche", notificationsAction);
+		personalSpace.addEntry("Inviti", invitationsAction);
 		personalSpace.addEntry("Le mie iscrizioni", subscriptionsAction);
 		personalSpace.addEntry("Le mie proposte", proposalsAction);
 		personalSpace.addEntry("Modifica profilo", userEditingAction);
@@ -679,13 +685,36 @@ public class UIManager {
 				// Aggiungo l'evento alla bacheca
 				this.model.getEventBoard().addEvent(newEvent, users.getCurrentUser());
 				
-				MenuAction toHomeAction = () -> {this.mainMenu();};
+				
+				// Preparo il menu degli inviti
+				Inviter inviter = new Inviter(newEvent, model.getEventBoard());
+				
+				MenuAction dialogAction = null;
+				StringBuffer dialogDescription = new StringBuffer("L'evento è stato creato e pubblicato correttamente.\nSei stato iscritto/a in automatico al tuo evento.");
+				String dialogBackEntryTitle = null;
+				
+				// Sono presenti utenti invitabili
+				if (inviter.getCandidates().size() > 0) {
+					
+					dialogAction = () -> {this.inviteUsersMenu(newEvent, inviter);};
+					dialogBackEntryTitle = "Vai al menu degli inviti";
+					
+				}
+				// Non ci sono candidati all'invito
+				else {
+					
+					dialogAction = () -> {this.mainMenu();};
+					dialogDescription.append("\nNon sono presenti utenti invitabili all'evento.");
+					dialogBackEntryTitle = "Torna al menu principale";
+					
+				}
+				
 				this.dialog(
 						"Pubblicazione completata", 
-						"L'evento è stato creato e pubblicato correttamente.\nSei stato iscritto/a in automatico al tuo evento.", 
-						"Torna al menu principale", 
-						toHomeAction);
-			});
+						dialogDescription.toString(), 
+						dialogBackEntryTitle, 
+						dialogAction);
+				});
 		}
 		
 		this.currentMenu = createEventMenu;
@@ -818,6 +847,94 @@ public class UIManager {
 		}
 		
 		this.currentMenu = eventMenu;
+		
+	}
+	
+	/**
+	 * Crea il menu che permette al creatore di un evento di invitare altri utenti e lo rende
+	 * il menu corrente
+	 * 
+	 * @param e L'evento appena creato, al quale si desidera invitare gli altri utenti
+	 * @param inviter L'istanza di Inviter utilizzata per inviare gli inviti
+	 */
+	public void inviteUsersMenu(Event e, Inviter inviter) {
+		
+		MenuAction confirmAction = () -> {
+				
+				inviter.sendInvites();
+				MenuAction backAction = () -> {this.mainMenu();};
+				this.dialog("Inviti inviati correttamente",
+						    String.format("Hai inviato %d inviti", inviter.getInvited().size()),
+						    "Torna al menu principale",
+						    backAction);
+
+		};
+		
+		Menu inviteMenu = new Menu("Seleziona gli utenti che desideri invitare",
+								   null,
+								   "Conferma e invia gli inviti",
+								   confirmAction);
+		
+		for (User u : inviter.getCandidates()) {
+			
+			if (u == e.getCreator()) {
+				continue;
+			}
+			
+			StringBuffer entryTitle = new StringBuffer(u.getFieldValue(UserField.NICKNAME).toString());
+			MenuAction userAction = null;
+			
+			if (inviter.isInvited(u)) {
+				entryTitle.append(" [X]");
+				userAction = () -> {
+					inviter.removeInvitation(u);
+					this.inviteUsersMenu(e, inviter);
+				};
+			}
+			else {
+				entryTitle.append(" [ ]");
+				userAction = () -> {
+					inviter.addInvitation(u);
+					this.inviteUsersMenu(e, inviter);
+				};
+			}
+			
+			inviteMenu.addEntry(entryTitle.toString(), userAction);
+		}
+		
+		this.currentMenu = inviteMenu;
+	}
+	
+	/**
+	 * Crea il menu di visualizzazione degli inviti ricevuti da un utente e lo rende il menu corrente
+	 */
+	public void invitationsMenu() {
+		
+		MenuAction backAction = () -> {this.personalSpace();};
+		
+		String menuContent = null;
+		List<Invite> userInvites = users.getCurrentUser().getMailbox().getEveryInvite();
+		if (userInvites.size() == 0) {
+			menuContent = "Nessun invito da visualizzare";
+		}
+		Menu invitationsMenu = new Menu("Inviti ricevuti", menuContent, Menu.BACK_ENTRY_TITLE, backAction);
+		
+		for (Invite i : userInvites) {
+
+			MenuAction inviteAction = () -> {this.inviteMenu(i);};
+			invitationsMenu.addEntry(i.toString(), inviteAction);
+
+		}
+		
+		this.currentMenu = invitationsMenu;
+	}
+	
+	/**
+	 * Crea il menu utilizzato da un utente per interagire con un dato invito ad un evento
+	 * 
+	 * @param i L'invito di interesse dell'utente
+	 */
+	public void inviteMenu(Invite i) {
 		
 	}
 	
