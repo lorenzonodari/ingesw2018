@@ -1,9 +1,14 @@
 package it.unibs.ingesw.dpn.model.users;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
 import it.unibs.ingesw.dpn.model.fields.UserField;
+import it.unibs.ingesw.dpn.model.fieldvalues.CategoryListFieldValue;
 /**
  * Classe adibita alla gestione dei dati relativi agli utenti e dei login/logout
  */
@@ -124,10 +129,15 @@ public class UsersManager implements Serializable {
 		if (this.currentUser == null) {
 			throw new IllegalStateException();
 		}
-		
+	
 		return this.currentUser;
 	}
-	
+	public List<User> getUserByCategoryOfInterest(CategoryEnum category){
+			return users.stream()
+						.filter(user ->((CategoryListFieldValue) user.getFieldValue(UserField.CATEGORIE_DI_INTERESSE))
+																	 .contains(category))
+						.collect(Collectors.toCollection(ArrayList::new));			
+	}
 	/**
 	 * Verifica se un utente con il nome passato come parametro è già registrato 
 	 * all'interno del sistema.

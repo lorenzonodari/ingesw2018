@@ -6,18 +6,22 @@ import java.util.List;
 import java.util.Set;
 
 import it.unibs.ingesw.dpn.model.EventBoard;
+import it.unibs.ingesw.dpn.model.ModelManager;
+import it.unibs.ingesw.dpn.model.fields.CommonField;
 import it.unibs.ingesw.dpn.model.users.Invite;
+import it.unibs.ingesw.dpn.model.users.Notification;
 import it.unibs.ingesw.dpn.model.users.User;
 
 public class Inviter {
 	
 	private Event target;
+	private ModelManager model;
 	private HashMap<User, Boolean> invited = new HashMap<>();
 		
-	public Inviter(Event target, EventBoard board) {
-		
+	public Inviter(Event target, ModelManager model) {
+		this.model = model;
 		this.target = target;
-		for (User u : board.getListOfOldSubscribersFromPastEvents(target.getCreator())) {
+		for (User u : model.getEventBoard().getListOfOldSubscribersFromPastEvents(target.getCreator())) {
 			invited.put(u, false);
 		}
 		
@@ -127,11 +131,24 @@ public class Inviter {
 		return invited.get(u);
 		
 	}
-	
+	/**
+	 * Metodo che invia  notifiche agli utenti che hanno selezionato la categoria dell'evento come categoria di interesse
+	 */
+	public void sendNotification() {
+		
+		StringBuffer notificationContent = new StringBuffer("Un evento appartenente ad una tua categoria di interesse è appena stato creato: ");
+		notificationContent.append(target.getFieldValue(CommonField.TITOLO));
+		
+		for(User u : model.getUsersManager().getUserByCategoryOfInterest(target.getCategory())) {
+			u.getMailbox().deliver(new Notification(notificationContent.toString()));
+		}
+		
+	}
 	/**
 	 * Invia gli inviti agli utenti selezionati
 	 */
 	public void sendInvites() {
+
 		for(User p : invited.keySet()) {
 			
 			if (invited.get(p)) {
@@ -139,4 +156,5 @@ public class Inviter {
 			}
 		}
 	}
+	
 }
