@@ -687,7 +687,7 @@ public class UIManager {
 				
 				
 				// Preparo il menu degli inviti
-				Inviter inviter = new Inviter(newEvent, model.getEventBoard());
+				Inviter inviter = new Inviter(newEvent, model);
 				
 				MenuAction dialogAction = null;
 				StringBuffer dialogDescription = new StringBuffer("L'evento è stato creato e pubblicato correttamente.\nSei stato iscritto/a in automatico al tuo evento.");
