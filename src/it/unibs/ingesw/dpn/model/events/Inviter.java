@@ -11,6 +11,12 @@ import it.unibs.ingesw.dpn.model.users.Invite;
 import it.unibs.ingesw.dpn.model.users.Notification;
 import it.unibs.ingesw.dpn.model.users.User;
 
+/**
+ * Classe che si occupa di mandare notifiche e inviti legate alla creazione di un nuovo oggetto {@link Event}.
+ * 
+ * @author Emanuele Poggi
+ *
+ */
 public class Inviter {
 	
 	private Event target;
@@ -23,7 +29,6 @@ public class Inviter {
 		for (User u : model.getEventBoard().getListOfOldSubscribersFromPastEvents(target.getCreator())) {
 			invited.put(u, false);
 		}
-		
 		
 	}
 	/**
