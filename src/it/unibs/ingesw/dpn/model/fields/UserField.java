@@ -1,9 +1,9 @@
 package it.unibs.ingesw.dpn.model.fields;
 
+import it.unibs.ingesw.dpn.model.fieldvalues.CategoryListFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.LocalDateFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
-import it.unibs.ingesw.dpn.model.fieldvalues.CategoryListFieldValue;;
 
 public enum UserField implements Field {
 	
