@@ -535,7 +535,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		description.append(String.format("Creatore    : %s\n", this.getCreator().getFieldValue(UserField.NICKNAME)));
 		// Valori dei campi
 		description.append("Campi       :\n");
-		Category cat = CategoryProvider.getProvider().getCategory(CategoryEnum.PARTITA_DI_CALCIO);
+		Category cat = CategoryProvider.getProvider().getCategory(this.category);
 		for (Field f : cat.getFields()) {
 			if(!(this.getFieldValue(f) == null)) {
 			description.append(String.format(" | %-50s : %s\n",

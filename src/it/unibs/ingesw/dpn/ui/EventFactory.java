@@ -8,9 +8,11 @@ import java.util.Map;
 import it.unibs.ingesw.dpn.model.categories.Category;
 import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
 import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
+import it.unibs.ingesw.dpn.model.events.ConferenceEvent;
 import it.unibs.ingesw.dpn.model.events.Event;
 import it.unibs.ingesw.dpn.model.events.SoccerMatchEvent;
 import it.unibs.ingesw.dpn.model.fields.CommonField;
+import it.unibs.ingesw.dpn.model.fields.ConferenceField;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fields.SoccerMatchField;
 import it.unibs.ingesw.dpn.model.fieldvalues.DateFieldValue;
@@ -160,6 +162,10 @@ public class EventFactory {
 		// Campi esclusivi della categoria "SoccerMatchField"
 		} else if (field instanceof SoccerMatchField) {
 			value = acquireSoccerMatchFieldValue((SoccerMatchField) field);
+			
+		// Campi esclusivi della categoria "ConferenceField"
+		} else if (field instanceof ConferenceField) {
+			value = acquireConferenceFieldValue((ConferenceField) field);
 			
 		// Campi estranei
 		} else {
@@ -324,8 +330,12 @@ public class EventFactory {
 		Event newEvent = null;
 		switch (this.provisionalCategory) {
 				
-		case PARTITA_DI_CALCIO:
+		case PARTITA_DI_CALCIO :
 			newEvent = new SoccerMatchEvent(this.provisionalCreator, this.provisionalFieldValues);
+			break;
+			
+		case CONFERENZA :
+			newEvent = new ConferenceEvent(this.provisionalCreator, this.provisionalFieldValues);
 			break;
 				
 		}
@@ -544,13 +554,13 @@ public class EventFactory {
 	
 
 	/**
-	 * Metodo che acquisisce e restituisce il valore di un campo "CommonField".
+	 * Metodo che acquisisce e restituisce il valore di un campo "SoccerMatch".
 	 * 
-	 * Precondizione: Il campo che si vuole acquisire deve essere contenuto nell'enum {@link CommonField},
-	 * ossia deve essere comune a tutte le categorie.
+	 * Precondizione: Il campo che si vuole acquisire deve essere contenuto nell'enum {@link SoccerMatchField},
+	 * ossia deve essere esclusivo della categoria "Partita di calcio".
 	 * 
 	 * @param field Il campo di cui si vuole acquisire il valore
-	 * @return
+	 * @return Il valore acquisito
 	 */
 	private FieldValue acquireSoccerMatchFieldValue(SoccerMatchField field) {
 		switch (field) {
@@ -592,6 +602,34 @@ public class EventFactory {
 		
 		// Se non matcho nulla
 		throw new IllegalArgumentException("Il campo non corrisponde ad alcun campo della categoria \"Partita di calcio\"");
+	}
+	
+	/**
+	 * Metodo che acquisisce e restituisce il valore di un campo "ConferenceField".
+	 * 
+	 * Precondizione: Il campo che si vuole acquisire deve essere contenuto nell'enum {@link ConferenceField},
+	 * ossia deve essere un campo esclusivo della categoria "Conferenza".
+	 * 
+	 * @param field Il campo di cui si vuole acquisire il valore
+	 * @return Il valore acquisito
+	 */
+	private FieldValue acquireConferenceFieldValue(ConferenceField field) {
+		switch (field) {
+		
+		case RELATORI :
+		{
+			return StringFieldValue.acquireValue(renderer, getter);
+		}
+			
+		case ARGOMENTO :
+		{
+			return StringFieldValue.acquireValue(renderer, getter);
+		}
+		
+		}
+		
+		// Se non matcho nulla
+		throw new IllegalArgumentException("Il campo non corrisponde ad alcun campo della categoria \"Conferenza\"");
 	}
 
 	/**

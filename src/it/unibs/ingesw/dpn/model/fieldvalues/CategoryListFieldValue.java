@@ -67,7 +67,7 @@ public class CategoryListFieldValue implements FieldValue, Serializable {
 		if (categoryToRemove == null) {
 			throw new IllegalArgumentException("Impossibile rimuovere una categoria nulla: parametro non inizializzato");
 		}
-		if (this.categoryList.contains(categoryToRemove)) {
+		if (!this.categoryList.contains(categoryToRemove)) {
 			return false;
 		} else {
 			this.categoryList.remove(categoryToRemove);

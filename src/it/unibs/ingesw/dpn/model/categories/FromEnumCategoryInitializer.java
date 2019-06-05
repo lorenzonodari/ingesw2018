@@ -1,6 +1,7 @@
 package it.unibs.ingesw.dpn.model.categories;
 
 import it.unibs.ingesw.dpn.model.fields.CommonField;
+import it.unibs.ingesw.dpn.model.fields.ConferenceField;
 import it.unibs.ingesw.dpn.model.fields.SoccerMatchField;
 
 public class FromEnumCategoryInitializer implements CategoryInitializer {
@@ -75,7 +76,23 @@ public class FromEnumCategoryInitializer implements CategoryInitializer {
 				
 				// Aggiungo i campi esclusivi
 				categories[c].addAllFields(SoccerMatchField.values());
+				
 				break;
+				
+			// Conferenza
+			case CONFERENZA :
+				categories[c] = new Category(
+						"Conferenza",
+						"Evento di divulgazione che prevede un relatore e più ascoltatori, ognuno dei quali può personalizzare la propria formula di partecipazione");
+
+				// Aggiungo i campi comuni
+				categories[c].addAllFields(CommonField.values());
+				
+				// Aggiungo i campi esclusivi
+				categories[c].addAllFields(ConferenceField.values());
+				
+				break;
+				
 			}
 		}
 		

@@ -17,7 +17,8 @@ import it.unibs.ingesw.dpn.model.events.Event;
  */
 public enum CategoryEnum implements Serializable {
 	
-	PARTITA_DI_CALCIO;
+	PARTITA_DI_CALCIO,
+	CONFERENZA;
 	
 	// Altre eventuali categorie da aggiungere qui.
 	

@@ -21,8 +21,10 @@ public class ConsoleInputGetter implements InputGetter {
 	private static final String PARSING_INTEGER_ERROR = "Impossibile interpretare il valore \"%s\" come numero intero";
 	private static final String PARSING_FLOAT_ERROR = "Impossibile interpretare il valore \"%s\" come numero in virgola mobile";
 	private static final String PARSING_BOOLEAN_ERROR = "Impossibile interpretare il valore \"%s\" come valore booleano. Usare [V/F], [vero/falso], [T/F] o [true/false].";
-	private static final String LOWERBOUND_NUM_ERROR = "Il valore %d è inferiore al minimo previsto %d";
-	private static final String UPPERBOUND_NUM_ERROR = "Il valore %d è superiore al massimo previsto %d";
+	private static final String LOWERBOUND_INTEGER_ERROR = "Il valore %d è inferiore al minimo previsto %d";
+	private static final String UPPERBOUND_INTEGER_ERROR = "Il valore %d è superiore al massimo previsto %d";
+	private static final String LOWERBOUND_FLOAT_ERROR = "Il valore %f è inferiore al minimo previsto %f";
+	private static final String UPPERBOUND_FLOAT_ERROR = "Il valore %f è superiore al massimo previsto %f";
 	private static final String INVALID_FORMAT_STRING_ERROR = "La stringa \"%s\" non corrisponde al formato atteso";
 
 	/**
@@ -85,12 +87,12 @@ public class ConsoleInputGetter implements InputGetter {
 			}		
 			if (parsedValue < min) {
 				renderer.renderError(String.format(
-						LOWERBOUND_NUM_ERROR,
+						LOWERBOUND_INTEGER_ERROR,
 						parsedValue,
 						min));
 			} else if (parsedValue > max) {
 				renderer.renderError(String.format(
-						UPPERBOUND_NUM_ERROR,
+						UPPERBOUND_INTEGER_ERROR,
 						parsedValue,
 						max));
 			} else {
@@ -138,12 +140,12 @@ public class ConsoleInputGetter implements InputGetter {
 			}			
 			if (parsedValue < min) {
 				renderer.renderError(String.format(
-						LOWERBOUND_NUM_ERROR,
+						LOWERBOUND_FLOAT_ERROR,
 						parsedValue,
 						min));
 			} else if (parsedValue > max) {
 				renderer.renderError(String.format(
-						UPPERBOUND_NUM_ERROR,
+						UPPERBOUND_FLOAT_ERROR,
 						parsedValue,
 						max));
 			} else {

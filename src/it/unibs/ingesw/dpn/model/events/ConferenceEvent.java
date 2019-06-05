@@ -8,20 +8,20 @@ import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 import it.unibs.ingesw.dpn.model.users.User;
 
 /**
- * Classe che rappresenta concettualmente il tipo di evento "Partita di calcio".
+ * Classe che rappresenta concettualmente il tipo di evento "Conferenza".
  * 
  * @author Michele Dusi, Emanuele Poggi, Lorenzo Nodari
  * 
  */
-public class SoccerMatchEvent extends Event {
+public class ConferenceEvent extends Event {
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -4342916685556543088L;
-	
+	private static final long serialVersionUID = -9171544783647521694L;
+
 	/**
-	 * Costruttore della classe SoccerMatchEvent, che verrà invocato dalla classe
+	 * Costruttore della classe ConferenceEvent, che verrà invocato dalla classe
 	 * apposita {@link it.unibs.ingesw.dpn.ui.EventFactory} la cui responsabilità principale è creare eventi.
 	 * 
 	 * Precondizione: i valori dei campi devono essere uguali come numero e come tipo ai campi
@@ -29,8 +29,8 @@ public class SoccerMatchEvent extends Event {
 	 * 
 	 * @param fieldValues i valori dei campi dell'evento di tipo "Partita di calcio"
 	 */
-	public SoccerMatchEvent(User creator, Map<Field, FieldValue> fieldValues) {
-		super(creator, CategoryEnum.PARTITA_DI_CALCIO, fieldValues);
+	public ConferenceEvent(User creator, Map<Field, FieldValue> fieldValues) {
+		super(creator, CategoryEnum.CONFERENZA, fieldValues);
 	}
-	
+
 }
