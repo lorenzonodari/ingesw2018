@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
@@ -133,10 +134,19 @@ public class UsersManager implements Serializable {
 		return this.currentUser;
 	}
 	public List<User> getUserByCategoryOfInterest(CategoryEnum category){
-			return users.stream()
-						.filter(user ->((CategoryListFieldValue) user.getFieldValue(UserField.CATEGORIE_DI_INTERESSE))
-																	 .contains(category))
-						.collect(Collectors.toCollection(ArrayList::new));			
+		
+		Predicate<User> filterPredicate = (user) -> {
+			
+			CategoryListFieldValue interests = (CategoryListFieldValue) user.getFieldValue(UserField.CATEGORIE_DI_INTERESSE);
+			if (interests == null) {
+				return false;
+			}
+			return interests.contains(category);
+			
+		};
+		
+		return users.stream().filter(filterPredicate)
+							 .collect(Collectors.toCollection(ArrayList::new));			
 	}
 	/**
 	 * Verifica se un utente con il nome passato come parametro è già registrato 
