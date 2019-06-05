@@ -123,7 +123,7 @@ public class EventBoard implements Serializable {
 				.keySet()
 				.stream()
 				.filter(event -> eventMap.get(event).contains(e))
-				.filter(event -> event.getState().equals(EventState.OPEN)
+				.filter(event -> event.getState().equals(EventState.OPEN))
 				.collect(Collectors.toCollection(ArrayList::new));
 	}
 	/**
