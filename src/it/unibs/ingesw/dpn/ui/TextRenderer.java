@@ -217,20 +217,6 @@ public class TextRenderer implements UIRenderer {
 		System.out.println(text);		
 	}
 	
-//	@Override
-//	public void renderTextInFrame(String text) {
-//		int len = text.trim().length();
-//		StringBuffer line = new StringBuffer();
-//		for (int i = 0; i < len + 8; i++) {
-//			line.append(FRAME_CHAR);
-//		}
-//		// Stampa la cornice e il testo
-//		System.out.println(line.toString());
-//		System.out.println("||  " + text.trim() + "  ||");
-//		System.out.println(line.toString());
-//		
-//	}
-	
 	@Override
 	public void renderTextInFrame(String text) {
 		int len = text.trim().length();
@@ -293,7 +279,7 @@ public class TextRenderer implements UIRenderer {
 						// La aggiungo alla lista di righe
 						textLines.add(buffer.toString());
 						// Resetto il buffer, aggiungendo la parola appena trovata
-						buffer = new StringBuffer(word);
+						buffer = new StringBuffer(word + " ");
 						
 						// TODO : al momento il metodo si incasina se ho una parola più lunga del massimo numero di caratteri per riga
 					}
