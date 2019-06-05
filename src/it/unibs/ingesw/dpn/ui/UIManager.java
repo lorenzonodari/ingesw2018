@@ -687,7 +687,7 @@ public class UIManager {
 				
 				
 				// Preparo il menu degli inviti
-				Inviter inviter = new Inviter(newEvent, model.getEventBoard());
+				Inviter inviter = new Inviter(newEvent, model);
 				
 				MenuAction dialogAction = null;
 				StringBuffer dialogDescription = new StringBuffer("L'evento è stato creato e pubblicato correttamente.\nSei stato iscritto/a in automatico al tuo evento.");
@@ -935,6 +935,57 @@ public class UIManager {
 	 * @param i L'invito di interesse dell'utente
 	 */
 	public void inviteMenu(Invite i) {
+		
+		Event event = i.getEvent();
+		
+		// Callback indietro
+		MenuAction backAction = () -> {this.invitationsMenu();};
+		
+		// Callback accetta invito
+		MenuAction acceptAction = () -> {
+			
+			if (model.getEventBoard().addSubscription(event, users.getCurrentUser())) {
+				
+				this.dialog("Invito accettato correttamente", null, Menu.BACK_ENTRY_TITLE, backAction);
+				
+			}
+			else {
+				this.dialog("Errore durante l'accettazione dell'invito", null, Menu.BACK_ENTRY_TITLE, backAction);
+			}
+			
+			users.getCurrentUser().getMailbox().delete(i);
+			
+		};
+		
+		// Callback rifiuta invito
+		MenuAction refuseAction = () -> {
+			
+			users.getCurrentUser().getMailbox().delete(i); // Cancella l'invito dalla mailbox
+			this.dialog("Invito rifiutato correttamente", null, Menu.BACK_ENTRY_TITLE, backAction);
+			
+		};
+		
+		Date now = new Date();
+		Date subscriptionTerm = (DateFieldValue) event.getFieldValue(CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE);
+		StringBuffer menuContent = new StringBuffer(event.toString());
+		Menu inviteMenu = null;
+		
+		// Verifico che le iscrizioni all'evento non siano chiuse
+		if (now.after(subscriptionTerm)) {
+			
+			menuContent.append("\n\n Non e' piu' possibile accettare l'invito: le iscrizioni all'evento sono chiuse");
+			inviteMenu = new Menu("Invito ad un evento", menuContent.toString(), Menu.BACK_ENTRY_TITLE, backAction);
+			
+		}
+		else {
+			
+			inviteMenu = new Menu("Invito ad un evento", menuContent.toString(), Menu.BACK_ENTRY_TITLE, backAction);
+			inviteMenu.addEntry("Accetta invito", acceptAction);
+			inviteMenu.addEntry("Rifiuta invito", refuseAction);
+
+		}
+		
+		this.currentMenu = inviteMenu;
 		
 	}
 	
