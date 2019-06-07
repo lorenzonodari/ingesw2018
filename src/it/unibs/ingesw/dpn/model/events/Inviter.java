@@ -144,6 +144,11 @@ public class Inviter {
 		notificationContent.append(target.getFieldValue(CommonField.TITOLO));
 		
 		for(User u : model.getUsersManager().getUserByCategoryOfInterest(target.getCategory())) {
+			
+			if (u == target.getCreator()) {
+				continue;
+			}
+			
 			u.getMailbox().deliver(new Notification(notificationContent.toString()));
 		}
 		
