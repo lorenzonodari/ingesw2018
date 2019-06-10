@@ -404,9 +404,10 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		}
 
 		// Notifica l'utente che l'iscrizione è andata a buon fine
-		subscriber.getMailbox().deliver(new Notification(
-				String.format(EVENT_SUBSCRIPTION_MESSAGE, this.valuesMap.get(CommonField.TITOLO))
-				));
+		StringBuffer message = new StringBuffer(String.format(EVENT_SUBSCRIPTION_MESSAGE, this.valuesMap.get(CommonField.TITOLO)));
+		message.append(String.format("; Importo dovuto: %.2f €", this.getExpensesForUser(subscriber)));
+		
+		subscriber.getMailbox().deliver(new Notification(message.toString()));
 		return true;
 	}
 	
