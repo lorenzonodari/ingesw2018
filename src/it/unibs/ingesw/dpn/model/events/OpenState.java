@@ -245,6 +245,15 @@ public class OpenState implements EventState, Serializable {
 	@Override
 	public void resetState(Event e) {
 		
+		
+		// Preparo i due timer:
+		// - quello del termine ultimo di ritiro delle iscrizioni
+		// - quello del termine ultimo di iscrizioni
+				
+		// Configuro i timer in modo che vengano eseguiti come daemon (grazie al parametro con valore true).
+		this.unsubscriptionTimeoutTimer = new Timer(UNSUBS_TIMER_NAME + e.hashCode(), true);
+		this.subscriptionTimeoutTimer = new Timer(SUBS_TIMER_NAME + e.hashCode(), true);
+		
 		// Ricavo la data del termine ultimo di iscrizione
 		Date unsubscriptionTimeoutDate = (Date) e.getFieldValue(CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE);
 		Date subscriptionTimeoutDate = (Date) e.getFieldValue(CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE);

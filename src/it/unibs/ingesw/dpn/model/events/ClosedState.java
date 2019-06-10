@@ -87,6 +87,10 @@ public class ClosedState implements EventState, Serializable {
 	@Override
 	public void resetState(Event e) {
 		
+		// Preparo il timer di scadenza della conclusione dell'evento
+		// Lo configuro in modo che venga eseguito come daemon (grazie al parametro con valore true).
+		this.ongoingTimer = new Timer(TIMER_NAME + e.hashCode(), true);
+		
 		// Ricavo la data di inizio dell'evento
 		Date ongoingDate = (Date) e.getFieldValue(CommonField.DATA_E_ORA);
 				

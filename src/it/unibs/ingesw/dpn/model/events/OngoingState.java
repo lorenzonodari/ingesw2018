@@ -57,6 +57,10 @@ public class OngoingState implements EventState, Serializable {
 	@Override
 	public void resetState(Event e) {
 		
+		// Preparo il timer di scadenza della conclusione dell'evento
+		// Lo configuro in modo che venga eseguito come daemon (grazie al parametro con valore true).
+		this.endingTimer = new Timer(TIMER_NAME + e.hashCode(), true);
+		
 		// Ricavo la data della conclusione dell'evento
 		Date endingDate = (Date) e.getFieldValue(CommonField.DATA_E_ORA_CONCLUSIVE);
 				
