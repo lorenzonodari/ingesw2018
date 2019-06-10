@@ -2,6 +2,8 @@ package it.unibs.ingesw.dpn.ui;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
 import it.unibs.ingesw.dpn.Main;
 import it.unibs.ingesw.dpn.model.ModelManager;
 import it.unibs.ingesw.dpn.model.users.UsersManager;
@@ -18,7 +20,9 @@ import it.unibs.ingesw.dpn.model.events.Inviter;
 import it.unibs.ingesw.dpn.model.fields.CommonField;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fields.UserField;
+import it.unibs.ingesw.dpn.model.fields.ConferenceField;
 import it.unibs.ingesw.dpn.model.fieldvalues.DateFieldValue;
+import it.unibs.ingesw.dpn.model.fieldvalues.OptionalCostsFieldValue;
 
 /**
  * Classe adibita alla gestione dell'interfaccia utente. In particolare, alle istanze
@@ -542,6 +546,14 @@ public class UIManager {
 				this.dialog("Non e' stato possibile annullare correttamente l'iscrizione", null, Menu.BACK_ENTRY_TITLE, dialogBackAction); 
 			}
 			
+			if (event.hasUserDependantFields()) {
+				OptionalCostsFieldValue costsFieldValue = (OptionalCostsFieldValue) event.getFieldValue(ConferenceField.SPESE_OPZIONALI);
+				
+				for (String cost : costsFieldValue.getValue().keySet()) {
+					costsFieldValue.removeUserFromCost(users.getCurrentUser(), cost);
+				}
+			}
+			
 		};
 		
 		// Callback ritira proposta
@@ -559,7 +571,36 @@ public class UIManager {
 			
 		};
 		
-		Menu eventMenu = new Menu("Visualizzazione evento", event.toString(), Menu.BACK_ENTRY_TITLE, backAction);
+		//Preparo il contenuto testuale del menu
+		StringBuffer menuContent = new StringBuffer(event.toString());
+		
+		if (event.hasUserDependantFields() && users.getCurrentUser() != event.getCreator()) {
+			menuContent.append("\n");
+			menuContent.append("Spese opzionali scelte: \n");
+			
+			OptionalCostsFieldValue costsFieldValue = (OptionalCostsFieldValue) event.getFieldValue(ConferenceField.SPESE_OPZIONALI);
+			Map<String, Float> costs = costsFieldValue.getValue();
+			
+			for (String cost : costs.keySet()) {
+				
+				menuContent.append(cost);
+				menuContent.append(String.format(" : %.2f € ", costs.get(cost)));
+				
+				if (!costsFieldValue.userHasCost(users.getCurrentUser(), cost)) {
+					menuContent.append("[ ]");
+				}
+				else {
+					menuContent.append("[X]");
+				}
+				
+				menuContent.append("\n");
+			}
+			menuContent.append("\n");
+			
+			menuContent.append(String.format("Costo complessivo di partecipazione: %.2f €", event.getExpensesForUser(users.getCurrentUser())));
+		}
+		
+		Menu eventMenu = new Menu("Visualizzazione evento", menuContent.toString(), Menu.BACK_ENTRY_TITLE, backAction);
 		
 		// Le iscrizioni e le proposte possono essere ritirate solamente in data precedente al "Termine ultimo di ritiro iscrizione"
 		Date withdrawLimit = (DateFieldValue) event.getFieldValue(CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE);
@@ -570,7 +611,38 @@ public class UIManager {
 			eventMenu.addEntry("Ritira proposta", withdrawAction);
 		}
 		else if (model.getEventBoard().verifySubscription(event, model.getUsersManager().getCurrentUser()) && now.before(subscriptionLimit)) {
+			
 			eventMenu.addEntry("Iscriviti all'evento", subscriptionAction);
+			
+			if (event.hasUserDependantFields() && users.getCurrentUser() != event.getCreator()) {
+				
+				OptionalCostsFieldValue costsFieldValue = (OptionalCostsFieldValue) event.getFieldValue(ConferenceField.SPESE_OPZIONALI);
+				Map<String, Float> costs = costsFieldValue.getValue();
+				
+				for (String cost : costs.keySet()) {
+					
+					// Callback seleziona spesa aggiuntiva
+					MenuAction selectAction = () -> {
+						costsFieldValue.registerUserToCost(users.getCurrentUser(), cost);
+						this.eventMenu(event);
+					};
+					
+					// Callback rimuovi spesa aggiuntiva
+					MenuAction removeAction = () -> {
+						costsFieldValue.removeUserFromCost(users.getCurrentUser(), cost);
+						this.eventMenu(event);
+					};
+					
+					if (!costsFieldValue.userHasCost(users.getCurrentUser(), cost)) {
+						String entryName = String.format("Desidero sostenere la spesa: \"%s\"", cost);
+						eventMenu.addEntry(entryName, selectAction);
+					}
+					else {
+						String entryName = String.format("Non desidero sostenere la spesa: \"%s\"", cost);
+						eventMenu.addEntry(entryName, removeAction);
+					}
+				}
+			}
 		}
 		else if (now.before(withdrawLimit)) {
 			eventMenu.addEntry("Ritira iscrizione", unsubscribeAction);
@@ -971,6 +1043,33 @@ public class UIManager {
 		Date now = new Date();
 		Date subscriptionTerm = (DateFieldValue) event.getFieldValue(CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE);
 		StringBuffer menuContent = new StringBuffer(event.toString());
+		
+		if (event.hasUserDependantFields() && users.getCurrentUser() != event.getCreator()) {
+			menuContent.append("\n");
+			menuContent.append("Spese opzionali scelte: \n");
+			
+			OptionalCostsFieldValue costsFieldValue = (OptionalCostsFieldValue) event.getFieldValue(ConferenceField.SPESE_OPZIONALI);
+			Map<String, Float> costs = costsFieldValue.getValue();
+			
+			for (String cost : costs.keySet()) {
+				
+				menuContent.append(cost);
+				menuContent.append(String.format(" : %.2f € ", costs.get(cost)));
+				
+				if (!costsFieldValue.userHasCost(users.getCurrentUser(), cost)) {
+					menuContent.append("[ ]");
+				}
+				else {
+					menuContent.append("[X]");
+				}
+				
+				menuContent.append("\n");
+			}
+			menuContent.append("\n");
+			
+			menuContent.append(String.format("Costo complessivo di partecipazione: %.2f €", event.getExpensesForUser(users.getCurrentUser())));
+		}
+		
 		Menu inviteMenu = null;
 		
 		// Verifico che le iscrizioni all'evento non siano chiuse
@@ -978,6 +1077,36 @@ public class UIManager {
 			
 			menuContent.append("\n\n Non e' piu' possibile accettare l'invito: le iscrizioni all'evento sono chiuse");
 			inviteMenu = new Menu("Invito ad un evento", menuContent.toString(), Menu.BACK_ENTRY_TITLE, backAction);
+			
+			if (event.hasUserDependantFields() && users.getCurrentUser() != event.getCreator()) {
+				
+				OptionalCostsFieldValue costsFieldValue = (OptionalCostsFieldValue) event.getFieldValue(ConferenceField.SPESE_OPZIONALI);
+				Map<String, Float> costs = costsFieldValue.getValue();
+				
+				for (String cost : costs.keySet()) {
+					
+					// Callback seleziona spesa aggiuntiva
+					MenuAction selectAction = () -> {
+						costsFieldValue.registerUserToCost(users.getCurrentUser(), cost);
+						this.inviteMenu(i);
+					};
+					
+					// Callback rimuovi spesa aggiuntiva
+					MenuAction removeAction = () -> {
+						costsFieldValue.removeUserFromCost(users.getCurrentUser(), cost);
+						this.inviteMenu(i);
+					};
+					
+					if (!costsFieldValue.userHasCost(users.getCurrentUser(), cost)) {
+						String entryName = String.format("Desidero sostenere la spesa: \"%s\"", cost);
+						inviteMenu.addEntry(entryName, selectAction);
+					}
+					else {
+						String entryName = String.format("Non desidero sostenere la spesa: \"%s\"", cost);
+						inviteMenu.addEntry(entryName, removeAction);
+					}
+				}
+			}
 			
 		}
 		else {

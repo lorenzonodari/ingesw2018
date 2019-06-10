@@ -133,6 +133,31 @@ public class OptionalCostsFieldValue implements FieldValue, Serializable {
 	}
 	
 	/**
+	 * Restituisce true se l'utente dato ha deciso di sostenere la spesa data
+	 * 
+	 * Precondizione: user != null && cost != null
+	 * Precondizione: il costo dato deve essere uno dei costi esistenti
+	 * 
+	 * @param user L'utente in questione
+	 * @param cost Il costo in questione
+	 * @return true se l'utente dato ha deciso di sostenere la spesa data
+	 */
+	public boolean userHasCost(User user, String cost) {
+		
+		// Verifica delle precondizioni
+		if (user == null || cost == null) {
+			throw new NullPointerException();
+		}
+		
+		if (!costs.containsKey(cost)) {
+			throw new IllegalArgumentException();
+		}
+		
+		return userChoices.get(cost).contains(user);
+		
+	}
+	
+	/**
 	 * Restituisce le spese opzionali complessive sostenute dall'utente dato
 	 * 
 	 * Precondizione: user != null
