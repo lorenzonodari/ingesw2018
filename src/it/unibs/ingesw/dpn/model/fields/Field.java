@@ -51,6 +51,15 @@ public interface Field {
 	public boolean isEditable();
 	
 	/**
+	 * Restituisce true se il campo da la possibilita' all'utente di interagire con questo
+	 * 
+	 * @return true se il campo da la possibilita' all'utente di interagire con questo
+	 */
+	public default boolean isUserDependant() {
+		return false;
+	}
+	
+	/**
 	 * Restituisce la classe le cui istanze sono i possibili valori di questo Field.
 	 * 
 	 * @return il "tipo" del campo

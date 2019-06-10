@@ -2,8 +2,10 @@ package it.unibs.ingesw.dpn.ui;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 import it.unibs.ingesw.dpn.model.categories.Category;
 import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
@@ -21,6 +23,7 @@ import it.unibs.ingesw.dpn.model.fieldvalues.GenderEnumFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.IntegerFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.IntegerIntervalFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.MoneyAmountFieldValue;
+import it.unibs.ingesw.dpn.model.fieldvalues.OptionalCostsFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.TimeAmountFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
 import it.unibs.ingesw.dpn.model.users.User;
@@ -624,6 +627,82 @@ public class EventFactory {
 		case ARGOMENTO :
 		{
 			return StringFieldValue.acquireValue(renderer, getter);
+		}
+		
+		case SPESE_OPZIONALI :
+		{
+			// Variabili ausiliarie
+			int option = 0;
+			LinkedHashMap<String, Float> entriesBuffer = new LinkedHashMap<>();
+			Stack<String> entriesOrder = new Stack<String>();
+			
+			
+			// Ciclo di acquisizione
+			do {
+				
+				// Stampa il riepilogo delle voci aggiunte
+				renderer.renderText("Voci di spesa opzionali:");
+				for (String s : entriesBuffer.keySet()) {
+					renderer.renderText(String.format(" - %s : %.2f €", s, entriesBuffer.get(s)));
+				}
+				renderer.renderText("");
+				
+				// Stampa le opzioni disponibili all'utente
+				renderer.renderText(" 1 - Aggiungi una voce");
+				
+				// Visualizzo l'opzione solo se ho gia' aggiunto almeno una voce
+				if (!entriesOrder.isEmpty()) {
+					renderer.renderText(" 2 - Rimuovi l'ultima voce");
+				}
+				
+				renderer.renderText(" 0 - Conferma");
+				
+				option = getter.getInteger(0, 2);
+				
+				// Aggiunta di una nuova voce
+				if (option == 1) {
+					
+					renderer.renderText("Inserisci la ragione della spesa");
+					String reason = getter.getString();
+					renderer.renderText("Inserisci l'ammontare della spesa");
+					float amount = getter.getFloat();
+					
+					if (entriesBuffer.containsKey(reason)) {
+						renderer.renderError("La voce di spesa inserita risulta gia' definita");
+					}
+					else {
+						entriesBuffer.put(reason, amount);
+						entriesOrder.push(reason);
+					}
+							
+				}
+				// Rimozione dell'ultima voce aggiunta
+				else if (option == 2) {
+					
+					entriesBuffer.remove(entriesOrder.pop());
+				}
+				
+				renderer.renderText("");
+				
+			} while (option != 0);
+			
+			// Preparo l'effettivo valore del campo se l'utente ha definito almeno una voce di spesa
+			if (entriesOrder.size() > 0) {
+				
+				OptionalCostsFieldValue value = new OptionalCostsFieldValue();
+				for (String s : entriesBuffer.keySet()) {
+				
+					value.addEntry(s, entriesBuffer.get(s));
+					
+				}
+				return value;
+
+			}
+			// In caso contrario restituisco null
+			else {
+				return null;
+			}
+			
 		}
 		
 		}

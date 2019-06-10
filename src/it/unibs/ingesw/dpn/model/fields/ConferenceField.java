@@ -2,6 +2,7 @@ package it.unibs.ingesw.dpn.model.fields;
 
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
+import it.unibs.ingesw.dpn.model.fieldvalues.OptionalCostsFieldValue;
 
 /**
  * Classe che presenta i dati per tutti i campi esclusivi previsti dalla tipologia di eventi "Conferenza".
@@ -16,6 +17,7 @@ public enum ConferenceField implements Field {
 			"Nomi delle persone che parleranno alla conferenza in qualità di relatori",
 			true,
 			true,
+			false,
 			StringFieldValue.class
 			),
 	
@@ -24,7 +26,16 @@ public enum ConferenceField implements Field {
 			"Breve descrizione delle tematiche che saranno trattate nella conferenza",
 			true,
 			false,
+			false,
 			StringFieldValue.class			
+			),
+	SPESE_OPZIONALI (
+			"Spese opzionali",
+			"Spese aggiuntive a scelta del partecipante",
+			false,
+			false,
+			true,
+			OptionalCostsFieldValue.class
 			)
 	
 	;
@@ -33,9 +44,10 @@ public enum ConferenceField implements Field {
 	private final String description;
 	private final boolean mandatory;
 	private final boolean editable;
+	private final boolean userDependant;
 	private Class<? extends FieldValue> type;
 	
-	private ConferenceField(String name, String description, boolean mandatory, boolean editable, Class<? extends FieldValue> type) {
+	private ConferenceField(String name, String description, boolean mandatory, boolean editable, boolean userDependant, Class<? extends FieldValue> type) {
 		if (name == null || description == null || type == null) {
 			throw new IllegalArgumentException();
 		}
@@ -43,6 +55,7 @@ public enum ConferenceField implements Field {
 		this.description = description;
 		this.mandatory = mandatory;
 		this.editable = editable;
+		this.userDependant = userDependant;
 		this.type = type;
 	}
 
@@ -84,6 +97,16 @@ public enum ConferenceField implements Field {
 	@Override
 	public boolean isEditable() {
 		return this.editable;
+	}
+	
+	/**
+	 * Restituisce true se il campo da la possibilita' all'utente di interagire con questo
+	 * 
+	 * @return true se il campo da la possibilita' all'utente di interagire con questo
+	 */
+	@Override
+	public boolean isUserDependant() {
+		return this.userDependant;
 	}
 
 	/**
