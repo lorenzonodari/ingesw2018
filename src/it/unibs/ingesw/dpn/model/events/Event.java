@@ -258,6 +258,18 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		 							   .collect(Collectors.toCollection(ArrayList::new));
 		 
 	 }
+	 
+	 /**
+	  * Restituisce true se l'evento contiene campi dipendenti dall'utente al momento della sua iscrizione
+	  * 
+	  * @return true se l'evento contiene campi dipendenti dall'utente al momento della sua iscrizione
+	  */
+	 public boolean hasUserDependantFields() {
+		 
+		 return this.valuesMap.keySet().stream()
+				   .filter(field -> field.isUserDependant())
+				   .count() > 0;
+	 }
 	
 	/**
 	 * Modifica lo stato dell'evento, secondo il pattern "State".
@@ -403,11 +415,15 @@ public abstract class Event implements Serializable, Comparable<Event> {
 			return false;
 		}
 
-		// Notifica l'utente che l'iscrizione è andata a buon fine
-		StringBuffer message = new StringBuffer(String.format(EVENT_SUBSCRIPTION_MESSAGE, this.valuesMap.get(CommonField.TITOLO)));
-		message.append(String.format("; Importo dovuto: %.2f €", this.getExpensesForUser(subscriber)));
+		// Se l'utente non e' il creatore, notifica l'utente che l'iscrizione è andata a buon fine
+		if (subscriber != this.creator) {
+			
+			StringBuffer message = new StringBuffer(String.format(EVENT_SUBSCRIPTION_MESSAGE, this.valuesMap.get(CommonField.TITOLO)));
+			message.append(String.format("; Importo dovuto: %.2f €", this.getExpensesForUser(subscriber)));
 		
-		subscriber.getMailbox().deliver(new Notification(message.toString()));
+			subscriber.getMailbox().deliver(new Notification(message.toString()));
+			
+		}
 		return true;
 	}
 	
