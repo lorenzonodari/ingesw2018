@@ -3,8 +3,10 @@ package it.unibs.ingesw.dpn.model.events;
 import java.util.Map;
 
 import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
+import it.unibs.ingesw.dpn.model.fields.ConferenceField;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
+import it.unibs.ingesw.dpn.model.fieldvalues.OptionalCostsFieldValue;
 import it.unibs.ingesw.dpn.model.users.User;
 
 /**
@@ -31,6 +33,17 @@ public class ConferenceEvent extends Event {
 	 */
 	public ConferenceEvent(User creator, Map<Field, FieldValue> fieldValues) {
 		super(creator, CategoryEnum.CONFERENZA, fieldValues);
+	}
+	
+	@Override
+	public float getExpensesForUser(User user) {
+		
+		float baseAmount = super.getExpensesForUser(user);
+		float extras = ((OptionalCostsFieldValue) this.getFieldValue(ConferenceField.SPESE_OPZIONALI)).getExpensesForUser(user);
+		
+		return baseAmount + extras;
+		
+		
 	}
 
 }

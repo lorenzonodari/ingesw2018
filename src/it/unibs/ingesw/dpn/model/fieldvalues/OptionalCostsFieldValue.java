@@ -2,8 +2,13 @@ package it.unibs.ingesw.dpn.model.fieldvalues;
 
 import java.io.Serializable;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 import java.util.Collections;
+
+import it.unibs.ingesw.dpn.model.users.User;
 
 public class OptionalCostsFieldValue implements FieldValue, Serializable {
 
@@ -13,10 +18,12 @@ public class OptionalCostsFieldValue implements FieldValue, Serializable {
 	private static final long serialVersionUID = 1605590568155502574L;
 	
 	private LinkedHashMap<String, Float> costs;
+	private HashMap<String, List<User>> userChoices;
 	
 	public OptionalCostsFieldValue() {
 		
 		this.costs = new LinkedHashMap<>();
+		this.userChoices = new HashMap<>();
 		
 	}
 	
@@ -41,6 +48,8 @@ public class OptionalCostsFieldValue implements FieldValue, Serializable {
 		}
 		
 		costs.put(name, amount);
+		userChoices.put(name, new LinkedList<User>());
+		
 	}
 	
 	/**
@@ -67,6 +76,83 @@ public class OptionalCostsFieldValue implements FieldValue, Serializable {
 		
 		return buffer.toString();
 		
+	}
+	
+	/**
+	 * Registra l'utente dato tra gli utenti che desiderano sostenere la spesa aggiuntiva data
+	 * 
+	 * Precondizione: user != null
+	 * Precondizione: cost != null
+	 * Precondizione: La spesa data e' presente tra i valori di questo campo
+	 * 
+	 * @param user L'utente che desidera sostenere la spesa aggiuntiva
+	 * @param cost La spesa che desidera sostenere
+	 * @return true se il processo va a buon fine
+	 */
+	public boolean registerUserToCost(User user, String cost) {
+		
+		// Verifica delle precondizioni
+		if (user == null || cost == null) {
+			throw new NullPointerException();
+		}
+		
+		if (!costs.containsKey(cost)) {
+			throw new IllegalArgumentException();
+		}
+		
+		userChoices.get(cost).add(user);
+		return true;
+		
+	}
+	
+	/**
+	 * Rimuove l'utente dato dalla lista degli utenti che desiderano sostenere la spesa aggiuntiva data
+	 * 
+	 * Precondizione: user != null
+	 * Precondizione: cost != null
+	 * Precondizione: La spesa data e' presente tra i valori di questo campo
+	 * 
+	 * @param user L'utente che desidera sostenere la spesa aggiuntiva
+	 * @param cost La spesa che desidera sostenere
+	 * @return true se il processo va a buon fine
+	 */
+	public boolean removeUserFromCost(User user, String cost) {
+		
+		// Verifica delle precondizioni
+		if (user == null || cost == null) {
+			throw new NullPointerException();
+		}
+		
+		if (!costs.containsKey(cost)) {
+			throw new IllegalArgumentException();
+		}
+		
+		userChoices.get(cost).remove(user);
+		return true;
+		
+	}
+	
+	/**
+	 * Restituisce le spese opzionali complessive sostenute dall'utente dato
+	 * 
+	 * Precondizione: user != null
+	 * Precondizione: L'utente deve essere gia' registrato tra quelli che sostengono spese aggiuntive
+	 * 
+	 * @param user L'utente per il quale calcolare le spese aggiuntive
+	 * @return Le spese aggiuntive sostenute dall'utente
+	 */
+	public float getExpensesForUser(User user) {
+		
+		float amount = 0.0f;
+		
+		for (String cost : userChoices.keySet()) {
+			
+			if (userChoices.get(cost).contains(user)) {
+				amount += costs.get(cost);
+			}
+		}
+		
+		return amount;
 	}
 	
 

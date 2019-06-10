@@ -1,10 +1,12 @@
 package it.unibs.ingesw.dpn.model.events;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import it.unibs.ingesw.dpn.model.categories.Category;
 import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
@@ -14,6 +16,7 @@ import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fields.UserField;
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.IntegerFieldValue;
+import it.unibs.ingesw.dpn.model.fieldvalues.MoneyAmountFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
 import it.unibs.ingesw.dpn.model.users.Mailbox;
 import it.unibs.ingesw.dpn.model.users.Notification;
@@ -241,6 +244,19 @@ public abstract class Event implements Serializable, Comparable<Event> {
 			 // Invio la notifica
 			 m.deliver(new Notification(message));
 		 }
+	 }
+	 
+	 /**
+	  * Restituisce i campi dell'evento dipendenti dall'utente al momento della sua iscrizione
+	  * 
+	  * @return La lista dei campi dipendenti dall'utente
+	  */
+	 public List<Field> getUserDependantFields() {
+		 
+		 return this.valuesMap.keySet().stream()
+		 							   .filter(field -> field.isUserDependant())
+		 							   .collect(Collectors.toCollection(ArrayList::new));
+		 
 	 }
 	
 	/**
@@ -518,6 +534,18 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		String thisTitle = this.valuesMap.get(CommonField.TITOLO).toString();
 		String otherTitle = e.valuesMap.get(CommonField.TITOLO).toString();
 		return thisTitle.compareTo(otherTitle);
+	}
+	
+	/**
+	 * Restituisce le spese che il dato utente dovra' sostenere per l'evento
+	 * 
+	 * @param user L'utente per il quale si vogliono conoscere i costi
+	 * @return Il costo che il dato utente dovra' sostenere
+	 */
+	public float getExpensesForUser(User user) {
+		
+		return ((MoneyAmountFieldValue) this.valuesMap.get(CommonField.QUOTA_INDIVIDUALE)).getValue();
+		
 	}
 	
 	/**
