@@ -274,7 +274,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * quando questi sono caricati da disco mediante serializzazione.
 	 */
 	public void resetState() {
-		this.state.onEntry(this);
+		this.state.resetState(this);
 	}
 	
 	/**
