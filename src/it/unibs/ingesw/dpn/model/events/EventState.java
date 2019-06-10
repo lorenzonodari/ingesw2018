@@ -88,6 +88,18 @@ public interface EventState {
 	public default void onUnsubscription(Event e) {
 		throw new IllegalStateException(String.format(STATE_EXCEPTION, this.getStateName().toUpperCase()));
 	}
+	
+	
+	/**
+	 * Il fine di questo metodo e' quello di resettare correttamente lo stato di un evento
+	 * in seguito alla sua deserializzazione. Poiche' non tutti gli stati di un evento necessitano
+	 * di particolari azioni per il corretto ripristino, l'implementazione di default del metodo non fa nulla.
+	 * 
+	 * @param e L'evento al quale si riferisce lo stato
+	 */
+	public default void resetState(Event e) {
+		
+	}
 
 	/**
 	 * Metodo di utilita' utilizzato per avviare il timer di cambio stato di un evento

@@ -236,5 +236,43 @@ public class OpenState implements EventState, Serializable {
 		
 	}
 	
-	
+	/**
+	 * In seguito alla deserializzazione di un OpenState, e' necessario riavviare i Timer di passaggio
+	 * di stato
+	 * 
+	 * @param e L'evento di riferimento dello stato
+	 */
+	@Override
+	public void resetState(Event e) {
+		
+		// Ricavo la data del termine ultimo di iscrizione
+		Date unsubscriptionTimeoutDate = (Date) e.getFieldValue(CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE);
+		Date subscriptionTimeoutDate = (Date) e.getFieldValue(CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE);
+		
+		// Semaforo per le precedenze
+		// Mi assicuro che "unsubscriptionTimeoutTimer" venga eseguito prima di "subscriptionTimeoutTimer".
+		this.timerSemaphore = new Semaphore(0);
+		
+		// Schedulo l'azione da effettuare al "Termine ultimo di ritiro iscrizione"
+		this.unsubscriptionTimeoutTimer.schedule(new TimerTask() {
+			
+			@Override
+			public void run() {
+				// Tutte le azioni da effettuare sono contenute nel seguente metodo:
+				onUnsubscriptionTimeout(e);
+			}
+		}, unsubscriptionTimeoutDate);
+		
+		// Schedulo l'azione da effettuare al "Termine ultimo di iscrizione"
+		this.subscriptionTimeoutTimer.schedule(new TimerTask() {
+			
+			@Override
+			public void run() {
+				// Tutte le azioni da effettuare sono contenute nel seguente metodo:
+				onSubscriptionTimeout(e);
+			}
+		}, subscriptionTimeoutDate);
+		
+	}
+		
 }

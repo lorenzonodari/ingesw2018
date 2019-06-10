@@ -77,5 +77,31 @@ public class ClosedState implements EventState, Serializable {
 		}
 		
 	}
+	
+	/**
+	 * In seguito alla deserializzazione di un ClosedState, e' necessario riavviare i timer ad esso
+	 * associati
+	 * 
+	 * @param e L'evento di riferimento dello stato
+	 */
+	@Override
+	public void resetState(Event e) {
+		
+		// Ricavo la data di inizio dell'evento
+		Date ongoingDate = (Date) e.getFieldValue(CommonField.DATA_E_ORA);
+				
+		// Verifico se effettuare il passaggio a ONGOING o a ENDED
+		if (e.getFieldValue(CommonField.DATA_E_ORA_CONCLUSIVE) != null) {
+
+			// Programmo il passaggio di stato da CLOSED a ONGOING
+			EventState.scheduleStateChange(e, EventState.ONGOING, ongoingTimer, ongoingDate);
+					
+		} else {
+				
+			// Programmo il passaggio di stato da CLOSED a ENDED
+			EventState.scheduleStateChange(e, EventState.ENDED, ongoingTimer, ongoingDate);
+			
+		}
+	}
 
 }

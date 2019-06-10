@@ -48,4 +48,21 @@ public class OngoingState implements EventState, Serializable {
 		
 	}
 	
+	/**
+	 * In seguito alla deserializzazione di un OngoingState, e' necessario riavviare il timer
+	 * per il passaggio allo stato "ENDED"
+	 * 
+	 * @param e L'evento di riferimento dello stato
+	 */
+	@Override
+	public void resetState(Event e) {
+		
+		// Ricavo la data della conclusione dell'evento
+		Date endingDate = (Date) e.getFieldValue(CommonField.DATA_E_ORA_CONCLUSIVE);
+				
+		// Schedulo il cambiamento di stato da ONGOING a ENDED
+		EventState.scheduleStateChange(e, EventState.ENDED, endingTimer, endingDate);
+		
+	}
+	
 }
