@@ -546,7 +546,7 @@ public class UIManager {
 				this.dialog("Non e' stato possibile annullare correttamente l'iscrizione", null, Menu.BACK_ENTRY_TITLE, dialogBackAction); 
 			}
 			
-			if (event.hasUserDependantFields()) {
+			if (event.hasUserDependantFields() && users.getCurrentUser() != event.getCreator()) {
 				OptionalCostsFieldValue costsFieldValue = (OptionalCostsFieldValue) event.getFieldValue(ConferenceField.SPESE_OPZIONALI);
 				
 				for (String cost : costsFieldValue.getValue().keySet()) {
@@ -869,9 +869,44 @@ public class UIManager {
 				this.dialog("Non e' stato possibile annullare correttamente l'iscrizione", null, Menu.BACK_ENTRY_TITLE, dialogBackAction); 
 			}
 			
+			if (event.hasUserDependantFields() && users.getCurrentUser() != event.getCreator()) {
+				OptionalCostsFieldValue costsFieldValue = (OptionalCostsFieldValue) event.getFieldValue(ConferenceField.SPESE_OPZIONALI);
+				
+				for (String cost : costsFieldValue.getValue().keySet()) {
+					costsFieldValue.removeUserFromCost(users.getCurrentUser(), cost);
+				}
+			}
+			
 		};
 		
-		Menu eventMenu = new Menu("Dettagli evento", event.toString(), Menu.BACK_ENTRY_TITLE, backAction);
+		StringBuffer menuContent = new StringBuffer(event.toString());
+		if (event.hasUserDependantFields() && users.getCurrentUser() != event.getCreator()) {
+			menuContent.append("\n");
+			menuContent.append("Spese opzionali scelte: \n");
+			
+			OptionalCostsFieldValue costsFieldValue = (OptionalCostsFieldValue) event.getFieldValue(ConferenceField.SPESE_OPZIONALI);
+			Map<String, Float> costs = costsFieldValue.getValue();
+			
+			for (String cost : costs.keySet()) {
+				
+				menuContent.append(cost);
+				menuContent.append(String.format(" : %.2f € ", costs.get(cost)));
+				
+				if (!costsFieldValue.userHasCost(users.getCurrentUser(), cost)) {
+					menuContent.append("[ ]");
+				}
+				else {
+					menuContent.append("[X]");
+				}
+				
+				menuContent.append("\n");
+			}
+			menuContent.append("\n");
+			
+			menuContent.append(String.format("Costo complessivo di partecipazione: %.2f €", event.getExpensesForUser(users.getCurrentUser())));
+		}
+		
+		Menu eventMenu = new Menu("Dettagli evento", menuContent.toString(), Menu.BACK_ENTRY_TITLE, backAction);
 		
 		// Le iscrizioni e le proposte possono essere ritirate solamente in data precedente al "Termine ultimo di ritiro iscrizione"
 		Date withdrawLimit = (DateFieldValue) event.getFieldValue(CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE);
