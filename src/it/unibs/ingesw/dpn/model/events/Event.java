@@ -254,7 +254,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 public List<Field> getUserDependantFields() {
 		 
 		 return this.valuesMap.keySet().stream()
-		 							   .filter(field -> field.isUserDependant())
+		 							   .filter(field -> field.isUserDependant() && this.getFieldValue(field) != null)
 		 							   .collect(Collectors.toCollection(ArrayList::new));
 		 
 	 }
@@ -267,7 +267,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 public boolean hasUserDependantFields() {
 		 
 		 return this.valuesMap.keySet().stream()
-				   .filter(field -> field.isUserDependant())
+				   .filter(field -> field.isUserDependant() && this.getFieldValue(field) != null)
 				   .count() > 0;
 	 }
 	
