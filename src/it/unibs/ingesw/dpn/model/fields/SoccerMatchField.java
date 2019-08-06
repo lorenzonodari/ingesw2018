@@ -2,7 +2,7 @@ package it.unibs.ingesw.dpn.model.fields;
 
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.GenderEnumFieldValue;
-import it.unibs.ingesw.dpn.model.fieldvalues.IntegerFieldValue;
+import it.unibs.ingesw.dpn.model.fieldvalues.IntegerIntervalFieldValue;
 
 public enum SoccerMatchField implements Field {
 	
@@ -17,7 +17,7 @@ public enum SoccerMatchField implements Field {
 			"Fascia di età",
 			"L'intervallo in cui sono comprese le età accettate dei giocatori",
 			true,
-			IntegerFieldValue.class
+			IntegerIntervalFieldValue.class
 			)
 	
 	;
