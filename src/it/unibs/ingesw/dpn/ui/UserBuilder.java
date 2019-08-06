@@ -35,7 +35,7 @@ import it.unibs.ingesw.dpn.model.users.UsersManager;
  * @author Michele Dusi, Lorenzo Nodari, Emanuele Poggi
  *
  */
-public class UserFactory {
+public class UserBuilder {
 
 	/** Input/Output */
 	private final UIRenderer renderer;
@@ -71,7 +71,7 @@ public class UserFactory {
 	 * @param getter L'acquisitore di dati primitivi
 	 * @param usersManager La classe che si occupa della gestione degli utenti.
 	 */
-	public UserFactory(UIRenderer renderer, InputGetter getter, UsersManager usersManager) {
+	public UserBuilder(UIRenderer renderer, InputGetter getter, UsersManager usersManager) {
 		// verifico la precondizione
 		if (renderer == null || getter == null || usersManager == null) {
 			throw new IllegalArgumentException("impossibile creare un oggetto UserFactory con parametri nulli");

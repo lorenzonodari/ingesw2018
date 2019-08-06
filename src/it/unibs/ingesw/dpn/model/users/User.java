@@ -34,7 +34,7 @@ public class User implements Serializable {
 	 * 
 	 * Precondizione: la lista di coppie (campo, valore) devono essere istanziate correttamente.
 	 * Questo significa che tutti i campi obbligatori devono già essere stati inizializzati. 
-	 * L'unica classe abilitata a fare ciò è la classe {@link UserFactory}.
+	 * L'unica classe abilitata a fare ciò è la classe {@link UserBuilder}.
 	 * 
 	 * @param fieldValues Le coppie (campo-valore) dell'utente
 	 */
@@ -126,7 +126,7 @@ public class User implements Serializable {
 	 * per un valore del campo indicato da {@link Field}. Poiché eseguire questi controlli all'interno della
 	 * classe User risulterebbe troppo oneroso e -per l'impostazione del programma- lievemente fuori luogo, si 
 	 * suppone con ragionevole certezza che tale condizione sia verificata a priori nel metodo chiamante 
-	 * dell'unica classe autorizzata a gestire la creazione e la modifica di User: {@link it.unibs.ingesw.dpn.ui.UserFactory}.
+	 * dell'unica classe autorizzata a gestire la creazione e la modifica di User: {@link it.unibs.ingesw.dpn.ui.UserBuilder}.
 	 * 
 	 * </ul>
 	 * 
@@ -181,7 +181,7 @@ public class User implements Serializable {
 	 * per un valore del campo indicato da {@link Field}. Poiché eseguire questi controlli all'interno della
 	 * classe User risulterebbe troppo oneroso e -per l'impostazione del programma- lievemente fuori luogo, si 
 	 * suppone con ragionevole certezza che tale condizione sia verificata a priori nel metodo chiamante 
-	 * dell'unica classe autorizzata a gestire la creazione e la modifica di User: {@link it.unibs.ingesw.dpn.ui.UserFactory}.
+	 * dell'unica classe autorizzata a gestire la creazione e la modifica di User: {@link it.unibs.ingesw.dpn.ui.UserBuilder}.
 	 * 
 	 * </ul>
 	 * 

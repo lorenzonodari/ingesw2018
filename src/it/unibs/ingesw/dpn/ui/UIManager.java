@@ -41,8 +41,8 @@ public class UIManager {
 	private ModelManager model;
 	private UsersManager users;
 	private Menu currentMenu;
-	private EventFactory eventFactory;
-	private UserFactory userFactory;
+	private EventBuilder eventFactory;
+	private UserBuilder userFactory;
 		
 	/**
 	 * Crea un nuovo UIManager utilizzando il renderer dato per la creazione
@@ -64,8 +64,8 @@ public class UIManager {
 		this.model = model;
 		this.users = model.getUsersManager();
 		this.currentMenu = null;
-		this.eventFactory = new EventFactory(renderer, inputManager);
-		this.userFactory = new UserFactory(renderer, inputManager, users);
+		this.eventFactory = new EventBuilder(renderer, inputManager);
+		this.userFactory = new UserBuilder(renderer, inputManager, users);
 		
 	}
 	
@@ -160,7 +160,7 @@ public class UIManager {
 	 * Crea il menu associato al processo di creazione di un utente, visualizzando i vari campi e permettendo
 	 * al fruitore di inizializzarne (sotto opportune ipotesi) i valori.
 	 * Questo metodo si occupa, in altre parole, di fornire un'interfaccia testuale interattiva al processo
-	 * di creazione di un oggetto {@link User} gestito da {@link UserFactory}.
+	 * di creazione di un oggetto {@link User} gestito da {@link UserBuilder}.
 	 */
 	public void createUserMenu() {
 
@@ -222,7 +222,7 @@ public class UIManager {
 	 * Crea il menu associato al processo di modifica di un utente, visualizzando i vari campi e permettendo
 	 * al fruitore di modificarne (sotto opportune ipotesi) i valori.
 	 * Questo metodo si occupa, in altre parole, di fornire un'interfaccia testuale interattiva al processo
-	 * di editing di un oggetto {@link User} gestito da {@link UserFactory}.
+	 * di editing di un oggetto {@link User} gestito da {@link UserBuilder}.
 	 */
 	public void editUserMenu() {
 

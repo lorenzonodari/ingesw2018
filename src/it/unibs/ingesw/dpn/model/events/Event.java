@@ -21,7 +21,7 @@ import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
 import it.unibs.ingesw.dpn.model.users.Mailbox;
 import it.unibs.ingesw.dpn.model.users.Notification;
 import it.unibs.ingesw.dpn.model.users.User;
-import it.unibs.ingesw.dpn.ui.EventFactory;
+import it.unibs.ingesw.dpn.ui.EventBuilder;
 
 /**
  * Classe astratta che rappresenta in maniera concettuale un evento generico gestito dal programma.
@@ -93,7 +93,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * Precondizione: il creatore dell'evento non deve essere un valore nullo. In questo caso verrebbe lanciata un'eccezione.
 	 * 
 	 * Precondizione: la lista di coppie (campo, valore) devono essere istanziate correttamente e devono 
-	 * rispettare i campi previsti dalla categoria. L'unica classe abilitata a fare ciò è la classe {@link EventFactory}.
+	 * rispettare i campi previsti dalla categoria. L'unica classe abilitata a fare ciò è la classe {@link EventBuilder}.
 	 * 
 	 * Precondizione: i valori dei campi devono essere uguali come numero e come tipo ai campi
 	 * previsti dalla categoria. Questo viene garantito dalla classe adibita alla creazione degli eventi.

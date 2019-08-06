@@ -40,7 +40,7 @@ import it.unibs.ingesw.dpn.model.users.User;
  * @author Michele Dusi, Lorenzo Nodari, Emanuele Poggi
  *
  */
-public class EventFactory {
+public class EventBuilder {
 	
 	/** Input/Output */
 	private final UIRenderer renderer;
@@ -69,7 +69,7 @@ public class EventFactory {
 	 * @param renderer Il renderizzatore dei prompt e dei messaggi d'errore
 	 * @param getter L'acquisitore di dati primitivi
 	 */
-	public EventFactory(UIRenderer renderer, InputGetter getter) {
+	public EventBuilder(UIRenderer renderer, InputGetter getter) {
 		this.renderer = renderer;
 		this.getter = getter;
 	}
