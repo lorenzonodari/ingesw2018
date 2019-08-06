@@ -1,23 +1,36 @@
 package it.unibs.ingesw.dpn.model.categories;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import it.unibs.ingesw.dpn.model.events.Event;
 import it.unibs.ingesw.dpn.model.fields.Field;
+import it.unibs.ingesw.dpn.model.fields.*;
 
 /**
- * Classe che rappresenta una categoria di eventi all'interno del programma.
- * Una categoria è caratterizzata da un nome, una descrizione e una lista di campi.
- * Per la creazione di una categoria è necessario utilizzare la classe {@link CategoryProvider}.
- * In quanto categoria astratta e concettuale, non contiene alcun riferimento alla classe {@link Event}.
+ * Enumerazione che contiene un elenco delle categorie attualmente previste dal progetto.
+ * Viene utilizzato dalla classe {@link Event} per avere un riferimento alla categoria di appartenenza.
+ * 
+ * Nota: l'aggiunta di una nuova istanza a questo enumerator richiede di completare, con i relativi dati,
+ * le classi che ne fanno uso in maniera esaustiva.
  * 
  * @author Michele Dusi, Emanuele Poggi, Lorenzo Nodari
  *
  */
-public class Category {
+public enum Category implements Serializable {
 	
-	private static final String EXCEPTION_FIELD_ALREADY_PRESENT = "Il campo \"%s\" è già presente all'interno della categoria \"%s\".";
+	PARTITA_DI_CALCIO (
+			"Partita di calcio",
+			"Evento sportivo che prevede una partita di calcio fra due squadre di giocatori",
+			SoccerMatchField.class),
+	
+	CONFERENZA (
+			"Conferenza",
+			"Evento di divulgazione che prevede un relatore e più ascoltatori, ognuno dei quali può personalizzare la propria formula di partecipazione",
+			ConferenceField.class);
+	// Altre eventuali categorie da aggiungere qui.
+	
 	private static final String TO_STRING = "-- Caratteristiche della categoria --\n\n"
 			+ "Nome:        %s\n"
 			+ "Descrizione: %s\n"
@@ -28,18 +41,27 @@ public class Category {
 	private String description;
 	private List<Field> fields;
 	
+	public static final int CATEGORIES_NUMBER = Category.values().length;
+	
 	/**
-	 * Costruttore con modificatore di accesso "friendly" della classe Category.
-	 * L'unica classe adibita alla creazione di un'istanza di {@link Category}
-	 * è la classe {@link CategoryProvider}.
+	 * Costruttore con modificatore di accesso "private" della classe Category.
 	 * 
 	 * @param name Il nome della categoria
 	 * @param description La descrizione della categoria
+	 * @param exclusiveFieldsEnum L'enumerazione contenente i campi esclusivi della categoria
 	 */
-	Category(String name, String description) {
+	private Category(String name, String description, Class<? extends Field> exclusiveFieldsEnum) {
 		this.name = name;
 		this.description = description;
-		this.fields = new ArrayList<>();
+		this.fields = new ArrayList<Field>();
+		
+		// Inizializzo i campi della categoria
+		for (Field f : CommonField.values()) {						// Tutti i campi comuni
+			this.fields.add(f);
+		}
+		for (Field f : exclusiveFieldsEnum.getEnumConstants()) {	// Tutti i campi esclusivi
+			this.fields.add(f);
+		}
 	}
 
 	/**
@@ -64,45 +86,6 @@ public class Category {
 	public List<Field> getFields() {
 		return this.fields;
 	}
-
-	/**
-	 * Aggiunge un campo alla categoria.
-	 * 
-	 * Nota: questo metodo può essere utilizzato solamente all'interno di questo package.
-	 * 
-	 * Precondizione: il campo da aggiungere non deve avere lo stesso nome 
-	 * di un altro campo all'interno di questa stessa categoria. Per fare ciò, 
-	 * viene effettuato un controllo sull'appartenenza del nuovo campo alla 
-	 * lista dei campi, mediante il metodo "equals" della classe {@link Field}
-	 * che confronta due campi in funzione dei loro nomi.
-	 * 
-	 * @param newField il nuovo campo da aggiungere.
-	 */
-	void addField(Field newField) {
-		if (!this.fields.contains(newField)) {
-			this.fields.add(newField);
-		} else {
-			String exceptionMessage = String.format(EXCEPTION_FIELD_ALREADY_PRESENT, newField.getName(), this.name);
-			throw new IllegalArgumentException(exceptionMessage);
-		}
-	}
-
-	/**
-	 * Aggiunge un'intera lista di campi alla categoria.
-	 * 
-	 * Nota: questo metodo può essere utilizzato solamente all'interno di questo package.
-	 * 
-	 * Precondizione: non devono esserci campi con lo stesso nome o con nomi già presenti
-	 * all'interno della categoria. Questo metodo non fa altro che richiamare il metodo 
-	 * di questa classe "addField" su tutti i campi passati come parametro.
-	 * 
-	 * @param commonFields i nuovi campi da aggiungere.
-	 */
-	void addAllFields(Field [] commonFields) {
-		for (Field f : commonFields) {
-			this.addField(f);
-		}
-	}
 	
 	/**
 	 * Restituisce una descrizione testuale completa dell'intera categoria e dei suoi campi.
@@ -121,5 +104,5 @@ public class Category {
 		}
 		return str.toString();
 	}
-
+	
 }

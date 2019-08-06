@@ -4,8 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
-import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
+import it.unibs.ingesw.dpn.model.categories.Category;
 
 /**
  * Classe che rappresenta il contenuto di un campo di tipo "lista di categorie".
@@ -20,7 +19,7 @@ public class CategoryListFieldValue implements FieldValue, Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = -3704161654157735866L;
-	private List<CategoryEnum> categoryList;
+	private List<Category> categoryList;
 	
 	/**
 	 * Costruisce un nuovo oggetto {@link CategoryListFieldValue} inizializzando a vuota la lista interna.
@@ -40,7 +39,7 @@ public class CategoryListFieldValue implements FieldValue, Serializable {
 	 * @param categoryToAdd La categoria da aggiungere.
 	 * @return "true" se l'aggiunta è andata a buon fine, "false" altrimenti. In entrambi i casi, al termine dell'esecuzione del metodo, la postcondizione è rispettata.
 	 */
-	public boolean addCategory(CategoryEnum categoryToAdd) {
+	public boolean addCategory(Category categoryToAdd) {
 		if (categoryToAdd == null) {
 			throw new IllegalArgumentException("Impossibile aggiungere una categoria nulla: parametro non inizializzato");
 		}
@@ -63,7 +62,7 @@ public class CategoryListFieldValue implements FieldValue, Serializable {
 	 * @param categoryToRemove La categoria da rimuovere
 	 * @return "true" se la rimozione è andata a buon fine, "false" altrimenti. In entrambi i casi, al termine dell'esecuzione del metodo, la postcondizione è rispettata.
 	 */
-	public boolean removeCategory(CategoryEnum categoryToRemove) {
+	public boolean removeCategory(Category categoryToRemove) {
 		if (categoryToRemove == null) {
 			throw new IllegalArgumentException("Impossibile rimuovere una categoria nulla: parametro non inizializzato");
 		}
@@ -83,7 +82,7 @@ public class CategoryListFieldValue implements FieldValue, Serializable {
 	 * @param categoryToCheck La categoria di cui si desidera verificare l'appartenenza
 	 * @return "True" se la categoria appartiene alla lista, false altrimenti.
 	 */
-	public boolean contains(CategoryEnum categoryToCheck) {
+	public boolean contains(Category categoryToCheck) {
 		// Verifica della precondizione
 		if (categoryToCheck == null) {
 			throw new IllegalArgumentException("Impossibile controllare una categoria nulla: parametro non inizializzato");
@@ -102,12 +101,11 @@ public class CategoryListFieldValue implements FieldValue, Serializable {
 		if (this.categoryList.isEmpty()) {
 			return null;
 		}
-		CategoryProvider provider = CategoryProvider.getProvider();
 		String [] stringList = new String[this.categoryList.size()];
 		// Aggiungo i nomi delle categorie alla lista
 		int i = 0;
-		for (CategoryEnum ce : this.categoryList) {
-			stringList[i++] = provider.getCategory(ce).getName();
+		for (Category c : this.categoryList) {
+			stringList[i++] = c.getName();
 		}
 		return stringList;
 		
@@ -126,11 +124,10 @@ public class CategoryListFieldValue implements FieldValue, Serializable {
 		if (this.categoryList.isEmpty()) {
 			return "";
 		}
-		CategoryProvider provider = CategoryProvider.getProvider();
 		StringBuffer s = new StringBuffer();
 		// Aggiungo i nomi delle categorie alla lista
-		for (CategoryEnum ce : this.categoryList) {
-			s.append(provider.getCategory(ce).getName());
+		for (Category c : this.categoryList) {
+			s.append(c.getName());
 			s.append(", ");
 		}
 		return s.toString().substring(0, s.length() - 2);
