@@ -41,10 +41,15 @@ public final class CategoryProvider {
 	 * come oggetto {@link Category}, data un'istanza dell'enum {@link CategoryEnum}.
 	 * Questo permette di mantenere istanze uniche all'interno di tutto il software.
 	 * 
+	 * Precondizione: il parametro non può essere nullo.
+	 * 
 	 * @param category La categoria prescelta di cui si cerca l'oggetto {@link Category} corrispondente
 	 * @return L'oggetto {@link Category}
 	 */
 	public Category getCategory(CategoryEnum category) {
+		if (category == null) {
+			throw new IllegalArgumentException("Impossibile restituire una categoria nulla");
+		}
 		return categories[category.ordinal()];
 	}
 	
