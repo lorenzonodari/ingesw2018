@@ -374,12 +374,20 @@ public class UserBuilder {
 		
 		if (creationOn) {
 			// Creo il nuovo oggetto User
-			finalisedUser = new User(this.provisionalFieldValues);
+			finalisedUser = new User(new java.util.ArrayList<Field>(this.provisionalFieldValues.keySet()));
+			for (Field f : this.provisionalFieldValues.keySet()) {
+				if (this.provisionalFieldValues.get(f) != null)
+					finalisedUser.setFieldValue(f, this.provisionalFieldValues.get(f));
+			}
+			finalisedUser.setDefaultFieldValues();
 			
 		} else if (editingOn) {
 			// Modifico l'oggetto User vecchio
 			finalisedUser = this.currentEditedUser;
-			finalisedUser.setAllFieldValues(this.provisionalFieldValues);
+			for (Field f : this.provisionalFieldValues.keySet()) {
+				if (this.provisionalFieldValues.get(f) != null)
+					finalisedUser.setFieldValue(f, this.provisionalFieldValues.get(f));
+			}
 			
 		} else {
 			// WTF

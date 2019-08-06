@@ -1,27 +1,24 @@
 package it.unibs.ingesw.dpn.model.events;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import it.unibs.ingesw.dpn.model.categories.Category;
 import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
 import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
+import it.unibs.ingesw.dpn.model.fields.AbstractFieldable;
 import it.unibs.ingesw.dpn.model.fields.CommonField;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fields.UserField;
-import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.IntegerFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.MoneyAmountFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
 import it.unibs.ingesw.dpn.model.users.Mailbox;
 import it.unibs.ingesw.dpn.model.users.Notification;
 import it.unibs.ingesw.dpn.model.users.User;
-import it.unibs.ingesw.dpn.ui.EventBuilder;
 
 /**
  * Classe astratta che rappresenta in maniera concettuale un evento generico gestito dal programma.
@@ -42,16 +39,15 @@ import it.unibs.ingesw.dpn.ui.EventBuilder;
  * @author Michele Dusi, Lorenzo Nodari, Emanuele Poggi
  *
  */
-public abstract class Event implements Serializable, Comparable<Event> {
+public abstract class Event extends AbstractFieldable implements Comparable<Event> {
 	
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 6018235806371842633L;
+	private static final long serialVersionUID = 1575965680034326082L;
 	
 	/** Eccezioni */
 	private static final String NULL_ARGUMENT_EXCEPTION = "Impossibile creare un evento con parametri nulli";
-	private static final String FIELD_NOT_PRESENT_EXCEPTION = "Il campo \"%s\" non appartiene alla categoria prevista dall'evento";
 	private static final String ILLEGAL_COMPARING_METHOD_EXCEPTION = "Metodologia di ordinamento non riconosciuta";
 	
 	/** Messaggi di Log o di notifica */
@@ -75,9 +71,6 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	
 	private final CategoryEnum category;
 	
-	/** La mappa dei valori e dei campi che caratterizzano e descrivono l'evento */
-	private final Map<Field, FieldValue> valuesMap;
-	
 	private EventState state;
 	
 	private final EventHistory history;
@@ -92,32 +85,24 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * 
 	 * Precondizione: il creatore dell'evento non deve essere un valore nullo. In questo caso verrebbe lanciata un'eccezione.
 	 * 
-	 * Precondizione: la lista di coppie (campo, valore) devono essere istanziate correttamente e devono 
-	 * rispettare i campi previsti dalla categoria. L'unica classe abilitata a fare ciò è la classe {@link EventBuilder}.
-	 * 
-	 * Precondizione: i valori dei campi devono essere uguali come numero e come tipo ai campi
-	 * previsti dalla categoria. Questo viene garantito dalla classe adibita alla creazione degli eventi.
-	 * 
 	 * Postcondizione: il creatore dell'evento NON è iscritto automaticamente alla mailing list dell'evento.
 	 * E' necessario chiamare il metodo "subscribe" per confermare l'iscrizione, ma solamente DOPO aver pubblicato l'evento.
 	 * 
 	 * @param creator L'utente {@link User} creatore dell'evento
 	 * @param category La categoria prescelta
-	 * @param fieldValues Le coppie (campo-valore) dell'evento
+	 * @param fieldsList La lista di campi previsti per questo evento
 	 */
-	public Event(User creator, CategoryEnum category, Map<Field, FieldValue> fieldValues) {
+	public Event(User creator, CategoryEnum category, List<Field> fieldsList) {
+		super(fieldsList);
+		
 		// Verifico che i parametri non siano nulli
-		if (creator == null || category == null || fieldValues == null) {
+		if (creator == null || category == null) {
 			throw new IllegalArgumentException(NULL_ARGUMENT_EXCEPTION);
 		}
 		
 		// Inizializzo gli attributi della classe
 		this.creator = creator;
 		this.category = category;
-		this.valuesMap = fieldValues;
-		
-		// Imposto i valori di default per alcuni campi che non sono stati inizializzati
-		this.setDefaultFieldValues();
 		
 		// Preparo l'oggetto EventHistory che terrà traccia dei cambiamenti di stato
 		this.history = new EventHistory();
@@ -129,7 +114,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		this.setState(new ValidState());
 
 		// Comunico all'utente che ha creato l'evento
-		notifyCreator(String.format(EVENT_CREATION_MESSAGE, this.valuesMap.get(CommonField.TITOLO)));	
+		notifyCreator(String.format(EVENT_CREATION_MESSAGE, this.getFieldValue(CommonField.TITOLO)));	
 		
 	}
 	
@@ -138,30 +123,31 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * Questo metodo viene chiamato dal costruttore e racchiude tutte le procedure che impostano
 	 * i valori dei campi facoltativi utilizzati nel programma.
 	 */
-	private void setDefaultFieldValues() {
+	@Override
+	public void setDefaultFieldValues() {
 
 		// TITOLO
 		// Valore di default = "<nomeCategoria> del <dataEvento>"
-		if (this.valuesMap.get(CommonField.TITOLO) == null) {
+		if (this.getFieldValue(CommonField.TITOLO) == null) {
 			Category eventCategory = CategoryProvider.getProvider().getCategory(this.category);
-			this.valuesMap.put(CommonField.TITOLO, new StringFieldValue(String.format(
+			this.setFieldValue(CommonField.TITOLO, new StringFieldValue(String.format(
 					"%s del %s",
 					eventCategory.getName(),
-					this.valuesMap.get(CommonField.DATA_E_ORA))));
+					this.getFieldValue(CommonField.DATA_E_ORA))));
 		}
 
 		// TOLLERANZA NUMERO DI PARTECIPANTI
 		// Valore di default = 0
-		if (this.valuesMap.get(CommonField.TOLLERANZA_NUMERO_DI_PARTECIPANTI) == null) {
-			this.valuesMap.put(CommonField.TOLLERANZA_NUMERO_DI_PARTECIPANTI, new IntegerFieldValue(0));
+		if (this.getFieldValue(CommonField.TOLLERANZA_NUMERO_DI_PARTECIPANTI) == null) {
+			this.setFieldValue(CommonField.TOLLERANZA_NUMERO_DI_PARTECIPANTI, new IntegerFieldValue(0));
 		}
 		
 		// TERMINE ULTIMO DI RITIRO ISCRIZIONE
 		// Valore di default = Termine ultimo di iscrizione
-		if (this.valuesMap.get(CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE) == null) {
-			this.valuesMap.put(
+		if (this.getFieldValue(CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE) == null) {
+			this.setFieldValue(
 					CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE, 
-					this.valuesMap.get(CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE)
+					this.getFieldValue(CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE)
 					);
 		}
 		
@@ -183,25 +169,6 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 */
 	public CategoryEnum getCategory() {
 		return this.category;
-	}
-	
-	/**
-	 * Restituisce il valore caratterizzante l'evento del campo richiesto.
-	 * 
-	 * Precondizione: l'oggetto {@link Field} passato come parametro deve essere un campo previsto e contenuto
-	 * nella categoria a cui appartiene l'evento.
-	 * 
-	 * @param chosenField il campo di cui si vuole conoscere il valore
-	 * @return Il valore del campo
-	 */
-	public FieldValue getFieldValue(Field chosenField) {
-		if (this.valuesMap.containsKey(chosenField)) {
-			return this.valuesMap.get(chosenField);
-		} else {
-			throw new IllegalArgumentException(String.format(
-					FIELD_NOT_PRESENT_EXCEPTION, 
-					chosenField.getName()));
-		}
 	}
 	
 	/**
@@ -253,7 +220,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	  */
 	 public List<Field> getUserDependantFields() {
 		 
-		 return this.valuesMap.keySet().stream()
+		 return this.getAllFieldValues().keySet().stream()
 		 							   .filter(field -> field.isUserDependant() && this.getFieldValue(field) != null)
 		 							   .collect(Collectors.toCollection(ArrayList::new));
 		 
@@ -266,7 +233,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	  */
 	 public boolean hasUserDependantFields() {
 		 
-		 return this.valuesMap.keySet().stream()
+		 return this.getAllFieldValues().keySet().stream()
 				   .filter(field -> field.isUserDependant() && this.getFieldValue(field) != null)
 				   .count() > 0;
 	 }
@@ -418,7 +385,10 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		// Se l'utente non e' il creatore, notifica l'utente che l'iscrizione è andata a buon fine
 		if (subscriber != this.creator) {
 			
-			StringBuffer message = new StringBuffer(String.format(EVENT_SUBSCRIPTION_MESSAGE, this.valuesMap.get(CommonField.TITOLO)));
+			StringBuffer message = new StringBuffer(
+					String.format(
+							EVENT_SUBSCRIPTION_MESSAGE, 
+							this.getFieldValue(CommonField.TITOLO)));
 			message.append(String.format("; Importo dovuto: %.2f €", this.getExpensesForUser(subscriber)));
 		
 			subscriber.getMailbox().deliver(new Notification(message.toString()));
@@ -464,7 +434,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		
 		// Notifica l'utente che la disiscrizione è andata a buon fine
 		unsubscriber.getMailbox().deliver(new Notification(
-				String.format(EVENT_UNSUBSCRIPTION_MESSAGE, this.valuesMap.get(CommonField.TITOLO))
+				String.format(EVENT_UNSUBSCRIPTION_MESSAGE, this.getFieldValue(CommonField.TITOLO))
 				));
 		return true;
 	}
@@ -524,8 +494,8 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * @return Un valore numerico per capire l'ordinamento dei due eventi
 	 */
 	public int compareByEventDateTo(Event e) {
-		Date thisDate = (Date) this.valuesMap.get(CommonField.DATA_E_ORA);
-		Date otherDate = (Date) e.valuesMap.get(CommonField.DATA_E_ORA);
+		Date thisDate = (Date) this.getFieldValue(CommonField.DATA_E_ORA);
+		Date otherDate = (Date) e.getFieldValue(CommonField.DATA_E_ORA);
 		// Se l'evento corrente è più recente come data di creazione dell'evento passato come parametro
 		if (thisDate.after(otherDate)) {
 			return +1;
@@ -548,8 +518,8 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * @return Un valore numerico per capire l'ordinamento dei due eventi
 	 */
 	public int compareByTitleTo(Event e) {
-		String thisTitle = this.valuesMap.get(CommonField.TITOLO).toString();
-		String otherTitle = e.valuesMap.get(CommonField.TITOLO).toString();
+		String thisTitle = this.getFieldValue(CommonField.TITOLO).toString();
+		String otherTitle = e.getFieldValue(CommonField.TITOLO).toString();
 		return thisTitle.compareTo(otherTitle);
 	}
 	
@@ -561,7 +531,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 */
 	public float getExpensesForUser(User user) {
 		
-		return ((MoneyAmountFieldValue) this.valuesMap.get(CommonField.QUOTA_INDIVIDUALE)).getValue();
+		return ((MoneyAmountFieldValue) this.getFieldValue(CommonField.QUOTA_INDIVIDUALE)).getValue();
 		
 	}
 	

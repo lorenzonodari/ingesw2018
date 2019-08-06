@@ -334,11 +334,21 @@ public class EventBuilder {
 		switch (this.provisionalCategory) {
 				
 		case PARTITA_DI_CALCIO :
-			newEvent = new SoccerMatchEvent(this.provisionalCreator, this.provisionalFieldValues);
+			newEvent = new SoccerMatchEvent(this.provisionalCreator, new java.util.ArrayList<Field>(this.provisionalFieldValues.keySet()));
+			for (Field f : this.provisionalFieldValues.keySet()) {
+				if (this.provisionalFieldValues.get(f) != null)
+					newEvent.setFieldValue(f, this.provisionalFieldValues.get(f));
+			}
+			newEvent.setDefaultFieldValues();
 			break;
 			
 		case CONFERENZA :
-			newEvent = new ConferenceEvent(this.provisionalCreator, this.provisionalFieldValues);
+			newEvent = new ConferenceEvent(this.provisionalCreator, new java.util.ArrayList<Field>(this.provisionalFieldValues.keySet()));
+			for (Field f : this.provisionalFieldValues.keySet()) {
+				if (this.provisionalFieldValues.get(f) != null)
+					newEvent.setFieldValue(f, this.provisionalFieldValues.get(f));
+			}
+			newEvent.setDefaultFieldValues();
 			break;
 				
 		}

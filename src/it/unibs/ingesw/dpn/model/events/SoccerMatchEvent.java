@@ -1,10 +1,9 @@
 package it.unibs.ingesw.dpn.model.events;
 
-import java.util.Map;
+import java.util.List;
 
 import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
 import it.unibs.ingesw.dpn.model.fields.Field;
-import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 import it.unibs.ingesw.dpn.model.users.User;
 
 /**
@@ -27,10 +26,11 @@ public class SoccerMatchEvent extends Event {
 	 * Precondizione: i valori dei campi devono essere uguali come numero e come tipo ai campi
 	 * previsti dalla categoria. Questo viene garantito dalla classe adibita alla creazione degli eventi.
 	 * 
-	 * @param fieldValues i valori dei campi dell'evento di tipo "Partita di calcio"
+	 * @param creator Il creatore dell'evento
+	 * @param fieldsList La lista di campi previsti per un evento "Conferenza"
 	 */
-	public SoccerMatchEvent(User creator, Map<Field, FieldValue> fieldValues) {
-		super(creator, CategoryEnum.PARTITA_DI_CALCIO, fieldValues);
+	public SoccerMatchEvent(User creator, List<Field> fieldsList) {
+		super(creator, CategoryEnum.PARTITA_DI_CALCIO, fieldsList);
 	}
 	
 }
