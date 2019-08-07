@@ -55,6 +55,43 @@ public abstract class AbstractFieldable implements Fieldable, Serializable {
 	}
 
 	/**
+	 * Metodo che restituisce "true" se il campo passato come parametro è
+	 * presente all'interno dell'oggetto Fieldable.
+	 * 
+	 * Precondizione: il campo non deve essere nullo.
+	 * 
+	 * @param searchedField il campo cercato
+	 * @return "true" se il campo è previsto per tale oggetto, "false" altrimenti.
+	 */
+	@Override
+	public boolean hasField(Field searchedField) {
+		// Verifica della precondizione
+		if (searchedField == null) {
+			throw new IllegalArgumentException(FIELD_NULL_EXCEPTION);
+		}
+		return this.valuesMap.containsKey(searchedField);
+	}
+
+	/**
+	 * Metodo che restituisce "true" se il campo passato come parametro è
+	 * stato inizializzato nell'oggetto, ossia se ha associato un oggetto {@link FieldValue} valido.
+	 * 
+	 * Nota: Se il campo NON è presente all'interno dell'oggetto, viene lanciata un'eccezione (e quindi
+	 * non viene restituito alcun valore).
+	 * 
+	 * @param searchedField il campo di cui si vuole sapere se esiste già un valore
+	 * @return "true" se il campo è previsto per tale oggetto, "false" altrimenti.
+	 */
+	public boolean hasFieldValue(Field searchedField) {
+		if (!this.hasField(searchedField)) {
+			throw new IllegalArgumentException(
+					String.format(FIELD_NOT_PRESENT_EXCEPTION, searchedField.getName()));
+		} else {
+			return (this.valuesMap.get(searchedField) != null);
+		}
+	}
+
+	/**
 	 * Restituisce il valore associato ad uno specifico campo.
 	 * 
 	 * Precondizione: il campo deve essere previsto per questo oggetto.
@@ -142,24 +179,6 @@ public abstract class AbstractFieldable implements Fieldable, Serializable {
 	 * classe che estende AbstractFieldable.
 	 */
 	public abstract void setDefaultFieldValues();
-
-	/**
-	 * Metodo che restituisce "true" se il campo passato come parametro è
-	 * presente all'interno dell'oggetto Fieldable.
-	 * 
-	 * Precondizione: il campo non deve essere nullo.
-	 * 
-	 * @param searchedField il campo cercato
-	 * @return "true" se il campo è previsto per tale oggetto, "false" altrimenti.
-	 */
-	@Override
-	public boolean hasField(Field searchedField) {
-		// Verifica della precondizione
-		if (searchedField == null) {
-			throw new IllegalArgumentException(FIELD_NULL_EXCEPTION);
-		}
-		return this.valuesMap.containsKey(searchedField);
-	}
 
 	/**
 	 * Restituisce "true" se e solo se tutti i campi obbligatori sono già stati inizializzati.

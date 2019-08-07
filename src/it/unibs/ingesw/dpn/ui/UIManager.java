@@ -12,13 +12,10 @@ import it.unibs.ingesw.dpn.model.users.Mailbox;
 import it.unibs.ingesw.dpn.model.users.Notification;
 import it.unibs.ingesw.dpn.model.users.User;
 import it.unibs.ingesw.dpn.model.categories.Category;
-import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
-import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
 import it.unibs.ingesw.dpn.model.events.Event;
 import it.unibs.ingesw.dpn.model.events.EventState;
 import it.unibs.ingesw.dpn.model.events.Inviter;
 import it.unibs.ingesw.dpn.model.fields.CommonField;
-import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fields.UserField;
 import it.unibs.ingesw.dpn.model.fields.ConferenceField;
 import it.unibs.ingesw.dpn.model.fieldvalues.DateFieldValue;
@@ -34,15 +31,13 @@ public class UIManager {
 	private static final String GENERIC_PROMPT = "Selezionare una voce";
 	private static final String INVALID_CHOICE_PROMPT = "Scelta non valida, riprovare";
 	private static final String LIST_ELEMENT_PREFIX = " * ";
-	private static final String CREATION_ENTRY_FORMAT = "%-50s : %s";
 	
 	private UIRenderer renderer;
 	private InputGetter inputManager;
 	private ModelManager model;
 	private UsersManager users;
 	private Menu currentMenu;
-	private EventBuilder eventFactory;
-	private UserBuilder userFactory;
+	private BuilderUIAssistant builderAssistant;
 		
 	/**
 	 * Crea un nuovo UIManager utilizzando il renderer dato per la creazione
@@ -64,8 +59,7 @@ public class UIManager {
 		this.model = model;
 		this.users = model.getUsersManager();
 		this.currentMenu = null;
-		this.eventFactory = new EventBuilder(renderer, inputManager);
-		this.userFactory = new UserBuilder(renderer, inputManager, users);
+		this.builderAssistant = new BuilderUIAssistant(renderer, inputManager);
 		
 	}
 	
@@ -145,136 +139,29 @@ public class UIManager {
 			if (this.users.login(username)) {
 				mainMenu();
 			} else {
-				this.userFactory.startCreation(username);
-				createUserMenu();
+				this.renderer.renderError("Login fallito");
+				this.loginMenu();
 			}
 		};
 		
+		// Callback Registrazione di un nuovo User
+		MenuAction registerAction = () -> {
+			// Creo il nuovo utente
+			User newUser = this.builderAssistant.createUser(users);
+			// Aggiungo l'utente alla lista di utenti
+			this.users.addUser(newUser);			
+			// Breve messaggio di conferma
+			MenuAction loginMenuAction = () -> {this.loginMenu();};
+			this.dialog("Registrazione completata", "Puoi ora procedere con il Login", "Torna al menu d'accesso", loginMenuAction);
+			
+		};
+	
+		
 		Menu loginMenu = new Menu("SocialNetwork", "Benvenuto/a", "Esci", quitAction);
 		loginMenu.addEntry("Login", loginAction);
+		loginMenu.addEntry("Register", registerAction);
 		
 		this.currentMenu = loginMenu;
-	}
-
-	/**
-	 * Crea il menu associato al processo di creazione di un utente, visualizzando i vari campi e permettendo
-	 * al fruitore di inizializzarne (sotto opportune ipotesi) i valori.
-	 * Questo metodo si occupa, in altre parole, di fornire un'interfaccia testuale interattiva al processo
-	 * di creazione di un oggetto {@link User} gestito da {@link UserBuilder}.
-	 */
-	public void createUserMenu() {
-
-		// Callback per abortire la creazione dell'utente
-		MenuAction abortAction = () -> {
-			this.userFactory.cancel();
-			this.loginMenu();
-			};
-
-		String title = String.format("Creazione di un nuovo utente");
-		Menu createUserMenu = new Menu(title, 
-				"Seleziona i campi dell'utente che vuoi impostare. \n"
-				+ "I campi contrassegnati dall'asterisco (*) sono obbligatori.\n"
-				+ "Quando avrai completato tutti i campi seleziona \"Conferma\".",
-				"Annulla la creazione e torna al menu principale", abortAction);
-			
-		// Ciclo su tutti i campi previsti per l'utente
-		for (Field f : UserField.values()) {
-			
-			/* Azione relativa ad un'opzione */
-			MenuAction fieldAction = () -> {
-				this.userFactory.acquireFieldValue(f);
-				// Creo il nuovo menu aggiornato
-				this.createUserMenu();
-				};
-			
-			// Creo la entry
-			String entryTitle = String.format(
-					CREATION_ENTRY_FORMAT,
-					f.getName() + ((f.isMandatory()) ? " (*)" : ""),
-					this.userFactory.getProvisionalFieldValueString(f));
-			createUserMenu.addEntry(entryTitle, fieldAction);
-			
-		}
-		
-		// Verifico che tutti i campi obbligatori siano stati acquisiti
-		if (this.userFactory.verifyMandatoryFields()) {
-			createUserMenu.addEntry("Conferma la creazione del nuovo utente", () -> {
-				
-				// Termino la creazione dell'utente
-				User newUser = this.userFactory.finalise();
-				
-				// Aggiungo l'utente alla lista di utenti
-				this.users.addUser(newUser);
-				
-				MenuAction toHomeAction = () -> {this.loginMenu();};
-				this.dialog(
-						"Creazione completata", 
-						"Ora puoi provare ad effettuare il login con l'utente che hai appena creato.", 
-						"Vai alla pagina iniziale", 
-						toHomeAction);
-			});
-		}
-		
-		this.currentMenu = createUserMenu;
-	}
-	
-	/**
-	 * Crea il menu associato al processo di modifica di un utente, visualizzando i vari campi e permettendo
-	 * al fruitore di modificarne (sotto opportune ipotesi) i valori.
-	 * Questo metodo si occupa, in altre parole, di fornire un'interfaccia testuale interattiva al processo
-	 * di editing di un oggetto {@link User} gestito da {@link UserBuilder}.
-	 */
-	public void editUserMenu() {
-
-		// Callback per abortire la modifica dell'utente
-		MenuAction abortAction = () -> {
-			this.userFactory.cancel();
-			this.personalSpace();
-			};
-
-		String title = String.format("Modifica del proprio profilo");
-		Menu editUserMenu = new Menu(title, 
-				"Seleziona i campi del profilo che vuoi modificare. \n"
-				+ "Soltanto i campi contrassegnati dal cancelletto (#) sono modificabili.\n"
-				+ "Quando avrai terminato seleziona \"Conferma\".",
-				"Annulla la modifica e torna allo spazio personale", abortAction);
-			
-		// Ciclo su tutti i campi previsti per l'utente
-		for (Field f : UserField.values()) {
-			
-			/* Azione relativa ad un'opzione */
-			MenuAction fieldAction = () -> {
-				this.userFactory.acquireFieldValue(f);
-				// Creo il nuovo menu aggiornato
-				this.editUserMenu();
-				};
-			
-			// Creo la entry
-			String entryTitle = String.format(
-					CREATION_ENTRY_FORMAT,
-					f.getName() + ((f.isEditable()) ? " (#)" : ""),
-					this.userFactory.getProvisionalFieldValueString(f));
-			editUserMenu.addEntry(entryTitle, fieldAction);
-			
-		}
-		
-		// Verifico che tutti i campi obbligatori siano stati acquisiti
-		if (this.userFactory.verifyMandatoryFields()) {
-			editUserMenu.addEntry("Conferma la modifica del profilo", () -> {
-				
-				// Termino la creazione dell'utente
-				this.userFactory.finalise();
-				
-				MenuAction toHomeAction = () -> {this.personalSpace();};
-				this.dialog(
-						"Modifica completata",
-						null, 
-						"Torna allo spazio personale", 
-						toHomeAction);
-			});
-		}
-		
-		this.currentMenu = editUserMenu;
 	}
 	
 	/**
@@ -300,8 +187,8 @@ public class UIManager {
 		
 		// Callback modifica utente
 		MenuAction userEditingAction = () -> {
-			this.userFactory.startEditing(users.getCurrentUser());
-			this.editUserMenu();
+			this.builderAssistant.editUser(this.users.getCurrentUser());
+			this.personalSpace();
 			};
 		
 		Menu personalSpace = new Menu("Spazio personale", backAction);
@@ -416,14 +303,52 @@ public class UIManager {
 		MenuAction backAction = () -> {this.mainMenu();};
 		
 		// Callback visualizza eventi
-		MenuAction eventsAction = () -> {this.eventView();;};
+		MenuAction eventsAction = () -> {this.eventView();};
 		
 		// Callback visualizza categorie
 		MenuAction categoriesAction = () -> {this.categoriesMenu();};
 	
 		
 		// Callback proponi evento
-		MenuAction createAction = () -> {this.categorySelectorMenu();};
+		MenuAction createAction = () -> {
+			Event newEvent = this.builderAssistant.createEvent(users);
+
+			// Aggiungo l'evento alla bacheca
+			this.model.getEventBoard().addEvent(newEvent, users.getCurrentUser());
+			
+			// Preparo il menu degli inviti
+			Inviter inviter = new Inviter(newEvent, model);
+			
+			MenuAction dialogAction = null;
+			StringBuffer dialogDescription = new StringBuffer("L'evento è stato creato e pubblicato correttamente.\nSei stato iscritto/a in automatico al tuo evento.");
+			String dialogBackEntryTitle = null;
+			
+			// Sono presenti utenti invitabili
+			if (inviter.getCandidates().size() > 0) {
+				
+				dialogAction = () -> {this.inviteUsersMenu(newEvent, inviter);};
+				dialogBackEntryTitle = "Vai al menu degli inviti";
+				
+			}
+			// Non ci sono candidati all'invito
+			else {
+				
+				dialogAction = () -> {this.mainMenu();};
+				dialogDescription.append("\nNon sono presenti utenti invitabili all'evento.");
+				dialogBackEntryTitle = "Torna al menu principale";
+				
+			}
+			
+			// Notifico gli utenti che sono interessati alla categoria dell'evento
+			inviter.sendNotifications();
+			
+			this.dialog(
+					"Pubblicazione completata", 
+					dialogDescription.toString(), 
+					dialogBackEntryTitle, 
+					dialogAction);
+			
+		};
 		
 		Menu boardMenu = new Menu("Bacheca", backAction);
 		boardMenu.addEntry("Visualizza eventi", eventsAction);
@@ -672,127 +597,6 @@ public class UIManager {
 				
 		this.currentMenu = eventView;
 			
-	}
-
-	/**
-	 * Permette la selezione di una categoria per la creazione di un evento.
-	 */
-	public void categorySelectorMenu() {
-		
-		// Callback indietro
-		MenuAction backAction = () -> {this.boardMenu();};
-		
-		Menu categorySelector = new Menu(
-				"Selezione della categoria", 
-				"Seleziona la categoria, fra quelle disponibili, in cui rientra l'evento che vuoi creare", 
-				Menu.BACK_ENTRY_TITLE, 
-				backAction);
-		
-		// Callback categorie
-		for (CategoryEnum category : CategoryEnum.values()) {
-			
-			Category completeCategory = CategoryProvider.getProvider().getCategory(category);
-			
-			// Per ciascuna categoria, l'azione corrispondente consiste nell'attivazione della factory
-			// (Con il creatore e la categoria opportuni) e nell'invocazione di "createEventMenu"
-			MenuAction categorySelectionAction = () -> {
-				this.eventFactory.startCreation(this.users.getCurrentUser(), category);
-				this.createEventMenu();
-				};
-				
-			categorySelector.addEntry(completeCategory.getName(), categorySelectionAction);
-			
-		}
-				
-		this.currentMenu = categorySelector;
-		
-	}
-	
-	/**
-	 * Crea il menu per la creazione dell'evento.
-	 * Il menu è composto da varie entries, ciascuna delle quali permette l'acquisizione di un campo 
-	 * relativo all'evento che si intende creare.
-	 */
-	public void createEventMenu() {
-		
-		// Callback per abortire la creazione dell'evento
-		MenuAction abortAction = () -> {
-			this.eventFactory.cancel();
-			this.boardMenu();
-			};
-		
-		String title = String.format("Creazione di un evento: %s", this.eventFactory.getProvisionalCategoryName());
-		Menu createEventMenu = new Menu(title, 
-				"Seleziona i campi dell'evento che vuoi impostare. \n"
-				+ "I campi contrassegnati dall'asterisco (*) sono obbligatori.\n"
-				+ "Quando avrai completato tutti i campi obbligatori seleziona \"Conferma\".", 
-				"Annulla la creazione e torna al menu principale", abortAction);
-				
-		// Ciclo su tutti i campi previsti per la categoria dell'evento che voglio creare
-		for (Field f : this.eventFactory.getProvisionalCategoryFields()) {
-			
-			/* Azione relativa ad un'opzione */
-			MenuAction fieldAction = () -> {
-				this.eventFactory.acquireFieldValue(f);
-				// Creo il nuovo menu aggiornato
-				this.createEventMenu();
-				};
-			
-			// Creo la entry
-			String entryTitle = String.format(
-					CREATION_ENTRY_FORMAT,
-					f.getName() + ((f.isMandatory()) ? " (*)" : ""),
-					this.eventFactory.getProvisionalFieldValueString(f));
-			createEventMenu.addEntry(entryTitle, fieldAction);
-			
-		}
-		
-		// Verifico che tutti i campi obbligatori siano stati acquisiti
-		if (this.eventFactory.verifyMandatoryFields()) {
-			createEventMenu.addEntry("Crea e pubblica l'evento", () -> {
-				
-				// Termino la creazione dell'evento
-				Event newEvent = this.eventFactory.finalise();
-				
-				// Aggiungo l'evento alla bacheca
-				this.model.getEventBoard().addEvent(newEvent, users.getCurrentUser());
-				
-				
-				// Preparo il menu degli inviti
-				Inviter inviter = new Inviter(newEvent, model);
-				
-				MenuAction dialogAction = null;
-				StringBuffer dialogDescription = new StringBuffer("L'evento è stato creato e pubblicato correttamente.\nSei stato iscritto/a in automatico al tuo evento.");
-				String dialogBackEntryTitle = null;
-				
-				// Sono presenti utenti invitabili
-				if (inviter.getCandidates().size() > 0) {
-					
-					dialogAction = () -> {this.inviteUsersMenu(newEvent, inviter);};
-					dialogBackEntryTitle = "Vai al menu degli inviti";
-					
-				}
-				// Non ci sono candidati all'invito
-				else {
-					
-					dialogAction = () -> {this.mainMenu();};
-					dialogDescription.append("\nNon sono presenti utenti invitabili all'evento.");
-					dialogBackEntryTitle = "Torna al menu principale";
-					
-				}
-				
-				// Notifico gli utenti che sono interessati alla categoria dell'evento
-				inviter.sendNotifications();
-				
-				this.dialog(
-						"Pubblicazione completata", 
-						dialogDescription.toString(), 
-						dialogBackEntryTitle, 
-						dialogAction);
-				});
-		}
-		
-		this.currentMenu = createEventMenu;
 	}
 	
 	public void subscriptionsMenu() {

@@ -21,6 +21,27 @@ import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
  *
  */
 public interface Fieldable {
+
+	/**
+	 * Metodo che restituisce "true" se il campo passato come parametro è
+	 * presente all'interno dell'oggetto Fieldable.
+	 * 
+	 * @param searchedField il campo cercato
+	 * @return "true" se il campo è previsto per tale oggetto, "false" altrimenti.
+	 */
+	public boolean hasField(Field searchedField);
+
+	/**
+	 * Metodo che restituisce "true" se il campo passato come parametro è
+	 * stato inizializzato nell'oggetto, ossia se ha associato un oggetto {@link FieldValue} valido.
+	 * 
+	 * Nota: Se il campo NON è presente all'interno dell'oggetto, viene lanciata un'eccezione (e quindi
+	 * non viene restituito alcun valore).
+	 * 
+	 * @param searchedField il campo di cui si vuole sapere se esiste già un valore
+	 * @return "true" se il campo è previsto per tale oggetto, "false" altrimenti.
+	 */
+	public boolean hasFieldValue(Field searchedField);
 	
 	/**
 	 * Restituisce il valore che caratterizza l'oggetto Fieldable nel campo richiesto.
@@ -54,15 +75,6 @@ public interface Fieldable {
 	 * classe che estende AbstractFieldable.
 	 */
 	public void setDefaultFieldValues();
-	
-	/**
-	 * Metodo che restituisce "true" se il campo passato come parametro è
-	 * presente all'interno dell'oggetto Fieldable.
-	 * 
-	 * @param searchedField il campo cercato
-	 * @return "true" se il campo è previsto per tale oggetto, "false" altrimenti.
-	 */
-	public boolean hasField(Field searchedField);
 	
 	/**
 	 * Metodo che restituisce "true" se e solo se tutti i campi marcati come "obbligatori"

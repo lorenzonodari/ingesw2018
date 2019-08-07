@@ -2,7 +2,7 @@ package it.unibs.ingesw.dpn.model.events;
 
 import java.util.List;
 
-import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
+import it.unibs.ingesw.dpn.model.categories.Category;
 import it.unibs.ingesw.dpn.model.fields.ConferenceField;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fieldvalues.OptionalCostsFieldValue;
@@ -32,7 +32,7 @@ public class ConferenceEvent extends Event {
 	 * @param fieldsList La lista di campi previsti per un evento "Conferenza"
 	 */
 	public ConferenceEvent(User creator, List<Field> fieldsList) {
-		super(creator, CategoryEnum.CONFERENZA, fieldsList);
+		super(creator, Category.CONFERENZA, fieldsList);
 	}
 	
 	@Override

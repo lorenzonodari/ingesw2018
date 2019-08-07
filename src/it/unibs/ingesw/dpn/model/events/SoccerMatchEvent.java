@@ -2,7 +2,7 @@ package it.unibs.ingesw.dpn.model.events;
 
 import java.util.List;
 
-import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
+import it.unibs.ingesw.dpn.model.categories.Category;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.users.User;
 
@@ -30,7 +30,7 @@ public class SoccerMatchEvent extends Event {
 	 * @param fieldsList La lista di campi previsti per un evento "Conferenza"
 	 */
 	public SoccerMatchEvent(User creator, List<Field> fieldsList) {
-		super(creator, CategoryEnum.PARTITA_DI_CALCIO, fieldsList);
+		super(creator, Category.PARTITA_DI_CALCIO, fieldsList);
 	}
 	
 }

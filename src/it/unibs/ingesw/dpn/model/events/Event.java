@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import it.unibs.ingesw.dpn.model.categories.Category;
-import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
-import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
 import it.unibs.ingesw.dpn.model.fields.AbstractFieldable;
 import it.unibs.ingesw.dpn.model.fields.CommonField;
 import it.unibs.ingesw.dpn.model.fields.Field;
@@ -69,7 +67,7 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 		
 	private final User creator;
 	
-	private final CategoryEnum category;
+	private final Category category;
 	
 	private EventState state;
 	
@@ -92,7 +90,7 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 	 * @param category La categoria prescelta
 	 * @param fieldsList La lista di campi previsti per questo evento
 	 */
-	public Event(User creator, CategoryEnum category, List<Field> fieldsList) {
+	public Event(User creator, Category category, List<Field> fieldsList) {
 		super(fieldsList);
 		
 		// Verifico che i parametri non siano nulli
@@ -129,10 +127,9 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 		// TITOLO
 		// Valore di default = "<nomeCategoria> del <dataEvento>"
 		if (this.getFieldValue(CommonField.TITOLO) == null) {
-			Category eventCategory = CategoryProvider.getProvider().getCategory(this.category);
 			this.setFieldValue(CommonField.TITOLO, new StringFieldValue(String.format(
 					"%s del %s",
-					eventCategory.getName(),
+					this.category.getName(),
 					this.getFieldValue(CommonField.DATA_E_ORA))));
 		}
 
@@ -163,11 +160,11 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 	}
 
 	/**
-	 * Restituisce la categoria di appartenenza dell'evento come istanza di {@link CategoryEnum}.
+	 * Restituisce la categoria di appartenenza dell'evento come istanza di {@link Category}.
 	 * 
 	 * @return la categoria a cui appartiene l'evento.
 	 */
-	public CategoryEnum getCategory() {
+	public Category getCategory() {
 		return this.category;
 	}
 	
@@ -544,14 +541,13 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 	public String toString() {
 		StringBuffer description = new StringBuffer();
 		// Categoria
-		String categoryName = CategoryProvider.getProvider().getCategory(this.category).getName();
+		String categoryName = this.category.getName();
 		description.append(String.format("Categoria   : %s\n", categoryName));
 		// Creatore
 		description.append(String.format("Creatore    : %s\n", this.getCreator().getFieldValue(UserField.NICKNAME)));
 		// Valori dei campi
 		description.append("Campi       :\n");
-		Category cat = CategoryProvider.getProvider().getCategory(this.category);
-		for (Field f : cat.getFields()) {
+		for (Field f : this.category.getFields()) {
 			if(!(this.getFieldValue(f) == null)) {
 			description.append(String.format(" | %-50s : %s\n",
 					f.getName(),

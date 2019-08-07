@@ -9,7 +9,6 @@ import java.io.ObjectInputStream;
 
 import it.unibs.ingesw.dpn.Main;
 import it.unibs.ingesw.dpn.model.categories.Category;
-import it.unibs.ingesw.dpn.model.categories.CategoryProvider;
 import it.unibs.ingesw.dpn.model.events.Event;
 import it.unibs.ingesw.dpn.model.users.UsersManager;
 
@@ -130,7 +129,7 @@ public class ModelManager implements Serializable {
 	 * @return L'array contenente le categorie registrate
 	 */
 	public Category [] getAllCategories() {
-		return CategoryProvider.getProvider().getAllCategories();
+		return Category.values();
 	}
 	
 	/**

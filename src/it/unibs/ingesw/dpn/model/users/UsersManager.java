@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import it.unibs.ingesw.dpn.model.categories.CategoryEnum;
+import it.unibs.ingesw.dpn.model.categories.Category;
 import it.unibs.ingesw.dpn.model.fields.UserField;
 import it.unibs.ingesw.dpn.model.fieldvalues.CategoryListFieldValue;
 /**
@@ -133,7 +133,7 @@ public class UsersManager implements Serializable {
 	
 		return this.currentUser;
 	}
-	public List<User> getUserByCategoryOfInterest(CategoryEnum category){
+	public List<User> getUserByCategoryOfInterest(Category category){
 		
 		Predicate<User> filterPredicate = (user) -> {
 			

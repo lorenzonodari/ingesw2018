@@ -242,4 +242,29 @@ public class ConsoleInputGetter implements InputGetter {
 		return parsedValue;
 	}
 
+	/**
+	 * Dopo aver presentato le opzioni presenti nel menu, richiede all'utente di selezionarne una.
+	 * Se la selezione è stata effettuata correttamente, restituisce l'azione associata a tale opzione.
+	 * 
+	 * Nota: La visualizzazione del menu <b>è compresa</b> nella chiamata di questo metodo.
+	 * 
+	 * @param menu Il menu da cui attingere 
+	 * @return L'azione corrispondente all'opzione selezionata
+	 */
+	public MenuAction getMenuChoice(Menu menu) {
+		// Render del menu e del prompt
+		renderer.renderMenu(menu);
+		renderer.renderEmptyPrompt();
+		
+		// Acquisizione del numero relativo all'opzione
+		int choice = this.getInteger(0, menu.getEntries().size());
+		
+		// Restituzione dell'opzione corrispondente
+		if (choice == 0) {
+			return menu.getQuitEntry().getAction();
+		} else {
+			return menu.getEntries().get(choice - 1).getAction();
+		}
+	}
+
 }
