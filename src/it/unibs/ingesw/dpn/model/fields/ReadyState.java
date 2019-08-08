@@ -13,7 +13,7 @@ public class ReadyState implements BuilderState {
 	 * @param b Il Builder a cui si fa riferimento
 	 */
 	@Override
-	public void onStartingCreating(AbstractBuilder b) {
+	public void onStartingCreation(AbstractBuilder b) {
 		b.setState(new CreatingState());
 	}
 	

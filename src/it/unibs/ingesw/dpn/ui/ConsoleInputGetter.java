@@ -254,7 +254,6 @@ public class ConsoleInputGetter implements InputGetter {
 	public MenuAction getMenuChoice(Menu menu) {
 		// Render del menu e del prompt
 		renderer.renderMenu(menu);
-		renderer.renderEmptyPrompt();
 		
 		// Acquisizione del numero relativo all'opzione
 		int choice = this.getInteger(0, menu.getEntries().size());

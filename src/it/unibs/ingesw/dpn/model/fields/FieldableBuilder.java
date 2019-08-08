@@ -17,15 +17,13 @@ import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 public interface FieldableBuilder {
 	
 	/**
-	 * Comincia il processo di creazione di un oggetto Fieldable di un tipo ben specifico,
-	 * dati i parametri del costruttore.
-	 * Ovviamente si intendono tutti i parametri che non sono dei Field, perché quelli vengono gestiti
-	 * nel resto del processo.
+	 * Comincia il processo di creazione di un oggetto Fieldable, dato l'oggetto vuoto.
+	 * Poiché il Fieldable Builder si occupa solo della creazione dei valori dei campi, è opportuno che
+	 * l'oggetto che viene passato abbia già gli attributi non campi inizializzati, e tutti i campi vuoti.
 	 * 
-	 * @param fieldableType L'implementazione di {@link Fieldable} che si intende istanziare.
-	 * @param startingParams i parametri NON FIELD necessari per la creazione dell'oggetto.
+	 * @param emptyFieldable L'oggetto Fieldable che si intende "riempire" di campi
 	 */
-	public void startCreating(Class<? extends Fieldable> fieldableType, Object... constructorParams);
+	public void startCreation(Fieldable emptyFieldable);
 	
 	/**
 	 * Comincia il processo di modifica dell'oggetto Fieldable passato come parametro.

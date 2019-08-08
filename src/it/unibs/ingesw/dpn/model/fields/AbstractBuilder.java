@@ -1,6 +1,5 @@
 package it.unibs.ingesw.dpn.model.fields;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
@@ -58,29 +57,23 @@ public abstract class AbstractBuilder implements FieldableBuilder {
 
 	/**
 	 * Inizia il processo di creazione di un oggetto Fieldable.
-	 * Questo significa che l'oggetto viene creato da zero, e poiché non è possibile sapere che oggetto
-	 * si vuole questo metodo utilizza la reflection per recuperare il costruttore adatto, dati i parametri
-	 * di istanziazione.
+	 * Questo significa che l'oggetto NON viene creato da zero, ma viene fatto da zero solamente il processo
+	 * di inizializzazione dei campi.
 	 * 
-	 * Nota: questo metodo permette alla classe padre di rimanere indipendente dalle classi figlie.
+	 * Precondizione: l'oggetto {@link Fieldable} NON deve essere nullo
 	 * 
-	 * @param fieldableType La classe che implementa Fieldable che si vuole istanziare
-	 * @param constructorParams la lista di parametri del costruttore di tale classe
+	 * @param emptyFieldable L'oggetto Fieldable "vuoto"
 	 */
 	@Override
-	public void startCreating(Class<? extends Fieldable> fieldableType, Object ... constructorParams) {
+	public void startCreation(Fieldable emptyFieldable) {
 		// Gestione dello stato
-		this.state.onStartingCreating(this);
+		this.state.onStartingCreation(this);
 		
-		// Creazione di un'istanza del nuovo oggetto.
-		Class<?> [] typeArray = (Class<?> []) Arrays.stream(constructorParams).map(o -> o.getClass()).toArray();
-		try {
-			this.provisionalFieldable = fieldableType.getConstructor(typeArray).newInstance(constructorParams);
-		} catch (Exception e) {
-			// In caso qualcosa vada storto nell'istanziazione, visualizzo l'errore e cancello il processo
-			e.printStackTrace();
-			this.cancel();
+		if (emptyFieldable == null) {
+			throw new IllegalArgumentException("Impossibile proseguire con la costruzione di un oggetto null");
 		}
+		
+		this.provisionalFieldable = emptyFieldable;
 	}
 
 	@Override
@@ -133,6 +126,9 @@ public abstract class AbstractBuilder implements FieldableBuilder {
 	public Fieldable finalise() {
 		// Gestione dello stato
 		this.state.onFinalisation(this);
+		
+		// Inizializzo i campi di default
+		this.provisionalFieldable.setDefaultFieldValues();
 		
 		return this.provisionalFieldable;
 	}

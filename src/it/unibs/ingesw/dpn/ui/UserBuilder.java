@@ -44,7 +44,7 @@ public class UserBuilder extends AbstractBuilder {
 	 */
 	public void startCreation() {
 		// Richiamo il metodo padre
-		super.startCreating(User.class, Arrays.asList(UserField.values()));
+		super.startCreation(new User(Arrays.asList(UserField.values())));
 	}
 	
 }

@@ -56,15 +56,14 @@ public class EventBuilder extends AbstractBuilder {
 		switch (category) {
 		
 		case CONFERENZA :
-			super.startCreating(ConferenceEvent.class, creator, categoryFields);
+			super.startCreation(new ConferenceEvent(creator, categoryFields));
 			break;
 			
 		case PARTITA_DI_CALCIO :
-			super.startCreating(SoccerMatchEvent.class, creator, categoryFields);
+			super.startCreation(new SoccerMatchEvent(creator, categoryFields));
 			break;
 			
 		}
-		
 	}
 	
 }
