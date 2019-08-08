@@ -21,7 +21,7 @@ public class SoccerMatchEvent extends Event {
 	
 	/**
 	 * Costruttore della classe SoccerMatchEvent, che verrà invocato dalla classe
-	 * apposita {@link it.unibs.ingesw.dpn.ui.EventBuilder} la cui responsabilità principale è creare eventi.
+	 * apposita {@link it.unibs.ingesw.dpn.model.fields.builder.EventBuilder} la cui responsabilità principale è creare eventi.
 	 * 
 	 * Precondizione: i valori dei campi devono essere uguali come numero e come tipo ai campi
 	 * previsti dalla categoria. Questo viene garantito dalla classe adibita alla creazione degli eventi.

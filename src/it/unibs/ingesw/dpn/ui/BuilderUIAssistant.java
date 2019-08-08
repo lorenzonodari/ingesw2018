@@ -8,7 +8,10 @@ import it.unibs.ingesw.dpn.model.categories.Category;
 import it.unibs.ingesw.dpn.model.events.Event;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fields.Fieldable;
-import it.unibs.ingesw.dpn.model.fields.FieldableBuilder;
+import it.unibs.ingesw.dpn.model.fields.UserField;
+import it.unibs.ingesw.dpn.model.fields.builder.EventBuilder;
+import it.unibs.ingesw.dpn.model.fields.builder.FieldableBuilder;
+import it.unibs.ingesw.dpn.model.fields.builder.UserBuilder;
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 import it.unibs.ingesw.dpn.model.users.User;
 import it.unibs.ingesw.dpn.model.users.UsersManager;
@@ -81,33 +84,39 @@ public class BuilderUIAssistant {
 	 * @param usersManager Un riferimento alla lista di tutti gli utenti
 	 * @return Il nuovo oggetto User
 	 */
-	public User createUser(UsersManager usersManager) {
-		// TEST
-		renderer.renderTextInFrame("...Processo di creazione di un Utente...");
-		// TEST
-		
+	public User createUser(UsersManager usersManager) {		
 		UserBuilder userBuilder = new UserBuilder(this.acquirer);
 		
-		// Comincio la creazione
-		userBuilder.startCreation();
-
-		do {
-			Menu createUserMenu = prepareCreationMenu(userBuilder);
-			MenuAction action = getter.getMenuChoice(createUserMenu);
-			action.execute();
-		} while (!userBuilder.isReady());
+		boolean repeatFlag = true;
 		
-		// TODO Controllare se il nickname NON è già presente nella lista di UsersManager
-		// Una roba tipo: usersManager.isNicknameExisting(user.getNickname());
+		do {
+			// Comincio la creazione
+			userBuilder.startCreation();
+			
+			do {
+				Menu createUserMenu = prepareCreationMenu(userBuilder);
+				MenuAction action = getter.getMenuChoice(createUserMenu);
+				action.execute();
+			} while (!userBuilder.isReady());
+		
+			if (this.finalisedAuxiliaryFieldable != null &&
+					usersManager.isNicknameExisting(
+							this.finalisedAuxiliaryFieldable.getFieldValue(UserField.NICKNAME).toString())) {
+				renderer.renderError("Il nickname scelto è già in uso.\nSelezionare un altro nickname.");
+			} else {
+				repeatFlag = false;
+			}
+		} while (repeatFlag);
 		
 		return (User) this.finalisedAuxiliaryFieldable;
 	}
-	
-	public void editUser(User selectedUser) {
-		// TEST
-		renderer.renderTextInFrame("...Processo di modifica di un Utente...");	
-		// TEST
-		
+
+	/**
+	 * Gestisce il processo di modifica di un oggetto User.
+	 * 
+	 * @param selectedUser Un riferimento all'oggetto User di cui modificare i campi
+	 */
+	public void editUser(User selectedUser) {		
 		UserBuilder userBuilder = new UserBuilder(this.acquirer);
 		
 		// Comincio la creazione
@@ -116,12 +125,18 @@ public class BuilderUIAssistant {
 		do {
 			Menu createUserMenu = prepareEditingMenu(userBuilder);
 			MenuAction action = getter.getMenuChoice(createUserMenu);
-			action.execute();
+			try {
+				action.execute();
+			}
+			catch (Exception e) {
+				renderer.renderError("Non è possibile modificare il valore di questo campo.");
+			}
 		} while (!userBuilder.isReady());
 		
 	}
 	
 	/* METODI PRIVATI DI UTILITÀ */
+	// Nel senso di "nascosti", non "privi"
 	
 	/**
 	 * Permette la creazione di un menu per selezionare una categoria all'interno di tutte quelle disponibili
@@ -176,11 +191,7 @@ public class BuilderUIAssistant {
 				+ "Quando avrai completato tutti i campi seleziona \"Esci e conferma\".",
 				"Annulla la creazione e torna al menu principale", abortAction);
 		
-		// TODO
-		// FARE UN METODO MIGLIORE PER AGGIUNGERE ENTRY IN UN COLPO SOLO
-		for (MenuEntry entry : prepareCreationMenuEntries(builder)) {
-			creationMenu.addEntry(entry.getName(), entry.getAction());
-		}
+		creationMenu.addAllEntry(prepareCreationMenuEntries(builder));
 
 		// Verifico che tutti i campi obbligatori siano stati acquisiti
 		if (builder.verifyMandatoryFields()) {
@@ -212,13 +223,11 @@ public class BuilderUIAssistant {
 				"Seleziona i campi che vuoi modificare. \n"
 				+ "Soltanto i campi contrassegnati dal cancelletto (#) sono modificabili.\n"
 				+ "Quando avrai completato tutti i campi seleziona \"Esci e conferma\".",
-				"Annulla la creazione e torna al menu principale", abortAction);
+				"Annulla le modifiche e torna al menu principale", abortAction);
+				// NOTA: Al momento l'annullamento delle modifiche non funziona
 		
-		// TODO
-		// FARE UN METODO MIGLIORE PER AGGIUNGERE ENTRY IN UN COLPO SOLO
-		for (MenuEntry entry : prepareEditingMenuEntries(builder)) {
-			editingMenu.addEntry(entry.getName(), entry.getAction());
-		}
+		// Aggiungo tutte le entries al menu
+		editingMenu.addAllEntry(prepareEditingMenuEntries(builder));
 
 		// Verifico che tutti i campi obbligatori siano stati acquisiti
 		if (builder.verifyMandatoryFields()) {

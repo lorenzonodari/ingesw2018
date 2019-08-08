@@ -1,8 +1,10 @@
-package it.unibs.ingesw.dpn.model.fields;
+package it.unibs.ingesw.dpn.model.fields.builder;
 
 import java.util.Collections;
 import java.util.Map;
 
+import it.unibs.ingesw.dpn.model.fields.Field;
+import it.unibs.ingesw.dpn.model.fields.Fieldable;
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 import it.unibs.ingesw.dpn.ui.FieldValueAcquirer;
 
