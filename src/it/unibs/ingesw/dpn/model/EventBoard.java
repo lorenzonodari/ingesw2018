@@ -22,7 +22,7 @@ public class EventBoard implements Serializable {
 	 */
 	private static final long serialVersionUID = 8389735292299317677L;
 	
-	private HashMap<Event, List<User>> eventMap = new HashMap<Event, List<User>>();
+	private List<Event> events = new ArrayList<Event>();
 	
 	/**
 	 * Aggiunge un evento alla lista della bacheca, pubblicandolo e rendendolo visibile a tutti.
@@ -38,15 +38,11 @@ public class EventBoard implements Serializable {
 		if (event == null) {
 			throw new IllegalStateException();
 		}
-		// Prepara la lista di iscritti per il nuovo evento
-		ArrayList<User> subscribers = new ArrayList<>();
-		eventMap.put(event, subscribers);
+
+		events.add(event);
 		
 		// Comunica all'evento che è stato pubblicato
 		event.publish();
-		
-		// Iscrive il creatore dell'evento
-		this.addSubscription(event, creator);
 		
 	}
 	
@@ -67,7 +63,7 @@ public class EventBoard implements Serializable {
 		}
 		
 		if (event.withdraw()) {
-			eventMap.remove(event);
+			events.remove(event);
 			return true;
 		}
 		else {
@@ -80,8 +76,7 @@ public class EventBoard implements Serializable {
 	 * Resistuisce la lista degli eventi 
 	 */
 	public List<Event> getEvents(){
-		return eventMap
-				.keySet()
+		return events
 				.stream()
 				.collect(Collectors.toCollection(ArrayList::new));
 	}
@@ -93,8 +88,7 @@ public class EventBoard implements Serializable {
 	 */
 	public List<Event> getEventsByState(String stateName){
 		
-		return eventMap
-				.keySet()
+		return events
 				.stream()
 				.filter(event -> event.getState().equals(stateName))
 				.collect(Collectors.toCollection(ArrayList::new));
@@ -106,8 +100,7 @@ public class EventBoard implements Serializable {
 	 * @param author : utente su cui si effettua la ricerca
 	 */
 	public List<Event> getEventsByAuthor(User author) {
-		return eventMap
-				.keySet()
+		return events
 				.stream()
 				.filter(event -> event.getState().equals(EventState.OPEN))
 				.filter(event -> event.getCreator() == author)
@@ -116,13 +109,12 @@ public class EventBoard implements Serializable {
 	/**
 	 * Restituisce la lista degli aperti a cui l'utente è iscritto
 	 * 
-	 * @param e : utente su cui avviene la ricerca 
+	 * @param user : utente su cui avviene la ricerca 
 	 */
-	public List<Event> getUserSubscriptions(User e) {
-		return eventMap
-				.keySet()
+	public List<Event> getUserSubscriptions(User user) {
+		return events
 				.stream()
-				.filter(event -> eventMap.get(event).contains(e))
+				.filter(event -> event.hasSubscriber(user))
 				.filter(event -> event.getState().equals(EventState.OPEN))
 				.collect(Collectors.toCollection(ArrayList::new));
 	}
@@ -135,101 +127,17 @@ public class EventBoard implements Serializable {
 	 */
 	public List<User> getListOfOldSubscribersFromPastEvents(User user) {
 		ArrayList<User> subscribers = new ArrayList<>();
-		for(Event e : eventMap
-				.keySet()
+		for(Event e : events
 				.stream()
 				.filter(event -> event.getState().equals(EventState.ENDED))
 				.filter(event -> event.getCreator() == user)
 				.collect(Collectors.toCollection(ArrayList::new))) {
-			for(User u : eventMap.get(e)) {
+			for(User u : e.getSubscribers()) {
 				if(!subscribers.contains(u))
 					subscribers.add(u);
 			}			
 		}
 		return subscribers;
 	}
-	/**
-	 * restituisce la list degli iscritti a un evento 
-	 * 
-	 * Precondizione: l'evento deve essere esistente
-	 * 
-	 * @param un evento specifico della bacheca, esistente
-	 */
-	public List<User> getSubscriptions(Event event){
-
-		// verifica precondizione
-		if (event == null) {
-			throw new IllegalStateException();
-		}
-		return eventMap.get(event);
-	}
-	
-	/**
-	 * Metodo che aggiunge un iscrizione di un utente ad un evento nella bacheca
-	 * Prima l'iscrizione avviene sulla bacheca cioè tramite l'associazione dell'utente alla lista dei suoi iscritti
-	 * poi la mailbox dell'utente viene aggiunta alla lista delle mailbox in ascolto dell'evento
-	 * 
-	 * Precondizione: l'evento deve essere un evento esistente e aperto in bacheca 
-	 * Precondizione: l'utente deve non essere già iscritto all'evento stesso 
-	 * 				  
-	 * @param event -> Evento in cui iscrivere un utente 
-	 * @param subscription -> L'utente da iscrivere
-	 *
-	 * @return restituisce true se l'operazione è andata buon fine, altrimenti false
-	 */
-	public boolean addSubscription(Event event, User subscription) {
-		// verifica precondizione
-		if (event == null || subscription == null ) {
-			throw new IllegalStateException();
-		}
-
-		if (event.subscribe(subscription)) {		
-			eventMap.get(event).add(subscription);
-			return true;
-		} else {
-			return false;
-		}
-
-	}
-	
-	/**
-	 * Metodo che verifica se in un determinato evento si è già iscritto un utente
-	 * 
-	 * @return true se l'utente non è già iscritto all'evento, false altrimenti 
-	 */
-	public boolean verifySubscription(Event event, User subscriber) {
-		// verifica precondizione
-		if (event == null || subscriber == null ) {
-			throw new IllegalStateException();
-		}
-		return !eventMap.get(event).contains(subscriber);
-	}
-	
-	/**
-	 * Metodo che rimuove una inscrizione di un utente ad un evento nella bacheca 
-	 * 
-	 * 
-	 * Precondizioni: l'evento deve esistere ed essere aperto in bacheca 
-	 * 				  l'utente deve essere iscritto all'evento
-	 * 
-	 * @param evento a cui si vuole disiscrivere l'utente
-	 * @param Utente da rimuovere dalla lista degli iscritti 
-	 * @return restituisce true se l'operazione è andata buon fine, altrimenti false
-	 */
-	public boolean removeSubscription(Event event, User toRemove) {
-
-		// verifica precondizione
-		if (event == null || toRemove == null) {
-			throw new IllegalStateException();
-		}
-		if(eventMap.get(event).remove(toRemove)){
-			event.unsubscribe(toRemove);
-			return true;
-		} else {
-			return false;
-		}
-		
-	}
-	
 	
 }

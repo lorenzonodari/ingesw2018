@@ -1,6 +1,7 @@
 package it.unibs.ingesw.dpn.model.events;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,7 +15,6 @@ import it.unibs.ingesw.dpn.model.fields.UserField;
 import it.unibs.ingesw.dpn.model.fieldvalues.IntegerFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.MoneyAmountFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
-import it.unibs.ingesw.dpn.model.users.Mailbox;
 import it.unibs.ingesw.dpn.model.users.Notification;
 import it.unibs.ingesw.dpn.model.users.User;
 
@@ -73,7 +73,7 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 	
 	private final EventHistory history;
 	
-	private final List<Mailbox> mailingList;
+	private final List<User> partecipants;
 	
 	/**
 	 * Crea un nuovo evento con la relativa categoria.
@@ -83,7 +83,7 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 	 * 
 	 * Precondizione: il creatore dell'evento non deve essere un valore nullo. In questo caso verrebbe lanciata un'eccezione.
 	 * 
-	 * Postcondizione: il creatore dell'evento NON è iscritto automaticamente alla mailing list dell'evento.
+	 * Postcondizione: il creatore dell'evento NON è iscritto automaticamente all'evento.
 	 * E' necessario chiamare il metodo "subscribe" per confermare l'iscrizione, ma solamente DOPO aver pubblicato l'evento.
 	 * 
 	 * @param creator L'utente {@link User} creatore dell'evento
@@ -106,7 +106,7 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 		this.history = new EventHistory();
 		
 		// Inizializzo la lista di sottoscrittori della mailing list
-		this.mailingList = new LinkedList<>();
+		this.partecipants = new LinkedList<>();
 		
 		// A questo punto posso settare lo stato come "valido".
 		this.setState(new ValidState());
@@ -178,9 +178,9 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 	 */
 	 void notifyEveryone(String message) {
 		// Cicla su tutte le mailbox
-		for (Mailbox mb : this.mailingList) {
+		for (User u : this.partecipants) {
 			// Recapita il messaggio impostato
-			mb.deliver(new Notification(message));
+			u.receive(new Notification(message));
 		}
 	 }
 	 
@@ -190,7 +190,7 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 	  * @param message Il testo della notifica
 	  */
 	 void notifyCreator(String message) {
-		 creator.getMailbox().deliver(new Notification(message));
+		 creator.receive(new Notification(message));
 	 }
 	 
 	 /**
@@ -199,14 +199,14 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 	  * @param message Il testo della notifica
 	  */
 	 void notifyPartecipants(String message) {
-		 for (Mailbox m : mailingList) {
-			 // Se incontro la mailbox del creatore
-			 if (m == creator.getMailbox()) {
-				 // Passo alla mailbox successiva
+		 for (User u : partecipants) {
+
+			 if (u == creator) {
 				 continue;
 			 }
+			 
 			 // Invio la notifica
-			 m.deliver(new Notification(message));
+			 u.receive(new Notification(message));
 		 }
 	 }
 	 
@@ -298,6 +298,7 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 		// TODO Eventuali azioni aggiuntive alla pubblicazione
 		try {
 			this.state.onPublication(this);
+			this.subscribe(this.creator);
 			return true;
 		}
 		catch (IllegalStateException e) {
@@ -358,7 +359,7 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 	 */
 	public boolean subscribe(User subscriber) {
 		// Verifica che l'utente non sia già iscritto
-		if (this.mailingList.contains(subscriber.getMailbox())) {
+		if (this.partecipants.contains(subscriber)) {
 			return false;
 		}
 		
@@ -367,7 +368,7 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 			 * l'invio di alcune notifiche. Tali notifiche verrebbero perse se aggiungessi l'utente alla
 			 * mailing list troppo tardi.
 			 */ 
-		this.mailingList.add(subscriber.getMailbox());
+		this.partecipants.add(subscriber);
 		
 		// Provo ad aggiungere un iscritto, demandando allo stato dell'evento il comportamento adeguato
 		try {
@@ -375,7 +376,7 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 		}
 		catch (IllegalStateException e) {
 			// In caso di eccezioni, l'iscrizione non può essere effettuata
-			this.mailingList.remove(subscriber.getMailbox());
+			this.partecipants.remove(subscriber);
 			return false;
 		}
 
@@ -388,7 +389,7 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 							this.getFieldValue(CommonField.TITOLO)));
 			message.append(String.format("; Importo dovuto: %.2f €", this.getExpensesForUser(subscriber)));
 		
-			subscriber.getMailbox().deliver(new Notification(message.toString()));
+			subscriber.receive(new Notification(message.toString()));
 			
 		}
 		return true;
@@ -412,7 +413,7 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 	 */
 	public boolean unsubscribe(User unsubscriber) {
 		// Verifico che l'utente sia già iscritto
-		if (!this.mailingList.contains(unsubscriber.getMailbox()) || (this.creator == unsubscriber)) {
+		if (!this.partecipants.contains(unsubscriber) || (this.creator == unsubscriber)) {
 			return false;
 		}
 		
@@ -427,10 +428,10 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 		}
 
 		// Rimuove l'iscritto dalla mailing list
-		this.mailingList.remove(unsubscriber.getMailbox());
+		this.partecipants.remove(unsubscriber);
 		
 		// Notifica l'utente che la disiscrizione è andata a buon fine
-		unsubscriber.getMailbox().deliver(new Notification(
+		unsubscriber.receive(new Notification(
 				String.format(EVENT_UNSUBSCRIPTION_MESSAGE, this.getFieldValue(CommonField.TITOLO))
 				));
 		return true;
@@ -559,5 +560,31 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 		description.append(this.history.toString());
 		return description.toString();
 	}
-
+	
+	/**
+	 * Restituisce true se l'utente dato e' iscritto all'evento
+	 * 
+	 * Precondizione: user != null
+	 * 
+	 * @param user L'utente del quale verificare l'iscrizione all'evento
+	 * @return true se l'utente risulta iscritto all'evento
+	 */
+	public boolean hasSubscriber(User user) {
+		
+		// Verifica precondizione
+		if (user == null) {
+			throw new IllegalArgumentException();
+		}
+		
+		return this.partecipants.contains(user);
+	}
+	
+	/**
+	 * Restituisce la lista non modificabile degli utenti iscritti all'evento
+	 * 
+	 * @return La lista degli iscritti all'evento
+	 */
+	public List<User> getSubscribers() {
+		return Collections.unmodifiableList(this.partecipants);
+	}
 }
