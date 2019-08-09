@@ -6,9 +6,9 @@ import java.util.Map;
 
 import it.unibs.ingesw.dpn.Main;
 import it.unibs.ingesw.dpn.model.ModelManager;
-import it.unibs.ingesw.dpn.model.users.UsersManager;
+import it.unibs.ingesw.dpn.model.users.UsersRepository;
 import it.unibs.ingesw.dpn.model.users.Invite;
-import it.unibs.ingesw.dpn.model.users.Mailbox;
+import it.unibs.ingesw.dpn.model.users.LoginManager;
 import it.unibs.ingesw.dpn.model.users.Notification;
 import it.unibs.ingesw.dpn.model.users.User;
 import it.unibs.ingesw.dpn.model.categories.Category;
@@ -33,7 +33,8 @@ public class UIManager {
 	private UIRenderer renderer;
 	private InputGetter inputManager;
 	private ModelManager model;
-	private UsersManager users;
+	private UsersRepository users;
+	private LoginManager loginManager;
 	private Menu currentMenu;
 	private BuilderUIAssistant builderAssistant;
 		
@@ -56,6 +57,7 @@ public class UIManager {
 		this.inputManager = new ConsoleInputGetter(renderer);
 		this.model = model;
 		this.users = model.getUsersManager();
+		this.loginManager = new LoginManager();
 		this.currentMenu = null;
 		this.builderAssistant = new BuilderUIAssistant(renderer, inputManager);
 		
@@ -95,7 +97,7 @@ public class UIManager {
 			this.renderer.renderText("Nickname: ");
 			String username = this.inputManager.getString();
 			// Provo a loggare
-			if (this.users.login(username)) {
+			if (this.loginManager.login(users, username)) {
 				mainMenu();
 			} else {
 				this.renderer.renderError("Login fallito");
@@ -146,7 +148,7 @@ public class UIManager {
 		
 		// Callback modifica utente
 		MenuAction userEditingAction = () -> {
-			this.builderAssistant.editUser(this.users.getCurrentUser());
+			this.builderAssistant.editUser(this.loginManager.getCurrentUser());
 			this.personalSpace();
 			};
 		
@@ -171,13 +173,13 @@ public class UIManager {
 		// Callback Cancella notifiche
 		MenuAction deleteAction = () -> {this.deleteNotificationMenu();};
 		
-		Mailbox mailbox = users.getCurrentUser().getMailbox();
+		User currentUser = loginManager.getCurrentUser();
 		String menuContent = null;
 		
-		if (mailbox.containsNotifications()) {
+		if (currentUser.hasNotifications()) {
 			
 			StringBuffer notifications = new StringBuffer();
-			for (Notification n : mailbox.getEveryNotification()) {
+			for (Notification n : currentUser.getNotifications()) {
 				notifications.append(LIST_ELEMENT_PREFIX);
 				notifications.append(n.toString());
 				notifications.append("\n");
@@ -208,14 +210,14 @@ public class UIManager {
 		
 		Menu deleteMenu = new Menu("Elimina notifiche", "Seleziona la notifica da eliminare", Menu.BACK_ENTRY_TITLE, backAction);
 		
-		Mailbox mailbox = users.getCurrentUser().getMailbox();
+		User currentUser = loginManager.getCurrentUser();
 		
-		if (mailbox.containsNotifications()) {
+		if (currentUser.hasNotifications()) {
 			
-			for (Notification n : mailbox.getEveryNotification()) {
+			for (Notification n : currentUser.getNotifications()) {
 				
 				MenuAction deleteAction = () -> {
-					mailbox.delete(n);
+					currentUser.delete(n);
 					this.deleteNotificationMenu();
 				};
 				
@@ -235,7 +237,7 @@ public class UIManager {
 		
 		// Callback Logout
 		MenuAction quitAction = () -> {
-			this.users.logout();
+			this.loginManager.logout();
 			loginMenu();
 		};
 		
@@ -270,10 +272,10 @@ public class UIManager {
 		
 		// Callback proponi evento
 		MenuAction createAction = () -> {
-			Event newEvent = this.builderAssistant.createEvent(users);
+			Event newEvent = this.builderAssistant.createEvent(loginManager);
 
 			// Aggiungo l'evento alla bacheca
-			this.model.getEventBoard().addEvent(newEvent, users.getCurrentUser());
+			this.model.getEventBoard().addEvent(newEvent, loginManager.getCurrentUser());
 			
 			// Preparo il menu degli inviti
 			Inviter inviter = new Inviter(newEvent, model);
@@ -406,7 +408,7 @@ public class UIManager {
 		// Iscriviti azione
 		MenuAction subscriptionAction = () -> {
 			MenuAction dialogBackAction = () -> {this.eventMenu(event);};
-			boolean success = model.getEventBoard().addSubscription(event, users.getCurrentUser());
+			boolean success = event.subscribe(loginManager.getCurrentUser());
 			
 			if (success) {
 				this.dialog("Iscrizione effettuata correttamente", null, Menu.BACK_ENTRY_TITLE, dialogBackAction);
@@ -421,7 +423,7 @@ public class UIManager {
 		MenuAction unsubscribeAction = () -> {
 			
 			MenuAction dialogBackAction = () -> {this.eventMenu(event);};
-			boolean success = model.getEventBoard().removeSubscription(event, model.getUsersManager().getCurrentUser());
+			boolean success = event.unsubscribe(loginManager.getCurrentUser());
 			
 			if (success) {
 				this.dialog("L'iscrizione e' stata rimossa correttamente", null, Menu.BACK_ENTRY_TITLE, dialogBackAction);
@@ -430,11 +432,11 @@ public class UIManager {
 				this.dialog("Non e' stato possibile annullare correttamente l'iscrizione", null, Menu.BACK_ENTRY_TITLE, dialogBackAction); 
 			}
 			
-			if (event.hasUserDependantFields() && users.getCurrentUser() != event.getCreator()) {
+			if (event.hasUserDependantFields() && loginManager.getCurrentUser() != event.getCreator()) {
 				OptionalCostsFieldValue costsFieldValue = (OptionalCostsFieldValue) event.getFieldValue(ConferenceField.SPESE_OPZIONALI);
 				
 				for (String cost : costsFieldValue.getValue().keySet()) {
-					costsFieldValue.removeUserFromCost(users.getCurrentUser(), cost);
+					costsFieldValue.removeUserFromCost(loginManager.getCurrentUser(), cost);
 				}
 			}
 			
@@ -458,7 +460,7 @@ public class UIManager {
 		//Preparo il contenuto testuale del menu
 		StringBuffer menuContent = new StringBuffer(event.toString());
 		
-		if (event.hasUserDependantFields() && users.getCurrentUser() != event.getCreator()) {
+		if (event.hasUserDependantFields() && loginManager.getCurrentUser() != event.getCreator()) {
 			menuContent.append("\n");
 			menuContent.append("Spese opzionali scelte: \n");
 			
@@ -470,7 +472,7 @@ public class UIManager {
 				menuContent.append(cost);
 				menuContent.append(String.format(" : %.2f € ", costs.get(cost)));
 				
-				if (!costsFieldValue.userHasCost(users.getCurrentUser(), cost)) {
+				if (!costsFieldValue.userHasCost(loginManager.getCurrentUser(), cost)) {
 					menuContent.append("[ ]");
 				}
 				else {
@@ -481,7 +483,7 @@ public class UIManager {
 			}
 			menuContent.append("\n");
 			
-			menuContent.append(String.format("Costo complessivo di partecipazione: %.2f €", event.getExpensesForUser(users.getCurrentUser())));
+			menuContent.append(String.format("Costo complessivo di partecipazione: %.2f €", event.getExpensesForUser(loginManager.getCurrentUser())));
 		}
 		
 		Menu eventMenu = new Menu("Visualizzazione evento", menuContent.toString(), Menu.BACK_ENTRY_TITLE, backAction);
@@ -491,14 +493,14 @@ public class UIManager {
 		Date subscriptionLimit = (DateFieldValue) event.getFieldValue(CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE);
 		Date now = new Date();
 		
-		if (users.getCurrentUser() == event.getCreator() && now.before(withdrawLimit)) {
+		if (loginManager.getCurrentUser() == event.getCreator() && now.before(withdrawLimit)) {
 			eventMenu.addEntry("Ritira proposta", withdrawAction);
 		}
-		else if (model.getEventBoard().verifySubscription(event, model.getUsersManager().getCurrentUser()) && now.before(subscriptionLimit)) {
+		else if (event.hasSubscriber(loginManager.getCurrentUser()) && now.before(subscriptionLimit)) {
 			
 			eventMenu.addEntry("Iscriviti all'evento", subscriptionAction);
 			
-			if (event.hasUserDependantFields() && users.getCurrentUser() != event.getCreator()) {
+			if (event.hasUserDependantFields() && loginManager.getCurrentUser() != event.getCreator()) {
 				
 				OptionalCostsFieldValue costsFieldValue = (OptionalCostsFieldValue) event.getFieldValue(ConferenceField.SPESE_OPZIONALI);
 				Map<String, Float> costs = costsFieldValue.getValue();
@@ -507,17 +509,17 @@ public class UIManager {
 					
 					// Callback seleziona spesa aggiuntiva
 					MenuAction selectAction = () -> {
-						costsFieldValue.registerUserToCost(users.getCurrentUser(), cost);
+						costsFieldValue.registerUserToCost(loginManager.getCurrentUser(), cost);
 						this.eventMenu(event);
 					};
 					
 					// Callback rimuovi spesa aggiuntiva
 					MenuAction removeAction = () -> {
-						costsFieldValue.removeUserFromCost(users.getCurrentUser(), cost);
+						costsFieldValue.removeUserFromCost(loginManager.getCurrentUser(), cost);
 						this.eventMenu(event);
 					};
 					
-					if (!costsFieldValue.userHasCost(users.getCurrentUser(), cost)) {
+					if (!costsFieldValue.userHasCost(loginManager.getCurrentUser(), cost)) {
 						String entryName = String.format("Desidero sostenere la spesa: \"%s\"", cost);
 						eventMenu.addEntry(entryName, selectAction);
 					}
@@ -569,10 +571,10 @@ public class UIManager {
 										  backAction);
 		
 		// Callback per ogni evento al quale l'utente e' iscritto ma del quale non e' creatore
-		List<Event> subscriptions = model.getEventBoard().getUserSubscriptions(users.getCurrentUser());
+		List<Event> subscriptions = model.getEventBoard().getUserSubscriptions(loginManager.getCurrentUser());
 		for (Event e : subscriptions) {
 			
-			if (e.getCreator() != users.getCurrentUser()) {
+			if (e.getCreator() != loginManager.getCurrentUser()) {
 				
 				MenuAction eventAction = () -> {this.subscribedEventMenu(e);};
 				subscriptionsMenu.addEntry(e.getFieldValue(CommonField.TITOLO).toString(), eventAction);
@@ -595,7 +597,7 @@ public class UIManager {
 										  backAction);
 		
 		// Callback per ogni evento creato dall'utente
-		List<Event> proposals = model.getEventBoard().getEventsByAuthor(users.getCurrentUser());
+		List<Event> proposals = model.getEventBoard().getEventsByAuthor(loginManager.getCurrentUser());
 		for (Event e : proposals) {
 				
 			MenuAction eventAction = () -> {this.proposedEventMenu(e);};
@@ -623,7 +625,7 @@ public class UIManager {
 		MenuAction unsubscribeAction = () -> {
 			
 			MenuAction dialogBackAction = () -> {this.subscriptionsMenu();};
-			boolean success = model.getEventBoard().removeSubscription(event, model.getUsersManager().getCurrentUser());
+			boolean success = event.unsubscribe(loginManager.getCurrentUser());
 			
 			if (success) {
 				this.dialog("L'iscrizione e' stata rimossa correttamente", null, Menu.BACK_ENTRY_TITLE, dialogBackAction);
@@ -632,18 +634,18 @@ public class UIManager {
 				this.dialog("Non e' stato possibile annullare correttamente l'iscrizione", null, Menu.BACK_ENTRY_TITLE, dialogBackAction); 
 			}
 			
-			if (event.hasUserDependantFields() && users.getCurrentUser() != event.getCreator()) {
+			if (event.hasUserDependantFields() && loginManager.getCurrentUser() != event.getCreator()) {
 				OptionalCostsFieldValue costsFieldValue = (OptionalCostsFieldValue) event.getFieldValue(ConferenceField.SPESE_OPZIONALI);
 				
 				for (String cost : costsFieldValue.getValue().keySet()) {
-					costsFieldValue.removeUserFromCost(users.getCurrentUser(), cost);
+					costsFieldValue.removeUserFromCost(loginManager.getCurrentUser(), cost);
 				}
 			}
 			
 		};
 		
 		StringBuffer menuContent = new StringBuffer(event.toString());
-		if (event.hasUserDependantFields() && users.getCurrentUser() != event.getCreator()) {
+		if (event.hasUserDependantFields() && loginManager.getCurrentUser() != event.getCreator()) {
 			menuContent.append("\n");
 			menuContent.append("Spese opzionali scelte: \n");
 			
@@ -655,7 +657,7 @@ public class UIManager {
 				menuContent.append(cost);
 				menuContent.append(String.format(" : %.2f € ", costs.get(cost)));
 				
-				if (!costsFieldValue.userHasCost(users.getCurrentUser(), cost)) {
+				if (!costsFieldValue.userHasCost(loginManager.getCurrentUser(), cost)) {
 					menuContent.append("[ ]");
 				}
 				else {
@@ -666,7 +668,7 @@ public class UIManager {
 			}
 			menuContent.append("\n");
 			
-			menuContent.append(String.format("Costo complessivo di partecipazione: %.2f €", event.getExpensesForUser(users.getCurrentUser())));
+			menuContent.append(String.format("Costo complessivo di partecipazione: %.2f €", event.getExpensesForUser(loginManager.getCurrentUser())));
 		}
 		
 		Menu eventMenu = new Menu("Dettagli evento", menuContent.toString(), Menu.BACK_ENTRY_TITLE, backAction);
@@ -786,7 +788,7 @@ public class UIManager {
 		MenuAction backAction = () -> {this.personalSpace();};
 		
 		String menuContent = null;
-		List<Invite> userInvites = users.getCurrentUser().getMailbox().getEveryInvite();
+		List<Invite> userInvites = loginManager.getCurrentUser().getInvites();
 		if (userInvites.size() == 0) {
 			menuContent = "Nessun invito da visualizzare";
 		}
@@ -817,7 +819,7 @@ public class UIManager {
 		// Callback accetta invito
 		MenuAction acceptAction = () -> {
 			
-			if (model.getEventBoard().addSubscription(event, users.getCurrentUser())) {
+			if (event.subscribe(loginManager.getCurrentUser())) {
 				
 				this.dialog("Invito accettato correttamente", null, Menu.BACK_ENTRY_TITLE, backAction);
 				
@@ -826,14 +828,14 @@ public class UIManager {
 				this.dialog("Errore durante l'accettazione dell'invito", null, Menu.BACK_ENTRY_TITLE, backAction);
 			}
 			
-			users.getCurrentUser().getMailbox().delete(i);
+			loginManager.getCurrentUser().delete(i);
 			
 		};
 		
 		// Callback rifiuta invito
 		MenuAction refuseAction = () -> {
 			
-			users.getCurrentUser().getMailbox().delete(i); // Cancella l'invito dalla mailbox
+			loginManager.getCurrentUser().delete(i); // Cancella l'invito dalla mailbox
 			this.dialog("Invito rifiutato correttamente", null, Menu.BACK_ENTRY_TITLE, backAction);
 			
 		};
@@ -842,7 +844,7 @@ public class UIManager {
 		Date subscriptionTerm = (DateFieldValue) event.getFieldValue(CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE);
 		StringBuffer menuContent = new StringBuffer(event.toString());
 		
-		if (event.hasUserDependantFields() && users.getCurrentUser() != event.getCreator()) {
+		if (event.hasUserDependantFields() && loginManager.getCurrentUser() != event.getCreator()) {
 			menuContent.append("\n");
 			menuContent.append("Spese opzionali scelte: \n");
 			
@@ -854,7 +856,7 @@ public class UIManager {
 				menuContent.append(cost);
 				menuContent.append(String.format(" : %.2f € ", costs.get(cost)));
 				
-				if (!costsFieldValue.userHasCost(users.getCurrentUser(), cost)) {
+				if (!costsFieldValue.userHasCost(loginManager.getCurrentUser(), cost)) {
 					menuContent.append("[ ]");
 				}
 				else {
@@ -865,7 +867,7 @@ public class UIManager {
 			}
 			menuContent.append("\n");
 			
-			menuContent.append(String.format("Costo complessivo di partecipazione: %.2f €", event.getExpensesForUser(users.getCurrentUser())));
+			menuContent.append(String.format("Costo complessivo di partecipazione: %.2f €", event.getExpensesForUser(loginManager.getCurrentUser())));
 		}
 		
 		Menu inviteMenu = null;
@@ -876,7 +878,7 @@ public class UIManager {
 			menuContent.append("\n\n Non e' piu' possibile accettare l'invito: le iscrizioni all'evento sono chiuse");
 			inviteMenu = new Menu("Invito ad un evento", menuContent.toString(), Menu.BACK_ENTRY_TITLE, backAction);
 			
-			if (event.hasUserDependantFields() && users.getCurrentUser() != event.getCreator()) {
+			if (event.hasUserDependantFields() && loginManager.getCurrentUser() != event.getCreator()) {
 				
 				OptionalCostsFieldValue costsFieldValue = (OptionalCostsFieldValue) event.getFieldValue(ConferenceField.SPESE_OPZIONALI);
 				Map<String, Float> costs = costsFieldValue.getValue();
@@ -885,17 +887,17 @@ public class UIManager {
 					
 					// Callback seleziona spesa aggiuntiva
 					MenuAction selectAction = () -> {
-						costsFieldValue.registerUserToCost(users.getCurrentUser(), cost);
+						costsFieldValue.registerUserToCost(loginManager.getCurrentUser(), cost);
 						this.inviteMenu(i);
 					};
 					
 					// Callback rimuovi spesa aggiuntiva
 					MenuAction removeAction = () -> {
-						costsFieldValue.removeUserFromCost(users.getCurrentUser(), cost);
+						costsFieldValue.removeUserFromCost(loginManager.getCurrentUser(), cost);
 						this.inviteMenu(i);
 					};
 					
-					if (!costsFieldValue.userHasCost(users.getCurrentUser(), cost)) {
+					if (!costsFieldValue.userHasCost(loginManager.getCurrentUser(), cost)) {
 						String entryName = String.format("Desidero sostenere la spesa: \"%s\"", cost);
 						inviteMenu.addEntry(entryName, selectAction);
 					}

@@ -13,8 +13,9 @@ import it.unibs.ingesw.dpn.model.fields.builder.EventBuilder;
 import it.unibs.ingesw.dpn.model.fields.builder.FieldableBuilder;
 import it.unibs.ingesw.dpn.model.fields.builder.UserBuilder;
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
+import it.unibs.ingesw.dpn.model.users.LoginManager;
 import it.unibs.ingesw.dpn.model.users.User;
-import it.unibs.ingesw.dpn.model.users.UsersManager;
+import it.unibs.ingesw.dpn.model.users.UsersRepository;
 
 /**
  * Classe che si occupa di visualizzare l'interfaccia utente necessaria per il processo
@@ -48,7 +49,7 @@ public class BuilderUIAssistant {
 		this.acquirer = new FieldValueAcquirer(renderer, getter);
 	}
 	
-	public Event createEvent(UsersManager usersManager) {
+	public Event createEvent(LoginManager loginManager) {
 		// TEST
 		renderer.renderTextInFrame("...Processo di creazione di un Evento...");
 		// TEST
@@ -67,7 +68,7 @@ public class BuilderUIAssistant {
 		EventBuilder eventBuilder = new EventBuilder(this.acquirer);
 		
 		// Comunico al Builder che comincio la creazione di un oggetto ben specifico.
-		eventBuilder.startCreation(usersManager.getCurrentUser(), selectedCategory);
+		eventBuilder.startCreation(loginManager.getCurrentUser(), selectedCategory);
 
 		do {
 			Menu createUserMenu = prepareCreationMenu(eventBuilder);
@@ -84,7 +85,7 @@ public class BuilderUIAssistant {
 	 * @param usersManager Un riferimento alla lista di tutti gli utenti
 	 * @return Il nuovo oggetto User
 	 */
-	public User createUser(UsersManager usersManager) {		
+	public User createUser(UsersRepository usersManager) {		
 		UserBuilder userBuilder = new UserBuilder(this.acquirer);
 		
 		boolean repeatFlag = true;

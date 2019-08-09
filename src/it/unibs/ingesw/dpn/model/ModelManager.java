@@ -10,7 +10,7 @@ import java.io.ObjectInputStream;
 import it.unibs.ingesw.dpn.Main;
 import it.unibs.ingesw.dpn.model.categories.Category;
 import it.unibs.ingesw.dpn.model.events.Event;
-import it.unibs.ingesw.dpn.model.users.UsersManager;
+import it.unibs.ingesw.dpn.model.users.UsersRepository;
 
 /**
  * Classe che centralizza l'accesso ai dati di dominio. Tramite questa classe
@@ -25,7 +25,7 @@ public class ModelManager implements Serializable {
 	 */
 	private static final long serialVersionUID = 4340634112104559263L;
 	
-	private UsersManager usersManager;
+	private UsersRepository usersManager;
 	private EventBoard eventBoard;
 	
 	/**
@@ -34,7 +34,7 @@ public class ModelManager implements Serializable {
 	 */
 	public ModelManager()  {
 		
-		this.usersManager = new UsersManager();
+		this.usersManager = new UsersRepository();
 		this.eventBoard = new EventBoard();
 		
 	}
@@ -137,7 +137,7 @@ public class ModelManager implements Serializable {
 	 * 
 	 * @return Il gestore degli utenti in uso
 	 */
-	public UsersManager getUsersManager() {
+	public UsersRepository getUsersManager() {
 		return this.usersManager;
 	}
 }

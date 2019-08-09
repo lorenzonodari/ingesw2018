@@ -149,7 +149,7 @@ public class Inviter {
 				continue;
 			}
 			
-			u.getMailbox().deliver(new Notification(notificationContent.toString()));
+			u.receive(new Notification(notificationContent.toString()));
 		}
 		
 	}
@@ -161,7 +161,7 @@ public class Inviter {
 		for(User p : invited.keySet()) {
 			
 			if (invited.get(p)) {
-				p.getMailbox().deliver(new Invite(this.target));
+				p.receive(new Invite(this.target));
 			}
 		}
 	}
