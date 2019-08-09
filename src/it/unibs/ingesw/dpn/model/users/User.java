@@ -73,5 +73,58 @@ public class User extends AbstractFieldable {
 		}
 		return description.toString();
 	}
+	
+	/**
+	 * Aggiunge la notifica data alle notifiche ricevute dall'utente
+	 * 
+	 * @param n La notifica da ricevere
+	 */
+	public void receive(Notification n) {
+		this.mailbox.deliver(n);
+	}
+	
+	/**
+	 * Aggiunge l'invito dato agli inviti ricevuti dall'utente
+	 * @param i
+	 */
+	public void receive(Invite i) {
+		this.mailbox.deliver(i);
+	}
+	
+	/**
+	 * Elimina la notifica data dalle notifiche ricevute dall'utente
+	 * 
+	 * @param n La notifica da eliminare
+	 */
+	public void delete(Notification n) {
+		this.mailbox.delete(n);
+	}
+	
+	/**
+	 * Elimina l'invito dato dagli inviti ricevuti dall'utente
+	 * 
+	 * @param n L'invito da eliminare
+	 */
+	public void delete(Invite i) {
+		this.mailbox.delete(i);
+	}
+	
+	/**
+	 * Restituisce true se l'utente ha notifiche
+	 * 
+	 * @return true se l'utente ha notifiche
+	 */
+	public boolean hasNotifications() {
+		return this.mailbox.containsNotifications();
+	}
+	
+	/**
+	 * Restituisce true se l'utente ha inviti
+	 * 
+	 * @return true se l'utente ha inviti
+	 */
+	public boolean hasInvites() {
+		return this.mailbox.containsInvites();
+	}
 
 }

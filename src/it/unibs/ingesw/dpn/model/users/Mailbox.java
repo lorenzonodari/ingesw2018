@@ -8,7 +8,7 @@ import java.util.Collections;
  * Classe utilizzata per contenere le informazioni relative ad un insieme di notifiche. In particolare, ad ogni
  * User e' associata una Mailbox contentente tutte le notifiche ricevute da tale utente.
  */
-public class Mailbox implements Serializable {
+class Mailbox implements Serializable {
 
 	/**
 	 * 
@@ -21,7 +21,7 @@ public class Mailbox implements Serializable {
 	/**
 	 * Crea una nuova mailbox, vuota
 	 */
-	public Mailbox() {
+	 Mailbox() {
 		this.notifications = new LinkedList<>();
 		this.invitations = new LinkedList<>();
 	}
@@ -34,7 +34,7 @@ public class Mailbox implements Serializable {
 	 * 
 	 * @return Una view non modificabile delle notifiche contenute nella mailbox
 	 */
-	public List<Notification> getEveryNotification() {
+	 List<Notification> getEveryNotification() {
 		return Collections.unmodifiableList(this.notifications);
 	}
 	
@@ -46,7 +46,7 @@ public class Mailbox implements Serializable {
 	 * 
 	 * @return Una view non modificabile degli inviti contenuti nella mailbox
 	 */
-	public List<Invite> getEveryInvite() {
+	 List<Invite> getEveryInvite() {
 		return Collections.unmodifiableList(this.invitations);
 	}
 	
@@ -58,7 +58,7 @@ public class Mailbox implements Serializable {
 	 * 
 	 * @param toAdd La notifica da aggiungere alla mailbox
 	 */
-	public void deliver(Notification toAdd) {
+	 void deliver(Notification toAdd) {
 		
 		// Verifica delle precondizioni
 		if (notifications.contains(toAdd)) {
@@ -79,7 +79,7 @@ public class Mailbox implements Serializable {
 	 * 
 	 * @param toAdd L'invito da aggiungere alla mailbox
 	 */
-	public void deliver(Invite toAdd) {
+	 void deliver(Invite toAdd) {
 		
 		// Verifica delle precondizioni
 		if (invitations.contains(toAdd)) {
@@ -100,7 +100,7 @@ public class Mailbox implements Serializable {
 	 * 
 	 * @param toDelete La notifica da eliminare dalla mailbox
 	 */
-	public void delete(Notification toDelete) {
+	 void delete(Notification toDelete) {
 		
 		// Verifica delle precondizioni
 		if (!notifications.contains(toDelete)) {
@@ -120,7 +120,7 @@ public class Mailbox implements Serializable {
 	 * 
 	 * @param toDelete L'invito da eliminare dalla mailbox
 	 */
-	public void delete(Invite toDelete) {
+	 void delete(Invite toDelete) {
 		
 		// Verifica delle precondizioni
 		if (!invitations.contains(toDelete)) {
@@ -137,7 +137,7 @@ public class Mailbox implements Serializable {
 	 * 
 	 * @return true se la mailbox contiene almeno una notifica
 	 */
-	public boolean containsNotifications() {
+	 boolean containsNotifications() {
 		return !this.notifications.isEmpty();
 	}
 	
@@ -146,7 +146,7 @@ public class Mailbox implements Serializable {
 	 * 
 	 * @return true se la mailbox contiene almeno un invito
 	 */
-	public boolean containsInvites() {
+	 boolean containsInvites() {
 		return !this.invitations.isEmpty();
 	}
 	
