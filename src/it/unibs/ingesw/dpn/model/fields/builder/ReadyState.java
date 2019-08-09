@@ -1,4 +1,4 @@
-package it.unibs.ingesw.dpn.model.fields;
+package it.unibs.ingesw.dpn.model.fields.builder;
 
 public class ReadyState implements BuilderState {
 

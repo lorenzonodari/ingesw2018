@@ -23,7 +23,7 @@ public class MenuEntry {
 		
 		// Verifica delle precondizioni
 		if (name == null || entryAction == null) {
-			throw new NullPointerException();
+			throw new NullPointerException("Impossibile istanziare un'oggetto MenuEntry con componenti nulle");
 		}
 		
 		this.name = name;

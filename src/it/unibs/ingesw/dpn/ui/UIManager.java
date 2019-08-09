@@ -28,8 +28,6 @@ import it.unibs.ingesw.dpn.model.fieldvalues.OptionalCostsFieldValue;
  */
 public class UIManager {
 	
-	private static final String GENERIC_PROMPT = "Selezionare una voce";
-	private static final String INVALID_CHOICE_PROMPT = "Scelta non valida, riprovare";
 	private static final String LIST_ELEMENT_PREFIX = " * ";
 	
 	private UIRenderer renderer;
@@ -64,42 +62,6 @@ public class UIManager {
 	}
 	
 	/**
-	 * Acquisisce la scelta dell'utente relativa al menu dato
-	 * 
-	 * Precondizione: menu != null
-	 * 
-	 * @param menu Il menu relativo alla scelta da prendere
-	 * @return L'azione corrispondente alla scelta dell'utente
-	 */
-	private MenuAction getUserChoice(Menu menu) {
-		
-		boolean done = false;
-		int choice = 0;
-		List<MenuEntry> entries = menu.getEntries();
-		
-		do {
-			
-			try {
-				
-				choice = inputManager.getInteger(0, entries.size());
-				done = true;
-				
-			}
-			catch (NumberFormatException ex) {
-				
-				renderer.renderText(INVALID_CHOICE_PROMPT);
-			}
-			
-		} while (!done);
-		
-		if (choice == 0) {
-			return menu.getQuitEntry().getAction();
-		}
-		
-		return entries.get(choice - 1).getAction(); // Le scelte son numerate partendo da 1
-	}
-	
-	/**
 	 * Avvia il loop dell'interfaccia utente, all'interno del quale viene acquisita la scelta
 	 * dell'utente e viene eseguita l'azione corrispondente
 	 */
@@ -108,10 +70,7 @@ public class UIManager {
 		loginMenu();
 		while (true) {
 			
-			renderer.renderMenu(currentMenu);
-			renderer.renderText(GENERIC_PROMPT);
-			
-			MenuAction action = getUserChoice(currentMenu);
+			MenuAction action = inputManager.getMenuChoice(currentMenu);
 			action.execute();
 			
 		}
@@ -157,7 +116,7 @@ public class UIManager {
 		};
 	
 		
-		Menu loginMenu = new Menu("SocialNetwork", "Benvenuto/a", "Esci", quitAction);
+		Menu loginMenu = new Menu("SocialNetwork", "Benvenuto/a!", "Esci", quitAction);
 		loginMenu.addEntry("Login", loginAction);
 		loginMenu.addEntry("Register", registerAction);
 		

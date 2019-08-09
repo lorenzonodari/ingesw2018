@@ -75,15 +75,42 @@ public class Menu {
 		
 		// Verifica delle precondizioni
 		if (title == null || action == null) {
-			throw new NullPointerException();
+			throw new NullPointerException("Impossibile aggiungere una entry con componenti nulle");
 		}
 		
 		MenuEntry entry = new MenuEntry(title, action);
 		this.entries.add(entry);
 		
-		
 		// Verifica della postcondizione
 		assert this.entries.contains(entry);
+	}
+	
+	/**
+	 * Aggiunge un'intera lista di MenuEntry alle entires del menu.
+	 * 
+	 * Precondizione: la lista di entries non deve essere vuota o nulla.
+	 * Precondizione: ogni entry non deve essere composta da elementi null e non deve essere null.
+	 * 
+	 * Postcondizione: al termine dell'esecuzione del metodo, tutte le entry sono state aggiunte.
+	 * 
+	 * @param menuEntries la lista di MenuEntry da aggiungere al menu.
+	 */
+	public void addAllEntry(List<MenuEntry> menuEntries) {
+		
+		// Verifica delle precondizioni
+		if (menuEntries == null || menuEntries.isEmpty()) {
+			throw new IllegalArgumentException("Impossibile aggiungere al menu una lista nulla o vuota di entry");
+		} else if (menuEntries.contains(null)) {
+			throw new IllegalArgumentException("Impossibile aggiungere una entry nulla al menu");
+		}
+		
+		for (MenuEntry entry : menuEntries) {
+			this.entries.add(entry);
+			
+			// Verifica della poscondizione
+			assert this.entries.contains(entry);
+		}
+		
 	}
 	
 	public String getTitle() {

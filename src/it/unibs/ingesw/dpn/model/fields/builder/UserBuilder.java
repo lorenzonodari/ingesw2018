@@ -1,10 +1,10 @@
-package it.unibs.ingesw.dpn.ui;
+package it.unibs.ingesw.dpn.model.fields.builder;
 
 import java.util.Arrays;
 
-import it.unibs.ingesw.dpn.model.fields.AbstractBuilder;
 import it.unibs.ingesw.dpn.model.fields.UserField;
 import it.unibs.ingesw.dpn.model.users.User;
+import it.unibs.ingesw.dpn.ui.FieldValueAcquirer;
 
 /**
  * Classe che permette la creazione e la modifica di utenti in maniera "controllata", seguendo un preciso processo.

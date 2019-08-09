@@ -1,4 +1,6 @@
-package it.unibs.ingesw.dpn.model.fields;
+package it.unibs.ingesw.dpn.model.fields.builder;
+
+import it.unibs.ingesw.dpn.model.fields.Field;
 
 /**
  * Interfaccia che permette l'implementazione del pattern <em>State</em> all'interno del
