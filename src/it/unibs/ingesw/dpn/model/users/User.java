@@ -46,15 +46,6 @@ public class User extends AbstractFieldable {
 	}
 	
 	/**
-	 * Restituisce la mailbox dell'utente
-	 * 
-	 * @return La mailbox dell'utente
-	 */
-	public Mailbox getMailbox() {
-		return this.mailbox;
-	}
-	
-	/**
 	 * Restituisce una stringa contenente la descrizione completa ma compatta delle caratteristiche
 	 * dell'utente.
 	 *  
@@ -125,6 +116,24 @@ public class User extends AbstractFieldable {
 	 */
 	public boolean hasInvites() {
 		return this.mailbox.containsInvites();
+	}
+	
+	/**
+	 * Restituisce la lista delle notifiche ricevute dall'utente
+	 * 
+	 * @return La lista delle notifiche ricevute dall'utente
+	 */
+	public List<Notification> getNotifications() {
+		return this.mailbox.getEveryNotification();
+	}
+	
+	/**
+	 * Restituisce la lista degli inviti ricevuti dall'utente
+	 * 
+	 * @return La lista degli inviti ricevuti dall'utente
+	 */
+	public List<Invite> getInvites() {
+		return this.mailbox.getEveryInvite();
 	}
 
 }
