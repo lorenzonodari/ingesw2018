@@ -1,5 +1,7 @@
 package it.unibs.ingesw.dpn.model.fields;
 
+import java.time.LocalDate;
+
 import it.unibs.ingesw.dpn.model.fieldvalues.CategoryListFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.LocalDateFieldValue;
@@ -21,7 +23,22 @@ public enum UserField implements Field {
 			false,
 			true,
 			LocalDateFieldValue.class
-			),
+			)
+	{
+		@Override
+		public void checkValueCompatibility(Fieldable fieldableTarget, FieldValue value) throws FieldCompatibilityException {
+			LocalDateFieldValue localDateValue = (LocalDateFieldValue) value;
+			
+			if (localDateValue.getLocalDate().isAfter(LocalDate.now())) {
+				throw new FieldCompatibilityException("Impossibile accettare una data futura");
+				
+			} else if (localDateValue.getLocalDate().isAfter(LocalDate.now().minusYears(AGE_LIMIT))) {
+				throw new FieldCompatibilityException(String.format(
+						"Per utilizzare questo programma devi avere almeno %d anni.\nInserisci la tua vera data di nascita o termina l'esecuzione del programma.",
+						AGE_LIMIT));
+			}
+		}
+	},
 	
 	CATEGORIE_DI_INTERESSE (
 			"Categorie di interesse",
@@ -32,7 +49,11 @@ public enum UserField implements Field {
 			)
 	
 	;
+	
+	/** Parametri */
+	private static final int AGE_LIMIT = 12;
 
+	/** Attributi d'istanza */
 	private final String name;
 	private final String description;
 	private final boolean mandatory;
@@ -100,5 +121,6 @@ public enum UserField implements Field {
 	public Class<? extends FieldValue> getType() {
 		return this.type;
 	}	
+	
 
 }

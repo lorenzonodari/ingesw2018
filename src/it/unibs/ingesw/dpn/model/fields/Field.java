@@ -89,4 +89,74 @@ public interface Field {
 		return str;
 	}
 	
+	/**
+	 * Verifica se il valore passato come parametro è un'istanza della classe
+	 * prevista come "tipo" dell'oggetto {@link Field}.
+	 * 
+	 * @param value Il valore {@link FieldValue} da verificare.
+	 * @return "true" se il valore è un'istanza corretta, "false" altrimenti
+	 */
+	public default boolean checkValueType(FieldValue value) {
+		return this.getType().isInstance(value);
+	}
+	
+	/**
+	 * Verifica la compatibilità del valore {@link FieldValue} con il {@link Field} relativo
+	 * e con l'oggetto {@link Fieldable} in cui il valore è contenuto.
+	 * In caso la compatibilità sia verificata (ovvero nel caso in cui il valore non genera conflitti con gli altri valori) il
+	 * metodo termina senza errori. In caso contrario viene lanciata un'eccezione di tipo 
+	 * {@link FieldCompatibilityException} contenente tutti i dettagli dell'errore.
+	 * 
+	 * Nota: questo metodo deve essere chiamato successivamente a "checkValueType". Esso infatti dà per 
+	 * verificato che il valore sia già del tipo previsto.
+	 * 
+	 * @param fieldableTarget L'oggetto {@link Fieldable} contenente la coppia (campo, valore)
+	 * @param value Il valore {@link FieldValue} da verificare
+	 * @throws FieldCompatibilityException In caso in cui la compatibilità non risulti corretta
+	 */
+	public default void checkValueCompatibility(Fieldable fieldableTarget, FieldValue value) 
+			throws FieldCompatibilityException {
+				/* 
+				 * Se questo metodo non viene sovrascritto 
+				 * il controllo di compatibilità ha automaticamente successo.
+				 */
+			}
+	
+	/**
+	 * Una volta verificata la compatibilità del valore {@link FieldValue} con questo campo e con 
+	 * l'oggetto {@link Fieldable} in cui entrambi sono contenuti, questo metodo modifica alcuni valori
+	 * dell'oggetto target in modo da mantenere la coerenza interna fra i vari campi-valori.
+	 * 
+	 * @param fieldableTarget L'oggetto {@link Fieldable} contenente la coppia (campo, valore)
+	 * @param value Il valore i cui effetti possono essere propagati
+	 */
+	public default void propagateAcquisition(Fieldable fieldableTarget, FieldValue value) {
+		/* 
+		 * Se questo metodo non viene sovrascritto 
+		 * l'acquisizione del valore non comporta la modifica di nessun altro FieldValue.
+		 */
+	}
+	
+	/**
+	 * Metodo che accorpa i tre metodi:
+	 * <ul>
+	 * 	<li> checkValueType(FieldValue) : boolean </li>
+	 * 	<li> checkValueCompatibility(Fieldable, FieldValue) : void </li>
+	 * 	<li> propagateAcquisition(Fieldable, FieldValue) : void </li>
+	 * </ul>
+	 * 
+	 * Nota: se il primo metodo genera un'eccezione, il secondo non viene mai chiamato.
+	 * 
+	 * @param fieldableTarget L'oggetto {@link Fieldable} contenente la coppia (campo, valore)
+	 * @param value Il valore da verificare ed eventualmente propagare
+	 * @throws FieldCompatibilityException In caso in cui la compatibilità non risulti corretta
+	 */
+	public default void checkTypeAndCompatibilityAndPropagateValueAcquisition(Fieldable fieldableTarget, FieldValue value) throws FieldCompatibilityException {
+		if (!this.checkValueType(value)) {
+			throw new FieldCompatibilityException("Il tipo del valore non è compatibile con quello previsto dal campo");
+		}
+		this.checkValueCompatibility(fieldableTarget, value);
+		this.propagateAcquisition(fieldableTarget, value);
+	}
+	
 }

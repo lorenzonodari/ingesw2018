@@ -2,28 +2,23 @@ package it.unibs.ingesw.dpn.ui;
 
 import java.time.DateTimeException;
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Stack;
 
 import it.unibs.ingesw.dpn.model.categories.Category;
-import it.unibs.ingesw.dpn.model.fields.CommonField;
 import it.unibs.ingesw.dpn.model.fields.ConferenceField;
 import it.unibs.ingesw.dpn.model.fields.Field;
+import it.unibs.ingesw.dpn.model.fields.FieldCompatibilityException;
 import it.unibs.ingesw.dpn.model.fields.Fieldable;
 import it.unibs.ingesw.dpn.model.fields.SoccerMatchField;
 import it.unibs.ingesw.dpn.model.fields.UserField;
 import it.unibs.ingesw.dpn.model.fieldvalues.CategoryListFieldValue;
-import it.unibs.ingesw.dpn.model.fieldvalues.DateFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.GenderEnumFieldValue;
-import it.unibs.ingesw.dpn.model.fieldvalues.IntegerFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.IntegerIntervalFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.LocalDateFieldValue;
-import it.unibs.ingesw.dpn.model.fieldvalues.MoneyAmountFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.OptionalCostsFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
-import it.unibs.ingesw.dpn.model.fieldvalues.TimeAmountFieldValue;
 
 public class FieldValueAcquirer {
 	
@@ -81,26 +76,40 @@ public class FieldValueAcquirer {
 		
 		// Stampo sul renderer una breve introduzione
 		this.printFieldIntro(field);
+		
+		boolean repeatFlag = true;
+		FieldValue value = null;
 
-		// Campi comuni a tutte le categorie di Eventi
-		if (field instanceof CommonField) {
-			return acquireCommonFieldValue((CommonField) field);
+		do {
+			// Tento di acquisire un valore
+			try {
+				// Il primo livello di verifica che faccio è sul valore stesso, deve essere accettabile in quanto tale
+				
+	//#########################################################//
+				value = null; // TODO Qui andrebbe la chiamata per acquisire un valore FieldValue "crudo"
+	//#########################################################//
+				
+				// Il secondo livello di verifica coinvolge anche il Field e l'oggetto Fieldable interessato,
+				// e si compone di tre fasi:
+				// 1) Controllo sul tipo del Field
+				// 2) Controllo della compatibilità con gli altri campi
+				// 3) Propagazione del valore ad altri valori "legati" dello stesso oggetto Fieldable
+				field.checkTypeAndCompatibilityAndPropagateValueAcquisition(provisionalFieldable, value);
+				
+				// Se termino i controlli, termino anche la ripetizione
+				repeatFlag = false;
+			}
+			catch (FieldCompatibilityException e) {
+				// Se durante il processo si verifica un'eccezione, mostro l'eccezione e ripeto l'acquisizione
+				renderer.renderError(e.getMessage());
+				
+				// Ripeto l'acquisizione
+				repeatFlag = true;
+			}
 			
-		// Campi esclusivi della categoria "SoccerMatchField"
-		} else if (field instanceof SoccerMatchField) {
-			return acquireSoccerMatchFieldValue((SoccerMatchField) field);
-			
-		// Campi esclusivi della categoria "ConferenceField"
-		} else if (field instanceof ConferenceField) {
-			return acquireConferenceFieldValue((ConferenceField) field);
-			
-		} else if (field instanceof UserField) {
-			return acquireUserFieldValue((UserField) field);
-			
-		// Campi estranei
-		} else {
-			throw new IllegalArgumentException("Campo \"Field\" non riconosciuto: impossibile acquisire un valore");
-		}
+		} while (repeatFlag);
+		
+		return value;
 		
 	}
 
@@ -121,204 +130,14 @@ public class FieldValueAcquirer {
 				field.getDescription()));
 		renderer.renderLineSpace();
 	}
-
-	/**
-	 * Metodo che acquisisce e restituisce il valore di un campo "CommonField".
-	 * 
-	 * Precondizione: Il campo che si vuole acquisire deve essere contenuto nell'enum {@link CommonField},
-	 * ossia deve essere comune a tutte le categorie.
-	 * 
-	 * @param field Il campo di cui si vuole acquisire il valore
-	 * @return Il valore acquisito
-	 */
-	private FieldValue acquireCommonFieldValue(CommonField field) {
-		switch (field) {
-		
-		case TITOLO :
-		{
-			return StringFieldValue.acquireValue(renderer, getter);
-		}
-			
-		case LUOGO :
-		{
-			return StringFieldValue.acquireValue(renderer, getter);
-		}
-			
-		case DATA_E_ORA : 
-		{
-			// Acquisizione del dato
-			boolean okFlag = false;
-			DateFieldValue acquiredDate = null;
-			do {
-				acquiredDate = DateFieldValue.acquireValue(renderer, getter);
-				// Verifico che la data dell'evento sia posteriore alla creazione
-				if (acquiredDate.before(new Date())) {
-					renderer.renderError("Inserire una data futura");
-				} else if (isAfterOrEqualToDateField(acquiredDate, CommonField.DATA_E_ORA_CONCLUSIVE)) {
-					renderer.renderError("Data d'inizio posteriore alla data conclusiva dell'evento");
-				} else if (isBeforeOrEqualToDateField(acquiredDate, CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE)) {
-					renderer.renderError("Data d'inizio precedente al termine ultimo di iscrizione");
-				} else if (isBeforeOrEqualToDateField(acquiredDate, CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE)) {
-					renderer.renderError("Data d'inizio precedente al termine ultimo di ritiro iscrizione");
-				} else {
-					okFlag = true;
-				}
-			} while (!okFlag);
-
-			// Setup aggiuntivi, derivati da dati già presenti nell'evento
-			if (provisionalFieldable.hasFieldValue(CommonField.DATA_E_ORA_CONCLUSIVE)) {
-				
-				// Setup di "Durata"
-				TimeAmountFieldValue duration = new TimeAmountFieldValue(
-						acquiredDate,
-						((DateFieldValue) provisionalFieldable.getFieldValue(CommonField.DATA_E_ORA_CONCLUSIVE)));
-				provisionalFieldable.setFieldValue(CommonField.DURATA, duration);
-				
-			} else if (provisionalFieldable.hasFieldValue(CommonField.DURATA)) {
-				
-				// Setup di "Data e ora conclusive"
-				DateFieldValue dataEOraConclusive = new DateFieldValue(
-						acquiredDate.getTime() +
-						1000 * ((TimeAmountFieldValue) provisionalFieldable.getFieldValue(CommonField.DURATA)).getSeconds()
-						);
-				provisionalFieldable.setFieldValue(CommonField.DATA_E_ORA_CONCLUSIVE, dataEOraConclusive);
-			}
-			
-			// Restituzione del valore acquisito
-			return acquiredDate;
-		}
-			
-		case DATA_E_ORA_CONCLUSIVE : 
-		{
-			// Acquisizione del dato
-			boolean okFlag = false;
-			DateFieldValue acquiredDate = null;
-			do {
-				acquiredDate = DateFieldValue.acquireValue(renderer, getter);
-				// Verifico che la data dell'evento sia posteriore alla creazione
-				if (acquiredDate.before(new Date())) {
-					renderer.renderError("Inserire una data futura");
-				} else if (isBeforeOrEqualToDateField(acquiredDate, CommonField.DATA_E_ORA)) {
-					renderer.renderError("Data di conclusione precedente alla data d'inizio dell'evento");
-				} else if (isBeforeOrEqualToDateField(acquiredDate, CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE)) {
-					renderer.renderError("Data di conclusione precedente al termine ultimo di iscrizione");
-				} else if (isBeforeOrEqualToDateField(acquiredDate, CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE)) {
-					renderer.renderError("Data di conclusione precedente al termine ultimo di ritiro iscrizione");
-				} else {
-					okFlag = true;
-				}
-			} while (!okFlag);
-
-			// Setup aggiuntivi, derivati da dati già presenti nell'evento
-			if (provisionalFieldable.hasFieldValue(CommonField.DATA_E_ORA)) {
-				// Setup di "Durata"
-				TimeAmountFieldValue duration = new TimeAmountFieldValue(
-						((DateFieldValue) provisionalFieldable.getFieldValue(CommonField.DATA_E_ORA)),
-						acquiredDate);
-				provisionalFieldable.setFieldValue(CommonField.DURATA, duration);
-			}
-			
-			// Restituzione del valore acquisito
-			return acquiredDate;
-		}
-		
-		case DURATA : 
-		{
-			// Acquisizione del dato
-			TimeAmountFieldValue acquiredValue = TimeAmountFieldValue.acquireValue(renderer, getter);
-			
-			// Setup aggiuntivi, derivati da dati già presenti nell'evento
-			if (provisionalFieldable.hasFieldValue(CommonField.DATA_E_ORA)) {
-				// Setup di "Data e ora conclusive"
-				DateFieldValue dataEOraConclusive = new DateFieldValue(
-						((DateFieldValue) provisionalFieldable.getFieldValue(CommonField.DATA_E_ORA)).getTime() +
-						1000 * acquiredValue.getSeconds()
-						);
-				provisionalFieldable.setFieldValue(CommonField.DATA_E_ORA_CONCLUSIVE, dataEOraConclusive);
-			}
-			
-			// Restituzione del valore acquisito
-			return acquiredValue;
-		}
-		
-		case TERMINE_ULTIMO_DI_ISCRIZIONE : 
-		{
-			boolean okFlag = false;
-			DateFieldValue acquiredDate = null;
-			do {
-				acquiredDate = DateFieldValue.acquireValue(renderer, getter);
-				// Verifico che la data dell'evento sia posteriore alla creazione
-				if (acquiredDate.before(new Date())) {
-					renderer.renderError("Inserire una data futura");
-				} else if (isAfterOrEqualToDateField(acquiredDate, CommonField.DATA_E_ORA)) {
-					renderer.renderError("Termine ultimo d'iscrizione posteriore alla data d'inizio dell'evento");
-				} else if (isAfterOrEqualToDateField(acquiredDate, CommonField.DATA_E_ORA_CONCLUSIVE)) {
-					renderer.renderError("Termine ultimo d'iscrizione posteriore alla data di conclusione dell'evento");
-				} else if (isBeforeOrEqualToDateField(acquiredDate, CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE)) {
-					renderer.renderError("Termine ultimo d'iscrizione precedente al termine ultimo di ritiro iscrizione");
-				} else {
-					okFlag = true;
-				}
-			} while (!okFlag);
-			return acquiredDate;
-		}
-		
-		case TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE : 
-		{
-			boolean okFlag = false;
-			DateFieldValue acquiredDate = null;
-			do {
-				acquiredDate = DateFieldValue.acquireValue(renderer, getter);
-				// Verifico che la data dell'evento sia posteriore alla creazione
-				if (acquiredDate.before(new Date())) {
-					renderer.renderError("Inserire una data futura");
-				} else if (isAfterOrEqualToDateField(acquiredDate, CommonField.DATA_E_ORA)) {
-					renderer.renderError("Termine ultimo di ritiro iscrizione posteriore alla data d'inizio dell'evento");
-				} else if (isAfterOrEqualToDateField(acquiredDate, CommonField.DATA_E_ORA_CONCLUSIVE)) {
-					renderer.renderError("Termine ultimo di ritiro iscrizione posteriore alla data di conclusione dell'evento");
-				} else if (isAfterOrEqualToDateField(acquiredDate, CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE)) {
-					renderer.renderError("Termine ultimo di ritiro iscrizione posteriore al termine ultimo d'iscrizione");
-				} else {
-					okFlag = true;
-				}
-			} while (!okFlag);
-			return acquiredDate;
-		}
-		
-		case NUMERO_DI_PARTECIPANTI : 
-		{
-			renderer.renderText("Inserisci il numero di partecipanti (almeno 2)");
-			return new IntegerFieldValue(getter.getInteger(2, Integer.MAX_VALUE));
-		}
-			
-		case TOLLERANZA_NUMERO_DI_PARTECIPANTI : 
-		{
-			renderer.renderText("Inserisci la tolleranza massima sul numero di partecipanti");
-			return new IntegerFieldValue(getter.getInteger(0, Integer.MAX_VALUE));
-		}
-			
-		case QUOTA_INDIVIDUALE : 
-		{
-			renderer.renderText("Inserisci il costo di partecipazione");
-			return new MoneyAmountFieldValue(getter.getFloat(0, Float.MAX_VALUE));
-		}
-			
-		case COMPRESO_NELLA_QUOTA : 
-		{
-			return StringFieldValue.acquireValue(renderer, getter);
-		}
-			
-		case NOTE : 
-		{
-			return StringFieldValue.acquireValue(renderer, getter);
-		}
-
-		}
-		
-		// Se non matcho nulla
-		throw new IllegalArgumentException("Il campo non corrisponde ad alcun campo comune a tutte le categorie");
-	}
 	
+	/* 
+	 * TODO TODO TODO TODO TODO
+	 * I METODI SUCCESSIVI DOVRANNO ESSERE ELIMINATI.
+	 * AL MOMENTO VENGONO MANTENUTI COME RIFERIMENTO PER LA 
+	 * SCRITTURA DEL CODICE PER L'ACQUISIZIONE DEI FIELDVALUE.
+	 * TODO TODO TODO TODO TODO
+	 */
 
 	/**
 	 * Metodo che acquisisce e restituisce il valore di un campo "SoccerMatch".
@@ -334,6 +153,9 @@ public class FieldValueAcquirer {
 		
 		case GENERE :
 		{
+			// TODO:
+			// Quando questo pezzo di codice verrà tradotto e messo in "SoccerMatchField", sarà importante
+			// creare un metodo apposito solo con renderer e getter
 			GenderEnumFieldValue [] values = GenderEnumFieldValue.values();
 			int i = 1;
 			for (GenderEnumFieldValue gender : values) {
@@ -584,54 +406,6 @@ public class FieldValueAcquirer {
 		
 		// Se non matcho nulla
 		throw new IllegalArgumentException("Il campo non corrisponde ad alcun campo Utente");
-	}
-
-	/**
-	 * Verifica che una certa data sia successiva o al più uguale al valore temporale contenuto in un campo specificato.
-	 * Se il campo non contiene valore, restituisce false.
-	 * Se il campo non ha valore di tipo {@link DateFieldValue}, restituisce un'eccezione.
-	 * (Essendo un metodo privato, è compito della classe stessa assicurarsi che l'eccezione non si verifichi).
-	 * 
-	 * @param date La data da analizzare
-	 * @param comparingDateField Il campo da cui estrarre il valore (di tipo "data") con cui effettuare il confronto
-	 * @return true se il valore del campo ESISTE && se la data è SUCCESSIVA o CONTEMPORANEA.
-	 */
-	private boolean isAfterOrEqualToDateField(DateFieldValue date, Field comparingDateField) {
-		// Verifico che il campo abbia un tipo "data"
-		if (comparingDateField.getType() != DateFieldValue.class) {
-			throw new IllegalArgumentException("Impossibile interpretare il campo come data o istante temporale");
-		}
-		
-		return (
-				// Verifico che il valore del campo di comparazione sia presente
-				provisionalFieldable.getFieldValue(comparingDateField) != null && 
-				// Verifico che la data da controllare sia successiva o contemporanea al valore del campo
-				date.compareTo((Date) provisionalFieldable.getFieldValue(comparingDateField)) >= 0
-				);
-	}
-
-	/**
-	 * Verifica che una certa data sia precendte o al più uguale al valore temporale contenuto in un campo specificato.
-	 * Se il campo non contiene valore, restituisce false.
-	 * Se il campo non ha valore di tipo {@link DateFieldValue}, restituisce un'eccezione.
-	 * (Essendo un metodo privato, è compito della classe stessa assicurarsi che l'eccezione non si verifichi).
-	 * 
-	 * @param date La data da analizzare
-	 * @param comparingDateField Il campo da cui estrarre il valore (di tipo "data") con cui effettuare il confronto
-	 * @return true se il valore del campo ESISTE && se la data è PRECENDENTE o CONTEMPORANEA.
-	 */
-	private boolean isBeforeOrEqualToDateField(DateFieldValue date, Field comparingDateField) {
-		// Verifico che il campo abbia un tipo "data"
-		if (comparingDateField.getType() != DateFieldValue.class) {
-			throw new IllegalArgumentException("Impossibile interpretare il campo come data o istante temporale");
-		}
-		
-		return (
-				// Verifico che il valore del campo di comparazione sia presente
-				provisionalFieldable.getFieldValue(comparingDateField) != null && 
-				// Verifico che la data da controllare sia successiva o contemporanea al valore del campo
-				date.compareTo((Date) provisionalFieldable.getFieldValue(comparingDateField)) <= 0
-				);
 	}
 
 }

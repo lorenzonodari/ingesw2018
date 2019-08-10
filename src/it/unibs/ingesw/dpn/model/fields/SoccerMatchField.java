@@ -19,6 +19,19 @@ public enum SoccerMatchField implements Field {
 			true,
 			IntegerIntervalFieldValue.class
 			)
+	{
+		@Override
+		public void checkValueCompatibility(Fieldable fieldableTarget, FieldValue value) throws FieldCompatibilityException {
+			IntegerIntervalFieldValue integerIntervalValue = (IntegerIntervalFieldValue) value;
+			
+			if (integerIntervalValue.getMin() < 0) {
+				throw new FieldCompatibilityException("Impossibile accettare valori negativi");
+				
+			} else if (integerIntervalValue.getMax() > 150) {
+				throw new FieldCompatibilityException("Non è possibile accettare età superiori ai 150 anni");
+			}
+		}
+	}
 	
 	;
 

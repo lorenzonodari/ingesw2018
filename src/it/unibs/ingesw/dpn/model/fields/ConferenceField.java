@@ -117,6 +117,6 @@ public enum ConferenceField implements Field {
 	@Override
 	public Class<? extends FieldValue> getType() {
 		return this.type;
-	}
+	}	
 
 }
