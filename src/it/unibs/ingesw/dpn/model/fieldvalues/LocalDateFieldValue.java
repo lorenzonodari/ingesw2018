@@ -29,28 +29,6 @@ public class LocalDateFieldValue implements FieldValue, Serializable {
 	private LocalDate date = null;
 	
 	/**
-	 * Costruttore di un oggetto {@link LocalDateFieldValue} tramite i numeri del giorno, del mese
-	 * e dell'anno della data.
-	 * 
-	 * Precondizione: i numeri devono essere validi come data.
-	 * 
-	 * @param day Il giorno del mese
-	 * @param month Il mese dell'anno
-	 * @param year Il numero dell'anno
-	 */
-	public LocalDateFieldValue(int day, int month, int year) {
-		if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1900 || year > 2200) {
-			throw new IllegalArgumentException(String.format(
-					"Impossibile creare un oggetto LocalDateFieldValue con valori [giorno = %d, mese = %d, anno = %d]",
-					day,
-					month,
-					year));
-		}
-		// Creo l'oggetto LocalDate
-		this.date = LocalDate.of(year, month, day);
-	}
-	
-	/**
 	 * Restituisce la data contenuta come valore del campo all'interno di questo oggetto.
 	 * 
 	 * @return La data come oggetto {@link LocalDate}
@@ -78,8 +56,8 @@ public class LocalDateFieldValue implements FieldValue, Serializable {
 	 * @param getter Il getter
 	 * @return Il valore acquisito
 	 */
-	public static LocalDateFieldValue acquireValue(UIRenderer renderer, InputGetter getter) {
-		renderer.renderText("Inserisci il giorno in formato (GG/MM/AAAA)");
+	public void initializeValue(UIRenderer renderer, InputGetter getter) {
+		renderer.renderText("Inserisci la data in formato (GG/MM/AAAA)");
 		String data = getter.getMatchingString(
 				"(0?([1-9])|[1-2][0-9]|3([0-1]))" // Giorno
 				+ DATE_DELIMITER // Divisore
@@ -94,7 +72,7 @@ public class LocalDateFieldValue implements FieldValue, Serializable {
 		int year = scanDate.nextInt();
 		scanDate.close();
 		
-		return new LocalDateFieldValue(day, month, year);
+		this.date = LocalDate.of(year, month, day);
 	}
 
 }

@@ -1,10 +1,12 @@
 package it.unibs.ingesw.dpn.model.fieldvalues;
 
 import java.io.Serializable;
+
+import it.unibs.ingesw.dpn.ui.InputGetter;
+import it.unibs.ingesw.dpn.ui.UIRenderer;
 /**
  * Classe che rappresenta un intervallo di valori compreso fra due interi.
- * I due estremi possono essere inclusi o esclusi a piacere.
- * Di default, l'estremo iniziale è incluso e quello finale è escluso.
+ * Entrambi gli estremi sono inclusi nell'intervallo.
  * Implementa l'interfaccia {@link FieldValue}.
  * 
  * @author Michele Dusi, Lorenzo Nodari, Emanuele Poggi
@@ -18,29 +20,9 @@ public class IntegerIntervalFieldValue implements FieldValue, Serializable {
 	private static final long serialVersionUID = -9171350901257423215L;
 	
 	private static final String INCLUDE_MIN_STRING = "[";
-	private static final String EXCLUDE_MIN_STRING = "]";
 	private static final String INCLUDE_MAX_STRING = "]";
-	private static final String EXCLUDE_MAX_STRING = "[";
-
-	private static final boolean DEFAULT_MIN_INCLUSION = true;
-	private static final boolean DEFAULT_MAX_INCLUSION = true;
 	
 	private int min, max;
-	private boolean includeMin, includeMax;
-
-	public IntegerIntervalFieldValue(int min, int max) {
-		this(min, DEFAULT_MIN_INCLUSION, max, DEFAULT_MAX_INCLUSION);
-	}
-	
-	public IntegerIntervalFieldValue(int min, boolean includeMin, int max, boolean includeMax) {
-		if (min > max) {
-			throw new IllegalArgumentException("Impossibile creare un intervallo con estremo inferiore maggiore dell'estremo superiore.");
-		}
-		this.min = min;
-		this.max = max;
-		this.includeMin = includeMin;
-		this.includeMax = includeMax;
-	}
 	
 	public int getMin() {
 		return this.min;
@@ -49,42 +31,49 @@ public class IntegerIntervalFieldValue implements FieldValue, Serializable {
 	public int getMax() {
 		return this.max;
 	}
-
-	public boolean isMinIncluded() {
-		return this.includeMin;
-	}
-	
-	public boolean isMaxIncluded() {
-		return this.includeMax;
-	}
 	
 	/**
-	 * Restituisce la differenza fra il massimo valore e il minimo valore dell'intervallo,
-	 * prestando attenzione alla presenza o meno degli estremi.
-	 * Se sono inclusi, verranno conteggiati come valori possibili; altrimenti il loro valore non 
-	 * verrà conteggiato nelle possibilità.
-	 * Il risultato restituito corrisponde al numero di valori interi possibili dell'intervallo.
+	 * Restituisce il numero di valori compresi nell'intervallo
 	 * 
 	 * @return il numero di valori interi compresi nell'intervallo
 	 */
 	public int getRange() {
-		int range = this.max - this.min;
-		range += (this.includeMin) ?  0 : -1;
-		range += (this.includeMax) ? +1 :  0;
+		int range = this.max - this.min + 1;
 		return range;
 	}
 	
 	@Override
 	public String toString() {
 		return String.format("%s%d; %d%s", 
-				this.includeMin ?
-						INCLUDE_MIN_STRING :
-						EXCLUDE_MIN_STRING,
+				INCLUDE_MIN_STRING,
 				this.min,
 				this.max,
-				this.includeMax ?
-						INCLUDE_MAX_STRING :
-						EXCLUDE_MAX_STRING);
+				INCLUDE_MAX_STRING);
+	}
+
+	@Override
+	public void initializeValue(UIRenderer renderer, InputGetter input) {
+		
+		boolean check = false;
+		int tmpMin, tmpMax;
+		
+		do {
+			renderer.renderText("Inserisci il valore minimo");
+			tmpMin = input.getInteger();
+			renderer.renderText("Inserisci il valore massimo");
+			tmpMax = input.getInteger();
+			
+			if (min > max) {
+				renderer.renderError("Inserire un valore minimo inferiore al valore massimo");
+			} else {
+				check = true;
+			}
+			
+		} while (!check);
+
+		this.min = tmpMin;
+		this.max = tmpMax;
+		
 	}
 	
 

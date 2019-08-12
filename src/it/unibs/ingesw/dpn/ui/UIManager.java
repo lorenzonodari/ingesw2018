@@ -489,8 +489,8 @@ public class UIManager {
 		Menu eventMenu = new Menu("Visualizzazione evento", menuContent.toString(), Menu.BACK_ENTRY_TITLE, backAction);
 		
 		// Le iscrizioni e le proposte possono essere ritirate solamente in data precedente al "Termine ultimo di ritiro iscrizione"
-		Date withdrawLimit = (DateFieldValue) event.getFieldValue(CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE);
-		Date subscriptionLimit = (DateFieldValue) event.getFieldValue(CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE);
+		Date withdrawLimit = ((DateFieldValue) event.getFieldValue(CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE)).getValue();
+		Date subscriptionLimit = ((DateFieldValue) event.getFieldValue(CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE)).getValue();
 		Date now = new Date();
 		
 		if (loginManager.getCurrentUser() == event.getCreator() && now.before(withdrawLimit)) {
@@ -674,7 +674,7 @@ public class UIManager {
 		Menu eventMenu = new Menu("Dettagli evento", menuContent.toString(), Menu.BACK_ENTRY_TITLE, backAction);
 		
 		// Le iscrizioni e le proposte possono essere ritirate solamente in data precedente al "Termine ultimo di ritiro iscrizione"
-		Date withdrawLimit = (DateFieldValue) event.getFieldValue(CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE);
+		Date withdrawLimit = ((DateFieldValue) event.getFieldValue(CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE)).getValue();
 		Date now = new Date();
 		
 		if (now.before(withdrawLimit)) {
@@ -714,7 +714,7 @@ public class UIManager {
 		Menu eventMenu = new Menu("Dettagli evento", event.toString(), Menu.BACK_ENTRY_TITLE, backAction);
 		
 		// Le iscrizioni e le proposte possono essere ritirate solamente in data precedente al "Termine ultimo di ritiro iscrizione"
-		Date withdrawLimit = (DateFieldValue) event.getFieldValue(CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE);
+		Date withdrawLimit = ((DateFieldValue) event.getFieldValue(CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE)).getValue();
 		Date now = new Date();
 		
 		if (now.before(withdrawLimit)) {
@@ -841,7 +841,7 @@ public class UIManager {
 		};
 		
 		Date now = new Date();
-		Date subscriptionTerm = (DateFieldValue) event.getFieldValue(CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE);
+		Date subscriptionTerm = ((DateFieldValue) event.getFieldValue(CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE)).getValue();
 		StringBuffer menuContent = new StringBuffer(event.toString());
 		
 		if (event.hasUserDependantFields() && loginManager.getCurrentUser() != event.getCreator()) {

@@ -17,14 +17,26 @@ public enum CommonField implements Field, Serializable {
 			"Nome di fantasia attribuito all'evento",
 			false,
 			StringFieldValue.class
-			),
+			)
+	{
+		@Override
+		public FieldValue createBlankFieldValue() {
+			return new StringFieldValue();
+		}
+	},
 	
 	LUOGO (
 			"Luogo",
 			"Il luogo di svolgimento o di ritrovo dell'evento",
 			true,
 			StringFieldValue.class
-			),
+			)
+	{
+		@Override
+		public FieldValue createBlankFieldValue() {
+			return new StringFieldValue();
+		}
+	},
 	
 	DATA_E_ORA (
 			"Data e ora",
@@ -35,17 +47,20 @@ public enum CommonField implements Field, Serializable {
 	{
 		@Override
 		public void checkValueCompatibility(Fieldable fieldableTarget, FieldValue value) throws FieldCompatibilityException {
-			DateFieldValue dateValue = (DateFieldValue) value;
+			
+			DateFieldValue actualValue = (DateFieldValue) value;
+			Date dateValue = ((DateFieldValue) value).getValue();
+			
 			if (dateValue.before(new Date())) {
 				throw new FieldCompatibilityException("Inserire una data futura");
 				
-			} else if (isAfterOrEqualToDateField(dateValue, fieldableTarget, CommonField.DATA_E_ORA_CONCLUSIVE)) {
+			} else if (isAfterOrEqualToDateField(actualValue, fieldableTarget, CommonField.DATA_E_ORA_CONCLUSIVE)) {
 				throw new FieldCompatibilityException("Data d'inizio posteriore alla data conclusiva dell'evento");
 				
-			} else if (isBeforeOrEqualToDateField(dateValue, fieldableTarget, CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE)) {
+			} else if (isBeforeOrEqualToDateField(actualValue, fieldableTarget, CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE)) {
 				throw new FieldCompatibilityException("Data d'inizio precedente al termine ultimo di iscrizione");
 				
-			} else if (isBeforeOrEqualToDateField(dateValue, fieldableTarget, CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE)) {
+			} else if (isBeforeOrEqualToDateField(actualValue, fieldableTarget, CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE)) {
 				throw new FieldCompatibilityException("Data d'inizio precedente al termine ultimo di ritiro iscrizione");
 			}
 		}
@@ -58,19 +73,24 @@ public enum CommonField implements Field, Serializable {
 				
 				// Setup di "Durata"
 				TimeAmountFieldValue duration = new TimeAmountFieldValue(
-						dateValue,
-						((DateFieldValue) fieldableTarget.getFieldValue(CommonField.DATA_E_ORA_CONCLUSIVE)));
+						dateValue.getValue(),
+						((DateFieldValue) fieldableTarget.getFieldValue(CommonField.DATA_E_ORA_CONCLUSIVE)).getValue());
 				fieldableTarget.setFieldValue(CommonField.DURATA, duration);
 				
 			} else if (fieldableTarget.hasFieldValue(CommonField.DURATA)) {
 				
 				// Setup di "Data e ora conclusive"
 				DateFieldValue dataEOraConclusive = new DateFieldValue(
-						dateValue.getTime() +
+						dateValue.getValue().getTime() +
 						1000 * ((TimeAmountFieldValue) fieldableTarget.getFieldValue(CommonField.DURATA)).getSeconds()
 						);
 				fieldableTarget.setFieldValue(CommonField.DATA_E_ORA_CONCLUSIVE, dataEOraConclusive);
 			}
+		}
+		
+		@Override
+		public FieldValue createBlankFieldValue() {
+			return new DateFieldValue();
 		}
 	},
 	
@@ -83,18 +103,21 @@ public enum CommonField implements Field, Serializable {
 	{
 		@Override
 		public void checkValueCompatibility(Fieldable fieldableTarget, FieldValue value) throws FieldCompatibilityException {
-			DateFieldValue dateValue = (DateFieldValue) value;
+			
+			DateFieldValue actualValue = (DateFieldValue) value;
+			Date dateValue = actualValue.getValue();
+			
 			// Verifico che la data dell'evento sia posteriore alla creazione
 			if (dateValue.before(new Date())) {
 				throw new FieldCompatibilityException("Inserire una data futura");
 				
-			} else if (isBeforeOrEqualToDateField(dateValue, fieldableTarget, CommonField.DATA_E_ORA)) {
+			} else if (isBeforeOrEqualToDateField(actualValue, fieldableTarget, CommonField.DATA_E_ORA)) {
 				throw new FieldCompatibilityException("Data di conclusione precedente alla data d'inizio dell'evento");
 			
-			} else if (isBeforeOrEqualToDateField(dateValue, fieldableTarget, CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE)) {
+			} else if (isBeforeOrEqualToDateField(actualValue, fieldableTarget, CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE)) {
 				throw new FieldCompatibilityException("Data di conclusione precedente al termine ultimo di iscrizione");
 			
-			} else if (isBeforeOrEqualToDateField(dateValue, fieldableTarget, CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE)) {
+			} else if (isBeforeOrEqualToDateField(actualValue, fieldableTarget, CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE)) {
 				throw new FieldCompatibilityException("Data di conclusione precedente al termine ultimo di ritiro iscrizione");
 			}
 		}
@@ -106,10 +129,15 @@ public enum CommonField implements Field, Serializable {
 			if (fieldableTarget.hasFieldValue(CommonField.DATA_E_ORA)) {
 				// Setup di "Durata"
 				TimeAmountFieldValue duration = new TimeAmountFieldValue(
-						((DateFieldValue) fieldableTarget.getFieldValue(CommonField.DATA_E_ORA)),
-						dateValue);
+						((DateFieldValue) fieldableTarget.getFieldValue(CommonField.DATA_E_ORA)).getValue(),
+						dateValue.getValue());
 				fieldableTarget.setFieldValue(CommonField.DURATA, duration);
 			}
+		}
+		
+		@Override
+		public FieldValue createBlankFieldValue() {
+			return new DateFieldValue();
 		}
 	},
 	
@@ -127,11 +155,16 @@ public enum CommonField implements Field, Serializable {
 			if (fieldableTarget.hasFieldValue(CommonField.DATA_E_ORA)) {
 				// Setup di "Data e ora conclusive"
 				DateFieldValue dataEOraConclusive = new DateFieldValue(
-						((DateFieldValue) fieldableTarget.getFieldValue(CommonField.DATA_E_ORA)).getTime() +
+						((DateFieldValue) fieldableTarget.getFieldValue(CommonField.DATA_E_ORA)).getValue().getTime() +
 						1000 * dateValue.getSeconds()
 						);
 				fieldableTarget.setFieldValue(CommonField.DATA_E_ORA_CONCLUSIVE, dataEOraConclusive);
 			}
+		}
+		
+		@Override
+		public FieldValue createBlankFieldValue() {
+			return new TimeAmountFieldValue();
 		}
 	},
 
@@ -144,20 +177,28 @@ public enum CommonField implements Field, Serializable {
 	{
 		@Override
 		public void checkValueCompatibility(Fieldable fieldableTarget, FieldValue value) throws FieldCompatibilityException {
-			DateFieldValue dateValue = (DateFieldValue) value;
+			
+			DateFieldValue actualValue = (DateFieldValue) value;
+			Date dateValue = actualValue.getValue();
+			
 			// Verifico che la data dell'evento sia posteriore alla creazione
 			if (dateValue.before(new Date())) {
 				throw new FieldCompatibilityException("Inserire una data futura");
 			
-			} else if (isAfterOrEqualToDateField(dateValue, fieldableTarget, CommonField.DATA_E_ORA)) {
+			} else if (isAfterOrEqualToDateField(actualValue, fieldableTarget, CommonField.DATA_E_ORA)) {
 				throw new FieldCompatibilityException("Termine ultimo d'iscrizione posteriore alla data d'inizio dell'evento");
 			
-			} else if (isAfterOrEqualToDateField(dateValue, fieldableTarget, CommonField.DATA_E_ORA_CONCLUSIVE)) {
+			} else if (isAfterOrEqualToDateField(actualValue, fieldableTarget, CommonField.DATA_E_ORA_CONCLUSIVE)) {
 				throw new FieldCompatibilityException("Termine ultimo d'iscrizione posteriore alla data di conclusione dell'evento");
 			
-			} else if (isBeforeOrEqualToDateField(dateValue, fieldableTarget, CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE)) {
+			} else if (isBeforeOrEqualToDateField(actualValue, fieldableTarget, CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE)) {
 				throw new FieldCompatibilityException("Termine ultimo d'iscrizione precedente al termine ultimo di ritiro iscrizione");
 			}
+		}
+		
+		@Override
+		public FieldValue createBlankFieldValue() {
+			return new DateFieldValue();
 		}
 	},
 	
@@ -170,20 +211,28 @@ public enum CommonField implements Field, Serializable {
 	{
 		@Override
 		public void checkValueCompatibility(Fieldable fieldableTarget, FieldValue value) throws FieldCompatibilityException {
-			DateFieldValue dateValue = (DateFieldValue) value;
+			
+			DateFieldValue actualValue = (DateFieldValue) value;
+			Date dateValue = actualValue.getValue();
+			
 			// Verifico che la data dell'evento sia posteriore alla creazione
 			if (dateValue.before(new Date())) {
 				throw new FieldCompatibilityException("Inserire una data futura");
 			
-			} else if (isAfterOrEqualToDateField(dateValue, fieldableTarget, CommonField.DATA_E_ORA)) {
+			} else if (isAfterOrEqualToDateField(actualValue, fieldableTarget, CommonField.DATA_E_ORA)) {
 				throw new FieldCompatibilityException("Termine ultimo di ritiro iscrizione posteriore alla data d'inizio dell'evento");
 			
-			} else if (isAfterOrEqualToDateField(dateValue, fieldableTarget, CommonField.DATA_E_ORA_CONCLUSIVE)) {
+			} else if (isAfterOrEqualToDateField(actualValue, fieldableTarget, CommonField.DATA_E_ORA_CONCLUSIVE)) {
 				throw new FieldCompatibilityException("Termine ultimo di ritiro iscrizione posteriore alla data di conclusione dell'evento");
 			
-			} else if (isAfterOrEqualToDateField(dateValue, fieldableTarget, CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE)) {
+			} else if (isAfterOrEqualToDateField(actualValue, fieldableTarget, CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE)) {
 				throw new FieldCompatibilityException("Termine ultimo di ritiro iscrizione posteriore al termine ultimo d'iscrizione");
 			}
+		}
+		
+		@Override
+		public FieldValue createBlankFieldValue() {
+			return new DateFieldValue();
 		}
 	},
 	
@@ -202,6 +251,11 @@ public enum CommonField implements Field, Serializable {
 			if (integerValue.getValue() < 2) {
 				throw new FieldCompatibilityException("Il numero di partecipanti previsti deve essere almeno 2");
 			}
+		}
+		
+		@Override
+		public FieldValue createBlankFieldValue() {
+			return new IntegerFieldValue();
 		}
 		
 	},
@@ -223,6 +277,11 @@ public enum CommonField implements Field, Serializable {
 			}
 		}
 		
+		@Override
+		public FieldValue createBlankFieldValue() {
+			return new IntegerFieldValue();
+		}
+		
 	},
 	
 	QUOTA_INDIVIDUALE (
@@ -242,6 +301,11 @@ public enum CommonField implements Field, Serializable {
 			}
 		}
 		
+		@Override
+		public FieldValue createBlankFieldValue() {
+			return new MoneyAmountFieldValue();
+		}
+		
 	},
 	
 	COMPRESO_NELLA_QUOTA (
@@ -249,7 +313,13 @@ public enum CommonField implements Field, Serializable {
 			"Lista delle voci di spesa comprese nella quota di partecipazione",
 			false,
 			StringFieldValue.class
-			),
+			)
+	{
+		@Override
+		public FieldValue createBlankFieldValue() {
+			return new StringFieldValue();
+		}
+	},
 	
 	NOTE (
 			"Note",
@@ -257,6 +327,12 @@ public enum CommonField implements Field, Serializable {
 			false,
 			StringFieldValue.class
 			)
+	{
+		@Override
+		public FieldValue createBlankFieldValue() {
+			return new StringFieldValue();
+		}
+	}
 	
 	;
 
@@ -364,7 +440,7 @@ public enum CommonField implements Field, Serializable {
 				// Verifico che il valore del campo di comparazione sia presente
 				fieldable.getFieldValue(comparingDateField) != null && 
 				// Verifico che la data da controllare sia successiva o contemporanea al valore del campo
-				date.compareTo((Date) fieldable.getFieldValue(comparingDateField)) >= 0
+				date.getValue().compareTo((Date) fieldable.getFieldValue(comparingDateField)) >= 0
 				);
 	}
 
@@ -389,7 +465,7 @@ public enum CommonField implements Field, Serializable {
 				// Verifico che il valore del campo di comparazione sia presente
 				fieldable.getFieldValue(comparingDateField) != null && 
 				// Verifico che la data da controllare sia successiva o contemporanea al valore del campo
-				date.compareTo((Date) fieldable.getFieldValue(comparingDateField)) <= 0
+				date.getValue().compareTo((Date) fieldable.getFieldValue(comparingDateField)) <= 0
 				);
 	}
 	

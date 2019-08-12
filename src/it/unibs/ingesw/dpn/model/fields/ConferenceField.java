@@ -19,7 +19,13 @@ public enum ConferenceField implements Field {
 			true,
 			false,
 			StringFieldValue.class
-			),
+			)
+	{
+		@Override
+		public FieldValue createBlankFieldValue() {
+			return new StringFieldValue();
+		}
+	},
 	
 	ARGOMENTO (
 			"Argomento",
@@ -28,7 +34,14 @@ public enum ConferenceField implements Field {
 			false,
 			false,
 			StringFieldValue.class			
-			),
+			)
+	{
+		@Override
+		public FieldValue createBlankFieldValue() {
+			return new StringFieldValue();
+		}
+	},
+	
 	SPESE_OPZIONALI (
 			"Spese opzionali",
 			"Spese aggiuntive a scelta del partecipante",
@@ -37,6 +50,12 @@ public enum ConferenceField implements Field {
 			true,
 			OptionalCostsFieldValue.class
 			)
+	{
+		@Override
+		public FieldValue createBlankFieldValue() {
+			return new OptionalCostsFieldValue();
+		}
+	}
 	
 	;
 

@@ -1,7 +1,7 @@
 package it.unibs.ingesw.dpn.model.fields;
 
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
-import it.unibs.ingesw.dpn.model.fieldvalues.GenderEnumFieldValue;
+import it.unibs.ingesw.dpn.model.fieldvalues.GenderFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.IntegerIntervalFieldValue;
 
 public enum SoccerMatchField implements Field {
@@ -10,8 +10,14 @@ public enum SoccerMatchField implements Field {
 			"Genere",
 			"Il genere dei giocatori che partecipano alla partita",
 			true,
-			GenderEnumFieldValue.class
-			),
+			GenderFieldValue.class
+			)
+	{
+		@Override
+		public FieldValue createBlankFieldValue() {
+			return new GenderFieldValue();
+		}
+	},
 	
 	FASCIA_DI_ETA (
 			"Fascia di età",
@@ -30,6 +36,11 @@ public enum SoccerMatchField implements Field {
 			} else if (integerIntervalValue.getMax() > 150) {
 				throw new FieldCompatibilityException("Non è possibile accettare età superiori ai 150 anni");
 			}
+		}
+		
+		@Override
+		public FieldValue createBlankFieldValue() {
+			return new IntegerIntervalFieldValue();
 		}
 	}
 	

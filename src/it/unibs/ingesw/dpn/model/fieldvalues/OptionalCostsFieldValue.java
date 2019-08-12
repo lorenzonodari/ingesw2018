@@ -5,10 +5,13 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 import java.util.List;
 import java.util.Collections;
 
 import it.unibs.ingesw.dpn.model.users.User;
+import it.unibs.ingesw.dpn.ui.InputGetter;
+import it.unibs.ingesw.dpn.ui.UIRenderer;
 
 public class OptionalCostsFieldValue implements FieldValue, Serializable {
 
@@ -178,6 +181,76 @@ public class OptionalCostsFieldValue implements FieldValue, Serializable {
 		}
 		
 		return amount;
+	}
+
+	@Override
+	public void initializeValue(UIRenderer renderer, InputGetter input) {
+		
+		// Variabili ausiliarie
+		int option = 0;
+		LinkedHashMap<String, Float> entriesBuffer = new LinkedHashMap<>();
+		Stack<String> entriesOrder = new Stack<String>();
+		
+		
+		// Ciclo di acquisizione
+		do {
+			
+			// Stampa il riepilogo delle voci aggiunte
+			renderer.renderText("Voci di spesa opzionali:");
+			for (String s : entriesBuffer.keySet()) {
+				renderer.renderText(String.format(" - %s : %.2f €", s, entriesBuffer.get(s)));
+			}
+			renderer.renderText("");
+			
+			// Stampa le opzioni disponibili all'utente
+			renderer.renderText(" 1 - Aggiungi una voce");
+			
+			// Visualizzo l'opzione solo se ho gia' aggiunto almeno una voce
+			if (!entriesOrder.isEmpty()) {
+				renderer.renderText(" 2 - Rimuovi l'ultima voce");
+			}
+			
+			renderer.renderText(" 0 - Conferma");
+			
+			option = input.getInteger(0, 2);
+			
+			// Aggiunta di una nuova voce
+			if (option == 1) {
+				
+				renderer.renderText("Inserisci la ragione della spesa");
+				String reason = input.getString();
+				renderer.renderText("Inserisci l'ammontare della spesa");
+				float amount = input.getFloat();
+				
+				if (entriesBuffer.containsKey(reason)) {
+					renderer.renderError("La voce di spesa inserita risulta gia' definita");
+				}
+				else {
+					entriesBuffer.put(reason, amount);
+					entriesOrder.push(reason);
+				}
+						
+			}
+			// Rimozione dell'ultima voce aggiunta
+			else if (option == 2) {
+				
+				entriesBuffer.remove(entriesOrder.pop());
+			}
+			
+			renderer.renderText("");
+			
+		} while (option != 0);
+		
+		if (entriesOrder.size() > 0) {
+			
+			for (String s : entriesBuffer.keySet()) {
+			
+				this.addEntry(s, entriesBuffer.get(s));
+				
+			}
+	
+		}
+		
 	}
 	
 

@@ -17,7 +17,7 @@ import it.unibs.ingesw.dpn.ui.UIRenderer;
  * @author Michele Dusi, Lorenzo Nodari, Emanuele Poggi
  *
  */
-public class DateFieldValue extends Date implements FieldValue, Serializable {
+public class DateFieldValue implements FieldValue, Serializable {
 
 	/**
 	 * 
@@ -28,21 +28,25 @@ public class DateFieldValue extends Date implements FieldValue, Serializable {
 	private static final String DATE_DELIMITER = "(/|-|,| )";
 	private static final String HOURS_DELIMITER = "(:|\\.| )";
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(DATE_FORMAT_STRING);
-
+	
+	private Date date;
+	
 	/**
-	 * Genera un oggetto con la data attuale.
+	 * Costruttore che crea una istanza "vuota". Tale istanza dovra' quindi, prima di poter essere utilizzata, inizializzata
+	 * mediante la chiamata al metodo initializeValue().
+	 * 
 	 */
 	public DateFieldValue() {
-		super();
+		this.date = null;
 	}
-
+	
 	/**
 	 * Genera un oggetto, dato il numero di millisecondi.
 	 * 
 	 * @param dateLongValue Il numero di millisecondi trascorsi dal 1 gennaio 1970.
 	 */
 	public DateFieldValue(long dateLongValue) {
-		super(dateLongValue);
+		this.date = new Date(dateLongValue);
 	}
 	
 	/**
@@ -52,7 +56,11 @@ public class DateFieldValue extends Date implements FieldValue, Serializable {
 	 */
 	@Override
 	public String toString() {
-		return DATE_FORMAT.format(this);
+		return DATE_FORMAT.format(this.date);
+	}
+	
+	public Date getValue() {
+		return this.date;
 	}
 	
 	/**
@@ -63,7 +71,7 @@ public class DateFieldValue extends Date implements FieldValue, Serializable {
 	 * @param getter Il getter
 	 * @return Il valore acquisito
 	 */
-	public static DateFieldValue acquireValue(UIRenderer renderer, InputGetter getter) {
+	public void initializeValue(UIRenderer renderer, InputGetter getter) {
 		// Anno, mese, giorno
 		renderer.renderText("Inserisci il giorno in formato (GG/MM/AAAA)");
 		String data = getter.getMatchingString(
@@ -96,8 +104,7 @@ public class DateFieldValue extends Date implements FieldValue, Serializable {
 		// Creo la data
 		java.util.Calendar cal = java.util.Calendar.getInstance();
 		cal.set(anno, mese, giorno, ore, minuti, 0);
-		DateFieldValue date = new DateFieldValue(cal.getTimeInMillis());
-		return date;
+		this.date = new Date(cal.getTimeInMillis());
 	}
 
 }
