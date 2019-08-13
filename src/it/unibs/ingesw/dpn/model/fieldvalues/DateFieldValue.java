@@ -5,8 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Scanner;
 
-import it.unibs.ingesw.dpn.ui.InputGetter;
-import it.unibs.ingesw.dpn.ui.UIRenderer;
+import it.unibs.ingesw.dpn.ui.UserInterface;
 
 /**
  * Classe che rappresenta un valore di un campo di tipo "Data e Ora".
@@ -67,14 +66,13 @@ public class DateFieldValue implements FieldValue, Serializable {
 	 * Acquisisce un valore, utilizzando i metodi di I/O delle interfacce UIRenderer e InputGetter
 	 * ed effettuando le opportune convalide.
 	 * 
-	 * @param renderer Il renderer
-	 * @param getter Il getter
+	 * @param userInterface L'interfaccia utente utilizzata
 	 * @return Il valore acquisito
 	 */
-	public void initializeValue(UIRenderer renderer, InputGetter getter) {
+	public void initializeValue(UserInterface userInterface) {
 		// Anno, mese, giorno
-		renderer.renderText("Inserisci il giorno in formato (GG/MM/AAAA)");
-		String data = getter.getMatchingString(
+		userInterface.renderer().renderText("Inserisci il giorno in formato (GG/MM/AAAA)");
+		String data = userInterface.getter().getMatchingString(
 				"(0?([1-9])|[1-2][0-9]|3([0-1]))" // Giorno
 				+ DATE_DELIMITER // Divisore
 				+ "(0?([1-9])|1([0-2]))" // Mese
@@ -89,8 +87,8 @@ public class DateFieldValue implements FieldValue, Serializable {
 		scanDate.close();
 				
 		// Ora e minuti
-		renderer.renderText("Inserisci l'orario in formato (HH:MM)");
-		String ora = getter.getMatchingString(
+		userInterface.renderer().renderText("Inserisci l'orario in formato (HH:MM)");
+		String ora = userInterface.getter().getMatchingString(
 				"([0-1]?[0-9]|2[0-3])" // Ore
 				+ HOURS_DELIMITER // Divisore
 				+ "([0-5][0-9])"); // Minuti

@@ -2,8 +2,7 @@ package it.unibs.ingesw.dpn.model.fieldvalues;
 
 import java.io.Serializable;
 
-import it.unibs.ingesw.dpn.ui.InputGetter;
-import it.unibs.ingesw.dpn.ui.UIRenderer;
+import it.unibs.ingesw.dpn.ui.UserInterface;
 
 public class MoneyAmountFieldValue implements FieldValue, Serializable {
 	
@@ -24,9 +23,9 @@ public class MoneyAmountFieldValue implements FieldValue, Serializable {
 	}
 
 	@Override
-	public void initializeValue(UIRenderer renderer, InputGetter input) {
+	public void initializeValue(UserInterface userInterface) {
 		
-		this.value = input.getFloat();
+		this.value = userInterface.getter().getFloat();
 		
 	}
 

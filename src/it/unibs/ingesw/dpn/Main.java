@@ -5,7 +5,11 @@ import java.io.File;
 import it.unibs.ingesw.dpn.model.persistence.DiskSerializationStrategy;
 import it.unibs.ingesw.dpn.model.persistence.PersistenceException;
 import it.unibs.ingesw.dpn.model.persistence.PersistenceManager;
-import it.unibs.ingesw.dpn.ui.UIManager;
+import it.unibs.ingesw.dpn.ui.MenuManager;
+import it.unibs.ingesw.dpn.ui.TextUI;
+import it.unibs.ingesw.dpn.ui.UserInterface;
+
+
 
 public class Main {
 	
@@ -14,9 +18,11 @@ public class Main {
 	public static final int DB_SAVE_ERROR_EXIT_CODE = 2;
 	
 	public static final File DEFAULT_DATABASE = new File(System.getProperty("user.home"), "socialnetwork.db");
-	
+
 	private static PersistenceManager persistenceManager = null;
-	
+	private static UserInterface userInterface = null;
+	private static MenuManager menuManager = null;
+
 	public static void main(String[] args) {
 		
 
@@ -30,8 +36,11 @@ public class Main {
 			System.exit(DB_LOAD_ERROR_EXIT_CODE);
 		}
 
-		UIManager uiManager = new UIManager(persistenceManager.getModel());
-		uiManager.uiLoop();
+		userInterface = new TextUI();
+		menuManager = new MenuManager(persistenceManager.getModel(), userInterface);
+		
+		// Avvio del menu
+		menuManager.getStartMenuAction().execute(userInterface);
 
 	}
 	

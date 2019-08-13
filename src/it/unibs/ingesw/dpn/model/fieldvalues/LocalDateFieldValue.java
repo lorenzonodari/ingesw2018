@@ -5,8 +5,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
-import it.unibs.ingesw.dpn.ui.InputGetter;
-import it.unibs.ingesw.dpn.ui.UIRenderer;
+import it.unibs.ingesw.dpn.ui.UserInterface;
 
 /**
  * Classe che rappresenta un valore di un campo di tipo "data". Utilizza la classe {@link LocalDate} 
@@ -52,13 +51,12 @@ public class LocalDateFieldValue implements FieldValue, Serializable {
 	 * ed effettuando le opportune convalide.
 	 * L'acquisizione richiede l'inserimento di un giorno, un mese e un anno in un formato preciso.
 	 * 
-	 * @param renderer Il renderer
-	 * @param getter Il getter
+	 * @param userInterface L'interfaccia utente
 	 * @return Il valore acquisito
 	 */
-	public void initializeValue(UIRenderer renderer, InputGetter getter) {
-		renderer.renderText("Inserisci la data in formato (GG/MM/AAAA)");
-		String data = getter.getMatchingString(
+	public void initializeValue(UserInterface userInterface) {
+		userInterface.renderer().renderText("Inserisci la data in formato (GG/MM/AAAA)");
+		String data = userInterface.getter().getMatchingString(
 				"(0?([1-9])|[1-2][0-9]|3([0-1]))" // Giorno
 				+ DATE_DELIMITER // Divisore
 				+ "(0?([1-9])|1([0-2]))" // Mese

@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import it.unibs.ingesw.dpn.model.fields.UserField;
 import it.unibs.ingesw.dpn.model.users.User;
-import it.unibs.ingesw.dpn.ui.FieldValueAcquirer;
+import it.unibs.ingesw.dpn.ui.FieldValueUIAcquirer;
 
 /**
  * Classe che permette la creazione e la modifica di utenti in maniera "controllata", seguendo un preciso processo.
@@ -32,7 +32,7 @@ public class UserBuilder extends AbstractBuilder {
 	 * 
 	 * @param acquirer L'acquisitore di FieldValue
 	 */
-	public UserBuilder(FieldValueAcquirer acquirer) {
+	public UserBuilder(FieldValueUIAcquirer acquirer) {
 		super(acquirer);
 	}
 	

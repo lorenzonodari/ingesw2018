@@ -4,8 +4,7 @@ import java.io.Serializable;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
-import it.unibs.ingesw.dpn.ui.InputGetter;
-import it.unibs.ingesw.dpn.ui.UIRenderer;
+import it.unibs.ingesw.dpn.ui.UserInterface;
 
 /**
  * Classe che rappresenta il valore di un campo di tipo "quantità di tempo".
@@ -144,28 +143,26 @@ public class TimeAmountFieldValue implements FieldValue, Serializable {
 	 * Per fare ciò, viene chiesto di selezionare l'unità di tempo che più si adatta a rappresentare il periodo
 	 * di tempo, e dopo viene chiesto di selezionare il multiplo di tale unità.
 	 * 
-	 * @param renderer Il renderizzatore dei messaggi
-	 * @param getter L'acquisitore di dati
+	 * @param userInterface L'interfaccia utente da usare
 	 * @return Un valore di tipo "TimeAmountFieldValue"
 	 */
-	public void initializeValue(UIRenderer renderer, InputGetter getter) {
-		
+	public void initializeValue(UserInterface userInterface) {
 		// Seleziono unità di misura
-		renderer.renderText("Seleziona l'unità di misura temporale:");
-		renderer.renderLineSpace();
+		userInterface.renderer().renderText("Seleziona l'unità di misura temporale:");
+		userInterface.renderer().renderLineSpace();
 		int counter = 1;
 		for (TimeUnit unit : TimeUnit.values()) {
-			renderer.renderText(String.format("%3d) %s", counter++, unit.getName()));
+			userInterface.renderer().renderText(String.format("%3d) %s", counter++, unit.getName()));
 		}
-		renderer.renderLineSpace();
-		int unitIndex = getter.getInteger(1, TimeUnit.values().length) - 1;
+		userInterface.renderer().renderLineSpace();
+		int unitIndex = userInterface.getter().getInteger(1, TimeUnit.values().length) - 1;
 		TimeUnit chosenUnit = TimeUnit.values()[unitIndex];
 		
 		// Acquisisco la quantità
-		renderer.renderText(String.format(
-				"Inserisci il numero di %s:", 
+		userInterface.renderer().renderText(String.format(
+				"Inserisci il numero di %s:",
 				chosenUnit.getName().toLowerCase()));
-		long unitAmount = getter.getInteger(0, chosenUnit.getMaxUnitAmount());
+		long unitAmount = userInterface.getter().getInteger(0, chosenUnit.getMaxUnitAmount());
 		
 		this.seconds = unitAmount * chosenUnit.getUnit().getDuration().getSeconds();
 		

@@ -1,7 +1,6 @@
 package it.unibs.ingesw.dpn.model.fieldvalues;
 
-import it.unibs.ingesw.dpn.ui.InputGetter;
-import it.unibs.ingesw.dpn.ui.UIRenderer;
+import it.unibs.ingesw.dpn.ui.UserInterface;
 
 /**
  * Interfaccia che unforma il comportamento di un oggetto rappresentante il valore di un campo.
@@ -25,6 +24,6 @@ public interface FieldValue {
 	 * @param renderer Il renderer da utilizzare
 	 * @param input Il gestore dell'input da utilizzare
 	 */
-	public void initializeValue(UIRenderer renderer, InputGetter input);
+	public void initializeValue(UserInterface userInterface);
 
 }

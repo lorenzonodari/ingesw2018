@@ -10,8 +10,7 @@ import java.util.List;
 import java.util.Collections;
 
 import it.unibs.ingesw.dpn.model.users.User;
-import it.unibs.ingesw.dpn.ui.InputGetter;
-import it.unibs.ingesw.dpn.ui.UIRenderer;
+import it.unibs.ingesw.dpn.ui.UserInterface;
 
 public class OptionalCostsFieldValue implements FieldValue, Serializable {
 
@@ -123,16 +122,36 @@ public class OptionalCostsFieldValue implements FieldValue, Serializable {
 		
 		// Verifica delle precondizioni
 		if (user == null || cost == null) {
-			throw new NullPointerException();
+			throw new IllegalArgumentException("Impossibile rimuovere un utente o una spesa nulla");
 		}
 		
 		if (!costs.containsKey(cost)) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Impossibile rimuovere un utente da una spesa che non sta sostenendo");
 		}
 		
 		userChoices.get(cost).remove(user);
 		return true;
 		
+	}
+	
+	/**
+	 * Rimuove l'utente da tutte le spese aggiuntive che sta sostenendo.
+	 * 
+	 * Precondizione: user != null
+	 * 
+	 * @param user L'utente da rimuovere da tutte le spese
+	 */
+	public void removeUserFromAllCosts(User user) {
+		// Verifica delle precondizioni
+		if (user == null) {
+			throw new IllegalArgumentException("Impossibile rimuovere un utente nullo");
+		}
+		
+		for (String cost : this.userChoices.keySet()) {
+			if (this.userChoices.get(cost).contains(user)) {
+				this.userChoices.get(cost).remove(user);
+			}
+		}
 	}
 	
 	/**
@@ -184,7 +203,7 @@ public class OptionalCostsFieldValue implements FieldValue, Serializable {
 	}
 
 	@Override
-	public void initializeValue(UIRenderer renderer, InputGetter input) {
+	public void initializeValue(UserInterface userInterface) {
 		
 		// Variabili ausiliarie
 		int option = 0;
@@ -196,34 +215,34 @@ public class OptionalCostsFieldValue implements FieldValue, Serializable {
 		do {
 			
 			// Stampa il riepilogo delle voci aggiunte
-			renderer.renderText("Voci di spesa opzionali:");
+			userInterface.renderer().renderText("Voci di spesa opzionali:");
 			for (String s : entriesBuffer.keySet()) {
-				renderer.renderText(String.format(" - %s : %.2f €", s, entriesBuffer.get(s)));
+				userInterface.renderer().renderText(String.format(" - %s : %.2f €", s, entriesBuffer.get(s)));
 			}
-			renderer.renderText("");
+			userInterface.renderer().renderText("");
 			
 			// Stampa le opzioni disponibili all'utente
-			renderer.renderText(" 1 - Aggiungi una voce");
+			userInterface.renderer().renderText(" 1 - Aggiungi una voce");
 			
 			// Visualizzo l'opzione solo se ho gia' aggiunto almeno una voce
 			if (!entriesOrder.isEmpty()) {
-				renderer.renderText(" 2 - Rimuovi l'ultima voce");
+				userInterface.renderer().renderText(" 2 - Rimuovi l'ultima voce");
 			}
 			
-			renderer.renderText(" 0 - Conferma");
+			userInterface.renderer().renderText(" 0 - Conferma");
 			
-			option = input.getInteger(0, 2);
+			option = userInterface.getter().getInteger(0, 2);
 			
 			// Aggiunta di una nuova voce
 			if (option == 1) {
 				
-				renderer.renderText("Inserisci la ragione della spesa");
-				String reason = input.getString();
-				renderer.renderText("Inserisci l'ammontare della spesa");
-				float amount = input.getFloat();
+				userInterface.renderer().renderText("Inserisci la ragione della spesa");
+				String reason = userInterface.getter().getString();
+				userInterface.renderer().renderText("Inserisci l'ammontare della spesa");
+				float amount = userInterface.getter().getFloat();
 				
 				if (entriesBuffer.containsKey(reason)) {
-					renderer.renderError("La voce di spesa inserita risulta gia' definita");
+					userInterface.renderer().renderError("La voce di spesa inserita risulta gia' definita");
 				}
 				else {
 					entriesBuffer.put(reason, amount);
@@ -237,7 +256,7 @@ public class OptionalCostsFieldValue implements FieldValue, Serializable {
 				entriesBuffer.remove(entriesOrder.pop());
 			}
 			
-			renderer.renderText("");
+			userInterface.renderer().renderText("");
 			
 		} while (option != 0);
 		

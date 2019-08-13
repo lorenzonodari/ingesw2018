@@ -2,8 +2,8 @@ package it.unibs.ingesw.dpn.model.fieldvalues;
 
 import java.io.Serializable;
 
-import it.unibs.ingesw.dpn.ui.InputGetter;
-import it.unibs.ingesw.dpn.ui.UIRenderer;
+import it.unibs.ingesw.dpn.ui.UserInterface;
+
 /**
  * Classe che rappresenta un intervallo di valori compreso fra due interi.
  * Entrambi gli estremi sono inclusi nell'intervallo.
@@ -52,19 +52,19 @@ public class IntegerIntervalFieldValue implements FieldValue, Serializable {
 	}
 
 	@Override
-	public void initializeValue(UIRenderer renderer, InputGetter input) {
+	public void initializeValue(UserInterface userInterface) {
 		
 		boolean check = false;
 		int tmpMin, tmpMax;
 		
 		do {
-			renderer.renderText("Inserisci il valore minimo");
-			tmpMin = input.getInteger();
-			renderer.renderText("Inserisci il valore massimo");
-			tmpMax = input.getInteger();
+			userInterface.renderer().renderText("Inserisci il valore minimo");
+			tmpMin = userInterface.getter().getInteger();
+			userInterface.renderer().renderText("Inserisci il valore massimo");
+			tmpMax = userInterface.getter().getInteger();
 			
 			if (min > max) {
-				renderer.renderError("Inserire un valore minimo inferiore al valore massimo");
+				userInterface.renderer().renderError("Inserire un valore minimo inferiore al valore massimo");
 			} else {
 				check = true;
 			}

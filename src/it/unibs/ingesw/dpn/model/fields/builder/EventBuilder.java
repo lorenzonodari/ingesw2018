@@ -7,7 +7,7 @@ import it.unibs.ingesw.dpn.model.events.ConferenceEvent;
 import it.unibs.ingesw.dpn.model.events.SoccerMatchEvent;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.users.User;
-import it.unibs.ingesw.dpn.ui.FieldValueAcquirer;
+import it.unibs.ingesw.dpn.ui.FieldValueUIAcquirer;
 
 /**
  * Classe che permette la creazione di eventi in maniera "controllata", secondo il pattern "Factory" e
@@ -30,7 +30,7 @@ public class EventBuilder extends AbstractBuilder {
 	 * 
 	 * @param acquirer L'acquisitore di FieldValue
 	 */
-	public EventBuilder(FieldValueAcquirer acquirer) {
+	public EventBuilder(FieldValueUIAcquirer acquirer) {
 		super(acquirer);
 	}
 	

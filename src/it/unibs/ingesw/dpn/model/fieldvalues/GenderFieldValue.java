@@ -1,7 +1,6 @@
 package it.unibs.ingesw.dpn.model.fieldvalues;
 
-import it.unibs.ingesw.dpn.ui.InputGetter;
-import it.unibs.ingesw.dpn.ui.UIRenderer;
+import it.unibs.ingesw.dpn.ui.UserInterface;
 
 /**
  * Classe che rappresenta un valore di un campo contenente il genere.
@@ -46,15 +45,15 @@ public class GenderFieldValue implements FieldValue {
 	}
 
 	@Override
-	public void initializeValue(UIRenderer renderer, InputGetter getter) {
+	public void initializeValue(UserInterface userInterface) {
 		
 		Gender [] values = Gender.values();
 		int i = 1;
 		for (Gender gender : values) {
-			renderer.renderText(String.format("%3d)\t%s", 
+			userInterface.renderer().renderText(String.format("%3d)\t%s", 
 					i++, gender.toString()));
 		}
-		int input = getter.getInteger(1, values.length);
+		int input = userInterface.getter().getInteger(1, values.length);
 		this.gender = values[input - 1];
 		
 	}

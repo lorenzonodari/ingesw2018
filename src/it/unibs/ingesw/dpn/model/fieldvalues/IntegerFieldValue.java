@@ -2,8 +2,7 @@ package it.unibs.ingesw.dpn.model.fieldvalues;
 
 import java.io.Serializable;
 
-import it.unibs.ingesw.dpn.ui.InputGetter;
-import it.unibs.ingesw.dpn.ui.UIRenderer;
+import it.unibs.ingesw.dpn.ui.UserInterface;
 
 public class IntegerFieldValue implements FieldValue, Serializable {
 
@@ -36,9 +35,9 @@ public class IntegerFieldValue implements FieldValue, Serializable {
 	}
 
 	@Override
-	public void initializeValue(UIRenderer renderer, InputGetter input) {
+	public void initializeValue(UserInterface userInterface) {
 		
-		this.value = input.getInteger();
+		this.value = userInterface.getter().getInteger();
 		
 	}
 }

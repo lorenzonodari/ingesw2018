@@ -52,7 +52,7 @@ public interface Fieldable {
 	public FieldValue getFieldValue(Field chosenField);
 	
 	/**
-	 * Restituisce la lista di Field e FieldValue attualmente presente nell'oggetto.
+	 * Restituisce una copia immutabile della mappa di Field e FieldValue attualmente presente nell'oggetto.
 	 * 
 	 * @return la mappa dei campi e dei rispettivi valori
 	 */

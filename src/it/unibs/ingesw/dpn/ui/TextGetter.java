@@ -9,7 +9,7 @@ import java.util.Scanner;
  * 
  * @author Lorenzo Nodari, Michele Dusi, Emanuele Poggi
  */
-public class ConsoleInputGetter implements InputGetter {
+public class TextGetter implements UIGetter {
 	
 	private Scanner input;
 	private UIRenderer renderer;
@@ -28,21 +28,22 @@ public class ConsoleInputGetter implements InputGetter {
 	private static final String INVALID_FORMAT_STRING_ERROR = "La stringa \"%s\" non corrisponde al formato atteso";
 
 	/**
-	 * Crea una nuova istanza di {@link ConsoleInputGetter}.
+	 * Crea una nuova istanza di {@link TextGetter}.
 	 * Alla costruzione crea anche un nuovo oggetto UIRenderer per la segnalazione di errori.
 	 */
-	public ConsoleInputGetter() {
+	@Deprecated
+	public TextGetter() {
 		this.input = new Scanner(System.in);
 		this.renderer = new TextRenderer(); // Non consigliato
 	}
 	
 	/**
-	 * Crea una nuova istanza di {@link ConsoleInputGetter}.
+	 * Crea una nuova istanza di {@link TextGetter}.
 	 * Richiede come parametro un oggetto UIRenderer che si occupi della visualizzazione di eventuali errori.
 	 * 
 	 * @param renderer L'oggetto che renderizza gli errori durante l'acquisizione
 	 */
-	public ConsoleInputGetter(UIRenderer renderer) {
+	public TextGetter(UIRenderer renderer) {
 		this.input = new Scanner(System.in);
 		if (renderer != null) {
 			this.renderer = renderer;
@@ -251,7 +252,7 @@ public class ConsoleInputGetter implements InputGetter {
 	 * @param menu Il menu da cui attingere 
 	 * @return L'azione corrispondente all'opzione selezionata
 	 */
-	public MenuAction getMenuChoice(Menu menu) {
+	public Action getMenuChoice(MenuAction menu) {
 		// Render del menu e del prompt
 		renderer.renderMenu(menu);
 		
@@ -260,10 +261,32 @@ public class ConsoleInputGetter implements InputGetter {
 		
 		// Restituzione dell'opzione corrispondente
 		if (choice == 0) {
-			return menu.getQuitEntry().getAction();
+			return menu.getBackEntry().getAction();
 		} else {
 			return menu.getEntries().get(choice - 1).getAction();
 		}
+	}
+
+	@Override
+	public boolean getConfirmChoice(ConfirmAction confirm) {
+		// Render del testo di conferma e del prompt
+		renderer.renderConfirm(confirm);
+		
+		// Acquisizione del numero relativo all'opzione (fra due)
+		int choice = this.getInteger(0, 1);
+		
+		// Restituzione del boolean corrispondente
+		return (choice == 0) ? false : true;
+	}
+
+	@Override
+	public void getDialogInteraction(DialogAction dialogAction) {
+		// Render della finestra di dialogo
+		renderer.renderDialog(dialogAction);
+		
+		// acquisizione di un valore qualsiasi
+		renderer.renderEmptyPrompt();
+		input.next(); // TODO Potrebbe richiedere una correzione
 	}
 
 }
