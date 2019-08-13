@@ -7,7 +7,7 @@ package it.unibs.ingesw.dpn.ui;
 public class MenuEntry {
 	
 	private String name;
-	private MenuAction entryAction;
+	private Action entryAction;
 	
 	/**
 	 * Crea una nuova voce di menu, dato il nome e l'azione corrispondente.
@@ -19,7 +19,7 @@ public class MenuEntry {
 	 * @param name Il nome della voce del menu
 	 * @param entryAction L'azione corrispondente alla voce
 	 */
-	public MenuEntry(String name, MenuAction entryAction) {
+	public MenuEntry(String name, Action entryAction) {
 		
 		// Verifica delle precondizioni
 		if (name == null || entryAction == null) {
@@ -30,11 +30,22 @@ public class MenuEntry {
 		this.entryAction = entryAction;
 	}
 	
+	/**
+	 * Restituisce il nome, ossia il messaggio, contenuto in questa entry.
+	 * 
+	 * @return Il nome dell'entry.
+	 */
 	public String getName() {
 		return this.name;
 	}
 	
-	public MenuAction getAction() {
+	/**
+	 * Restituisce l'azione contenuta in questa entry, ossia un oggetto {@link Action}
+	 * che poi può essere eseguita.
+	 * 
+	 * @return L'azione associata a questa entry.
+	 */
+	public Action getAction() {
 		return this.entryAction;
 	}
 	

@@ -2,7 +2,7 @@ package it.unibs.ingesw.dpn;
 
 import java.io.File;
 
-import it.unibs.ingesw.dpn.ui.UIManager;
+import it.unibs.ingesw.dpn.ui.MenuManager;
 import it.unibs.ingesw.dpn.model.ModelManager;
 
 public class Main {
@@ -14,7 +14,7 @@ public class Main {
 	public static final File DEFAULT_DATABASE = new File(System.getProperty("user.home"), "socialnetwork.db");
 	
 	private static ModelManager modelManager = null;
-	private static UIManager uiManager = null;
+	private static MenuManager uiManager = null;
 
 	public static void main(String[] args) {
 		
@@ -28,7 +28,7 @@ public class Main {
 			modelManager = new ModelManager();
 		}
 		
-		uiManager = new UIManager(modelManager);
+		uiManager = new MenuManager(modelManager);
 		uiManager.uiLoop();
 
 	}

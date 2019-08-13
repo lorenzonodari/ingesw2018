@@ -2,8 +2,7 @@ package it.unibs.ingesw.dpn.model.fieldvalues;
 
 import java.io.Serializable;
 
-import it.unibs.ingesw.dpn.ui.InputGetter;
-import it.unibs.ingesw.dpn.ui.UIRenderer;
+import it.unibs.ingesw.dpn.ui.UserInterface;
 
 public class StringFieldValue implements FieldValue, Serializable {
 
@@ -23,9 +22,9 @@ public class StringFieldValue implements FieldValue, Serializable {
 		return this.value;
 	}
 	
-	public static StringFieldValue acquireValue(UIRenderer renderer, InputGetter getter) {
-		renderer.renderText("Inserisci il valore testuale del campo");
-		return new StringFieldValue(getter.getString());
+	public static StringFieldValue acquireValue(UserInterface userInterface) {
+		userInterface.renderer().renderText("Inserisci il valore testuale del campo");
+		return new StringFieldValue(userInterface.getter().getString());
 	}
 
 }

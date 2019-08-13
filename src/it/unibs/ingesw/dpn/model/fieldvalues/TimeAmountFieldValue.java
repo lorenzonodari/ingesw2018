@@ -4,8 +4,7 @@ import java.io.Serializable;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
-import it.unibs.ingesw.dpn.ui.InputGetter;
-import it.unibs.ingesw.dpn.ui.UIRenderer;
+import it.unibs.ingesw.dpn.ui.UserInterface;
 
 /**
  * Classe che rappresenta il valore di un campo di tipo "quantità di tempo".
@@ -139,23 +138,23 @@ public class TimeAmountFieldValue implements FieldValue, Serializable {
 	 * @param getter L'acquisitore di dati
 	 * @return Un valore di tipo "TimeAmountFieldValue"
 	 */
-	public static TimeAmountFieldValue acquireValue(UIRenderer renderer, InputGetter getter) {
+	public static TimeAmountFieldValue acquireValue(UserInterface userInterface) {
 		// Seleziono unità di misura
-		renderer.renderText("Seleziona l'unità di misura temporale:");
-		renderer.renderLineSpace();
+		userInterface.renderer().renderText("Seleziona l'unità di misura temporale:");
+		userInterface.renderer().renderLineSpace();
 		int counter = 1;
 		for (TimeUnit unit : TimeUnit.values()) {
-			renderer.renderText(String.format("%3d) %s", counter++, unit.getName()));
+			userInterface.renderer().renderText(String.format("%3d) %s", counter++, unit.getName()));
 		}
-		renderer.renderLineSpace();
-		int unitIndex = getter.getInteger(1, TimeUnit.values().length) - 1;
+		userInterface.renderer().renderLineSpace();
+		int unitIndex = userInterface.getter().getInteger(1, TimeUnit.values().length) - 1;
 		TimeUnit chosenUnit = TimeUnit.values()[unitIndex];
 		
 		// Acquisisco la quantità
-		renderer.renderText(String.format(
+		userInterface.renderer().renderText(String.format(
 				"Inserisci la durata dell'evento come numero di %s:", 
 				chosenUnit.getName().toLowerCase()));
-		long unitAmount = getter.getInteger(0, chosenUnit.getMaxUnitAmount());
+		long unitAmount = userInterface.getter().getInteger(0, chosenUnit.getMaxUnitAmount());
 		
 		// Restituisco il nuovo PeriodFieldValue
 		return new TimeAmountFieldValue(unitAmount, chosenUnit);

@@ -7,11 +7,25 @@ package it.unibs.ingesw.dpn.ui;
 public interface UIRenderer {
 
 	/**
-	 * Metodo adibito al rendering dell'intero menu
+	 * Metodo adibito al rendering dell'intero menu.
 	 * 
 	 * @param menu Il menu da renderizzare
 	 */
-	void renderMenu(Menu menu);
+	void renderMenu(MenuAction menu);
+
+	/**
+	 * Metodo adibito al rendering di un prompt di conferma.
+	 * 
+	 * @param confirm Il prompt di conferma da renderizzare
+	 */
+	void renderConfirm(ConfirmAction confirm);
+	
+	/**
+	 * Metodo adibito al rendering di una finestra di dialogo.
+	 *
+	 * @param dialog Il prompt di dialogo da renderizzare
+	 */
+	void renderDialog(DialogAction dialog);
 
 	/**
 	 * Renderizza un basilare prompt per indicare all'utente l'acquisizione di un dato.

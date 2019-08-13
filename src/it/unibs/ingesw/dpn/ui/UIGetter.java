@@ -3,7 +3,7 @@ package it.unibs.ingesw.dpn.ui;
 /**
  * Interfaccia utilizzata dalle classi adibite all'acquisizione di input dall'utente
  */
-public interface InputGetter {
+public interface UIGetter {
 
 	/**
 	 * Acquisisce un numero intero nell'intervallo [min, max] (estremi inclusi).
@@ -85,6 +85,22 @@ public interface InputGetter {
 	 * @param menu Il menu da cui attingere 
 	 * @return L'azione corrispondente all'opzione selezionata
 	 */
-	public MenuAction getMenuChoice(Menu menu);
+	public Action getMenuChoice(MenuAction menu);
+
+	/**
+	 * Presenta un prompt di conferma e richiede all'utente di selezionare una delle due opzioni.<br>
+	 * Restituisce "true" se viene selezionata l'opzione di conferma, "false" altrimenti.
+	 * 
+	 * @param confirm Il menu di conferma da cui attingere
+	 * @return Il boolean logicamente associato alla conferma o all'annullamento
+	 */
+	public boolean getConfirmChoice(ConfirmAction confirm);
+
+	/**
+	 * Visualizza un prompt di dialogo e attende un inserimento generico da parte dell'utente.
+	 * 
+	 * @param dialogAction La finestra di dialogo da visualizzare
+	 */
+	public void getDialogInteraction(DialogAction dialogAction);
 	
 }

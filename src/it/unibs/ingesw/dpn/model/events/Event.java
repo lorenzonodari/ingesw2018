@@ -10,10 +10,12 @@ import java.util.stream.Collectors;
 import it.unibs.ingesw.dpn.model.categories.Category;
 import it.unibs.ingesw.dpn.model.fields.AbstractFieldable;
 import it.unibs.ingesw.dpn.model.fields.CommonField;
+import it.unibs.ingesw.dpn.model.fields.ConferenceField;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fields.UserField;
 import it.unibs.ingesw.dpn.model.fieldvalues.IntegerFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.MoneyAmountFieldValue;
+import it.unibs.ingesw.dpn.model.fieldvalues.OptionalCostsFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
 import it.unibs.ingesw.dpn.model.users.Notification;
 import it.unibs.ingesw.dpn.model.users.User;
@@ -53,6 +55,9 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 	private static final String EVENT_SUBSCRIPTION_MESSAGE = "Ti sei iscritto/a correttamente all'evento \"%s\"";
 	private static final String EVENT_UNSUBSCRIPTION_MESSAGE = "Ti sei disiscritto/a correttamente dall'evento \"%s\"";
 	private static final String EVENT_CREATION_MESSAGE = "Hai creato l'evento \"%s\"";
+	
+	/** Stringhe di formattazione */
+	private static final String FIELD_DESCRIPTION_STRING = " | %-50s : %s\n";
 	
 	/** Strategie per il confronto di eventi */
 	public enum ComparingMethod {
@@ -295,7 +300,7 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 	 * @return true se l'evento viene pubblicato, false altrimenti.
 	 */
 	public boolean publish() {
-		// TODO Eventuali azioni aggiuntive alla pubblicazione
+		// Qui andranno eventuali azioni aggiuntive alla pubblicazione
 		try {
 			this.state.onPublication(this);
 			this.subscribe(this.creator);
@@ -324,7 +329,7 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 	 * @return true se l'evento viene ritirato, false altrimenti.
 	 */
 	public boolean withdraw() {
-		// TODO Eventuali azioni aggiuntive al ritiro di un evento
+		// Qui andranno eventuali azioni aggiuntive al ritiro di un evento
 		try {
 			this.state.onWithdrawal(this);
 			return true;
@@ -429,6 +434,15 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 
 		// Rimuove l'iscritto dalla mailing list
 		this.partecipants.remove(unsubscriber);
+		
+		for (Field userDependantField : this.getUserDependantFields()) {
+			// TODO Qui andrebbe usato il polimorfismo su Field e FieldValue
+			if (userDependantField == ConferenceField.SPESE_OPZIONALI) {
+				// Campo "Spese opzionali"
+				OptionalCostsFieldValue costsFieldValue = (OptionalCostsFieldValue) this.getFieldValue(ConferenceField.SPESE_OPZIONALI);
+				costsFieldValue.removeUserFromAllCosts(unsubscriber);
+			}
+		}
 		
 		// Notifica l'utente che la disiscrizione è andata a buon fine
 		unsubscriber.receive(new Notification(
@@ -539,6 +553,7 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 	 * 
 	 * @return Una descrizione testuale dell'evento
 	 */
+	@Override
 	public String toString() {
 		StringBuffer description = new StringBuffer();
 		// Categoria
@@ -550,7 +565,7 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 		description.append("Campi       :\n");
 		for (Field f : this.category.getFields()) {
 			if(!(this.getFieldValue(f) == null)) {
-			description.append(String.format(" | %-50s : %s\n",
+			description.append(String.format(FIELD_DESCRIPTION_STRING,
 					f.getName(),
 					this.getFieldValue(f).toString()));
 			}
@@ -559,6 +574,66 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 		description.append("Cronologia  :\n");
 		description.append(this.history.toString());
 		return description.toString();
+	}
+	
+	/**
+	 * Restituisce una descrizione testuale dell'evento.<br>
+	 * In particolare, adatta la descrizione a seconda dell'utente che richiede la
+	 * visualizzazione, in modo da presentare valori diversi in caso di campi {@link Field}
+	 * dipendenti dall'utente stesso.<br>
+	 * 
+	 * Nota: Nel caso in cui l'utente passato come parametro sia il creatore, viene visualizzata
+	 * la lista di campi in maniera standard.
+	 * 
+	 * @param pointOfViewUser L'utente in riferimento al quale si vuole ottenere una visualizzazione dell'evento
+	 * @return Una descrizione compatta dell'oggetto {@link Event} come oggetto {@link String}
+	 */
+	public String toString(User pointOfViewUser) {
+		// Se l'utente è il creatore, restituisco semplicemente il toString "base"
+		if (this.getCreator().equals(pointOfViewUser)) {
+			return this.toString();
+		}
+		
+		// L'inizio è identico
+		StringBuffer s = new StringBuffer(this.toString());
+		
+		// Aggiungo la visualizzazione dei campi dipendenti dall'utente, ma SOLO SE l'utente non è il creatore
+		s.append("Selezioni dell'utente:\n");
+		for (Field f : this.getUserDependantFields()) {
+			s.append(String.format(FIELD_DESCRIPTION_STRING, f.getName(), this.getFieldValue(f).toString()));
+			// TODO Credo che non funzioni...
+			// Attendo la visualizzazione personalizzata anche dei FieldValue
+		}
+	
+		/*
+		if (this.hasUserDependantFields() && pointOfViewUser != this.getCreator()) {
+			s.append("\n");
+			s.append("Spese opzionali scelte: \n");
+			
+			OptionalCostsFieldValue costsFieldValue = (OptionalCostsFieldValue) event.getFieldValue(ConferenceField.SPESE_OPZIONALI);
+			Map<String, Float> costs = costsFieldValue.getValue();
+			
+			for (String cost : costs.keySet()) {
+				
+				menuContent.append(cost);
+				menuContent.append(String.format(" : %.2f € ", costs.get(cost)));
+				
+				if (!costsFieldValue.userHasCost(loginManager.getCurrentUser(), cost)) {
+					menuContent.append("[ ]");
+				}
+				else {
+					menuContent.append("[X]");
+				}
+				
+				menuContent.append("\n");
+			}
+			menuContent.append("\n");
+			
+			menuContent.append(String.format("Costo complessivo di partecipazione: %.2f €", event.getExpensesForUser(loginManager.getCurrentUser())));
+		}
+		*/
+		
+		return s.toString();
 	}
 	
 	/**

@@ -20,14 +20,13 @@ import it.unibs.ingesw.dpn.model.fieldvalues.LocalDateFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.OptionalCostsFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
 
-public class FieldValueAcquirer {
+public class FieldValueUIAcquirer {
 	
 	/** Parametri */
 	private static final int AGE_LIMIT = 12;
 	
 	/** Input / Output */
-	private final UIRenderer renderer;
-	private final InputGetter getter;
+	private final UserInterface userInterface;
 	
 	/** Temporary reference */
 	private Fieldable provisionalFieldable = null;
@@ -35,16 +34,14 @@ public class FieldValueAcquirer {
 	/**
 	 * Costruttore. 
 	 * 
-	 * @param renderer
-	 * @param getter
+	 * @param userInterface Un'istanza di {@link UserInterface} che fa riferimento all'interfaccia utente da utilizzare.
 	 */
-	public FieldValueAcquirer(UIRenderer renderer, InputGetter getter) {
-		if (renderer == null || getter == null) {
+	public FieldValueUIAcquirer(UserInterface userInterface) {
+		if (userInterface == null) {
 			throw new IllegalArgumentException("Impossibile istanziare un nuovo FieldValueAcquirer con parametri nulli");
 		}
 		// Inizializzo I/O
-		this.renderer = renderer;
-		this.getter = getter;
+		this.userInterface = userInterface;
 	}
 	
 	/**
@@ -101,7 +98,7 @@ public class FieldValueAcquirer {
 			}
 			catch (FieldCompatibilityException e) {
 				// Se durante il processo si verifica un'eccezione, mostro l'eccezione e ripeto l'acquisizione
-				renderer.renderError(e.getMessage());
+				userInterface.renderer().renderError(e.getMessage());
 				
 				// Ripeto l'acquisizione
 				repeatFlag = true;
@@ -121,14 +118,14 @@ public class FieldValueAcquirer {
 	 * @param field Il campo di cui si vogliono visualizzare le informazioni
 	 */
 	private void printFieldIntro(Field field) {
-		renderer.renderLineSpace();
-		renderer.renderText(String.format(
+		userInterface.renderer().renderLineSpace();
+		userInterface.renderer().renderText(String.format(
 				" ### %-50s",
 				field.getName().toUpperCase()));
-		renderer.renderText(String.format(
+		userInterface.renderer().renderText(String.format(
 				" ### %s",
 				field.getDescription()));
-		renderer.renderLineSpace();
+		userInterface.renderer().renderLineSpace();
 	}
 	
 	/* 
@@ -159,10 +156,10 @@ public class FieldValueAcquirer {
 			GenderEnumFieldValue [] values = GenderEnumFieldValue.values();
 			int i = 1;
 			for (GenderEnumFieldValue gender : values) {
-				renderer.renderText(String.format("%3d)\t%s", 
+				userInterface.renderer().renderText(String.format("%3d)\t%s", 
 						i++, gender.toString()));
 			}
-			int input = getter.getInteger(1, values.length);
+			int input = userInterface.getter().getInteger(1, values.length);
 			return values[input - 1];
 		}
 			
@@ -172,13 +169,13 @@ public class FieldValueAcquirer {
 			IntegerIntervalFieldValue value = null;
 			boolean check = false;
 			do {
-				renderer.renderText("Inserisci il valore minimo");
-				int min = getter.getInteger(0, 150);
-				renderer.renderText("Inserisci il valore massimo");
-				int max = getter.getInteger(0, 150);
+				userInterface.renderer().renderText("Inserisci il valore minimo");
+				int min = userInterface.getter().getInteger(0, 150);
+				userInterface.renderer().renderText("Inserisci il valore massimo");
+				int max = userInterface.getter().getInteger(0, 150);
 				
 				if (min > max) {
-					renderer.renderError("Inserire un valore minimo inferiore al valore massimo");
+					userInterface.renderer().renderError("Inserire un valore minimo inferiore al valore massimo");
 				} else {
 					value = new IntegerIntervalFieldValue(min, max);
 					check = true;
@@ -207,12 +204,12 @@ public class FieldValueAcquirer {
 		
 		case RELATORI :
 		{
-			return StringFieldValue.acquireValue(renderer, getter);
+			return StringFieldValue.acquireValue(userInterface);
 		}
 			
 		case ARGOMENTO :
 		{
-			return StringFieldValue.acquireValue(renderer, getter);
+			return StringFieldValue.acquireValue(userInterface);
 		}
 		
 		case SPESE_OPZIONALI :
@@ -227,34 +224,34 @@ public class FieldValueAcquirer {
 			do {
 				
 				// Stampa il riepilogo delle voci aggiunte
-				renderer.renderText("Voci di spesa opzionali:");
+				userInterface.renderer().renderText("Voci di spesa opzionali:");
 				for (String s : entriesBuffer.keySet()) {
-					renderer.renderText(String.format(" - %s : %.2f €", s, entriesBuffer.get(s)));
+					userInterface.renderer().renderText(String.format(" - %s : %.2f €", s, entriesBuffer.get(s)));
 				}
-				renderer.renderText("");
+				userInterface.renderer().renderText("");
 				
 				// Stampa le opzioni disponibili all'utente
-				renderer.renderText(" 1 - Aggiungi una voce");
+				userInterface.renderer().renderText(" 1 - Aggiungi una voce");
 				
 				// Visualizzo l'opzione solo se ho gia' aggiunto almeno una voce
 				if (!entriesOrder.isEmpty()) {
-					renderer.renderText(" 2 - Rimuovi l'ultima voce");
+					userInterface.renderer().renderText(" 2 - Rimuovi l'ultima voce");
 				}
 				
-				renderer.renderText(" 0 - Conferma");
+				userInterface.renderer().renderText(" 0 - Conferma");
 				
-				option = getter.getInteger(0, 2);
+				option = userInterface.getter().getInteger(0, 2);
 				
 				// Aggiunta di una nuova voce
 				if (option == 1) {
 					
-					renderer.renderText("Inserisci la ragione della spesa");
-					String reason = getter.getString();
-					renderer.renderText("Inserisci l'ammontare della spesa");
-					float amount = getter.getFloat();
+					userInterface.renderer().renderText("Inserisci la ragione della spesa");
+					String reason = userInterface.getter().getString();
+					userInterface.renderer().renderText("Inserisci l'ammontare della spesa");
+					float amount = userInterface.getter().getFloat();
 					
 					if (entriesBuffer.containsKey(reason)) {
-						renderer.renderError("La voce di spesa inserita risulta gia' definita");
+						userInterface.renderer().renderError("La voce di spesa inserita risulta gia' definita");
 					}
 					else {
 						entriesBuffer.put(reason, amount);
@@ -268,7 +265,7 @@ public class FieldValueAcquirer {
 					entriesBuffer.remove(entriesOrder.pop());
 				}
 				
-				renderer.renderText("");
+				userInterface.renderer().renderText("");
 				
 			} while (option != 0);
 			
@@ -312,7 +309,7 @@ public class FieldValueAcquirer {
 		case NICKNAME :
 		{
 			// Nota: qui all'interno NON viene effettuato il controllo sull'esistenza precedente del Nickname
-			return StringFieldValue.acquireValue(renderer, getter);
+			return StringFieldValue.acquireValue(userInterface);
 			
 		}
 			
@@ -323,18 +320,18 @@ public class FieldValueAcquirer {
 			// Prompt e interazione con l'utente
 			do {
 				try {
-					date = LocalDateFieldValue.acquireValue(renderer, getter);
+					date = LocalDateFieldValue.acquireValue(userInterface);
 				}
 				catch (DateTimeException e) {
-					renderer.renderError("Data non accettabile");
+					userInterface.renderer().renderError("Data non accettabile");
 					continue;
 				}
 				
 				// Verifiche
 				if (date.getLocalDate().isAfter(LocalDate.now())) {
-					renderer.renderError("Impossibile accettare una data futura");
+					userInterface.renderer().renderError("Impossibile accettare una data futura");
 				} else if (date.getLocalDate().isAfter(LocalDate.now().minusYears(AGE_LIMIT))) {
-					renderer.renderError(String.format(
+					userInterface.renderer().renderError(String.format(
 							"Per utilizzare questo programma devi avere almeno %d anni.\nInserisci la tua vera data di nascita o termina l'esecuzione del programma.",
 							AGE_LIMIT));
 				} else {
@@ -370,19 +367,19 @@ public class FieldValueAcquirer {
 			
 			// Ciclo di interazione con l'utente
 			do {
-				renderer.renderText("Seleziona le categorie a cui sei interessato/a:");
+				userInterface.renderer().renderText("Seleziona le categorie a cui sei interessato/a:");
 				// Per ciascuna categoria creo e visualizzo l'opzione relativa
 				for (int i = 0; i < categories.length; i++) {
-					renderer.renderText(String.format(
+					userInterface.renderer().renderText(String.format(
 							"%3d) %-50s [%s]",
 							(i + 1),
 							categories[i].getName(),
 							(checksArray[i] ? "X" : " ")
 							));
 				}
-				renderer.renderText(String.format("%3d) %-50s", 0, "Esci e conferma"));
-				renderer.renderLineSpace();
-				option = getter.getInteger(0, categories.length);
+				userInterface.renderer().renderText(String.format("%3d) %-50s", 0, "Esci e conferma"));
+				userInterface.renderer().renderLineSpace();
+				option = userInterface.getter().getInteger(0, categories.length);
 				
 				// Inverto il check dell'opzione selezionata
 				if (option != 0) {

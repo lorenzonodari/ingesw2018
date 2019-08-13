@@ -120,16 +120,36 @@ public class OptionalCostsFieldValue implements FieldValue, Serializable {
 		
 		// Verifica delle precondizioni
 		if (user == null || cost == null) {
-			throw new NullPointerException();
+			throw new IllegalArgumentException("Impossibile rimuovere un utente o una spesa nulla");
 		}
 		
 		if (!costs.containsKey(cost)) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Impossibile rimuovere un utente da una spesa che non sta sostenendo");
 		}
 		
 		userChoices.get(cost).remove(user);
 		return true;
 		
+	}
+	
+	/**
+	 * Rimuove l'utente da tutte le spese aggiuntive che sta sostenendo.
+	 * 
+	 * Precondizione: user != null
+	 * 
+	 * @param user L'utente da rimuovere da tutte le spese
+	 */
+	public void removeUserFromAllCosts(User user) {
+		// Verifica delle precondizioni
+		if (user == null) {
+			throw new IllegalArgumentException("Impossibile rimuovere un utente nullo");
+		}
+		
+		for (String cost : this.userChoices.keySet()) {
+			if (this.userChoices.get(cost).contains(user)) {
+				this.userChoices.get(cost).remove(user);
+			}
+		}
 	}
 	
 	/**

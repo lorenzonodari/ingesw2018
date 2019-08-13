@@ -1,6 +1,7 @@
 package it.unibs.ingesw.dpn.model.fields;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -114,13 +115,13 @@ public abstract class AbstractFieldable implements Fieldable, Serializable {
 	}
 
 	/**
-	 * Restituisce l'intera lista attuale di campi e relativi valori.
+	 * Restituisce un riferimento immutabile alla lista attuale di campi e relativi valori.
 	 * 
 	 * @return La mappa attuale di coppie "Field-FieldValue"
 	 */
 	@Override
 	public Map<Field, FieldValue> getAllFieldValues() {
-		return this.valuesMap;
+		return Collections.unmodifiableMap(this.valuesMap);
 	}
 	
 	/**

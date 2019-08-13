@@ -9,6 +9,8 @@ import java.util.List;
  */
 public class TextRenderer implements UIRenderer {
 	
+	private static final String OPTION_FORMAT = "%2d%s%s\n";
+	
 	private static final String CLI_PROMPT = ">> ";
 	private static final String ERROR_PREFIX = "ERRORE: ";
 	private static final String ENTRY_NUM_SEPARATOR = " - ";
@@ -28,7 +30,7 @@ public class TextRenderer implements UIRenderer {
 	private static final int SO_EA = 5;
 
 	@Override
-	public void renderMenu(Menu menu) {
+	public void renderMenu(MenuAction menu) {
 		
 		// Costruisco la stringa totale
 		StringBuffer result = new StringBuffer();
@@ -48,7 +50,7 @@ public class TextRenderer implements UIRenderer {
 			body.append(toStringMenuEntry(entries.get(i), (i + 1)));
 		}
 		// Aggiungo l'opzione finale
-		body.append(toStringMenuEntry(menu.getQuitEntry(), 0));
+		body.append(toStringMenuEntry(menu.getBackEntry(), 0));
 		body.append(" "); // Aggiungo una riga vuota finale
 		
 	// Separo il corpo in linee
@@ -99,6 +101,41 @@ public class TextRenderer implements UIRenderer {
 		System.out.println(result.toString());
 		
 		
+	}
+
+	/**
+	 * Metodo adibito al rendering di un prompt di conferma
+	 * 
+	 * @param confirm Il prompt di conferma da renderizzare
+	 */
+	@Override
+	public void renderConfirm(ConfirmAction confirm) {
+		
+		// Costruisco la stringa totale
+		StringBuffer result = new StringBuffer();
+		
+		// Messaggio
+		result.append("\n" + confirm.getMessage() + "\n\n");
+		// Aggiungo le opzioni
+		result.append(toStringMenuEntry(confirm.getConfirmString(), 1));
+		result.append(toStringMenuEntry(confirm.getCancelString(), 0));
+		
+		result.append(" "); // Aggiungo una riga vuota finale
+	
+		this.renderLongTextInFrame(result.toString(), MAX_WIDTH);
+		
+	}
+
+	/**
+	 * Metodo adibito al rendering di una finestra di dialogo.
+	 *
+	 * @param dialog Il prompt di dialogo da renderizzare
+	 */
+	@Override
+	public void renderDialog(DialogAction dialog) {
+		// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+		this.renderTextInFrame("ERRORE! Metodo per la visualizzazione ancora da implementare");
+		// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
 	}
 	
 	/**
@@ -186,20 +223,35 @@ public class TextRenderer implements UIRenderer {
 		}
 		return s.toString();
 	}
-	
+
 	/**
 	 * Restituisce la stringa contenente il testo di una entry, più il numero iniziale.
 	 * 
 	 * @param entry L'opzione da renderizzare
 	 * @param index Il numero associato all'opzione
-	 * @return
+	 * @return La stringa che rappresenta l'opzione
 	 */
 	private String toStringMenuEntry(MenuEntry entry, int index) {
 		return String.format(
-				"%2d%s%s\n",
+				OPTION_FORMAT,
 				index,
 				ENTRY_NUM_SEPARATOR,
 				entry.getName());
+	}
+	
+	/**
+	 * Restituisce la stringa contenente un testo più il numero iniziale.
+	 * 
+	 * @param message Il testo da renderizzare
+	 * @param index Il numero associato all'opzione
+	 * @return La stringa che rappresenta l'opzione
+	 */
+	private String toStringMenuEntry(String option, int index) {
+		return String.format(
+				OPTION_FORMAT,
+				index,
+				ENTRY_NUM_SEPARATOR,
+				option);
 	}
 
 	@Override
