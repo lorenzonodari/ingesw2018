@@ -66,6 +66,13 @@ public interface Field {
 	 */
 	public Class<? extends FieldValue> getType();
 	
+	/**
+	 * Crea e restituisce un'istanza "vuota" di FieldValue. Con vuota si intende che tale 
+	 * instanza non contiene ancora alcun valore. Affinche' tale istanza rappresenti un valore
+	 * effettivo, dovra' quindi essere inizializzata mediante il metodo initializeFieldValue()
+	 */
+	public FieldValue createBlankFieldValue();
+	
 
 	/**
 	 * Restituisce la stringa per la rappresentazione testuale dell'intero campo.

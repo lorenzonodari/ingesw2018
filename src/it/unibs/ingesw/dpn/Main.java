@@ -3,6 +3,8 @@ package it.unibs.ingesw.dpn;
 import java.io.File;
 
 import it.unibs.ingesw.dpn.ui.MenuManager;
+import it.unibs.ingesw.dpn.ui.TextUI;
+import it.unibs.ingesw.dpn.ui.UserInterface;
 import it.unibs.ingesw.dpn.model.ModelManager;
 
 public class Main {
@@ -14,7 +16,8 @@ public class Main {
 	public static final File DEFAULT_DATABASE = new File(System.getProperty("user.home"), "socialnetwork.db");
 	
 	private static ModelManager modelManager = null;
-	private static MenuManager uiManager = null;
+	private static UserInterface userInterface = null;
+	private static MenuManager menuManager = null;
 
 	public static void main(String[] args) {
 		
@@ -28,8 +31,11 @@ public class Main {
 			modelManager = new ModelManager();
 		}
 		
-		uiManager = new MenuManager(modelManager);
-		uiManager.uiLoop();
+		userInterface = new TextUI();
+		menuManager = new MenuManager(modelManager, userInterface);
+		
+		// Avvio del menu
+		menuManager.getStartMenuAction().execute(userInterface);
 
 	}
 	

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.unibs.ingesw.dpn.model.categories.Category;
+import it.unibs.ingesw.dpn.ui.UserInterface;
 
 /**
  * Classe che rappresenta il contenuto di un campo di tipo "lista di categorie".
@@ -131,5 +132,43 @@ public class CategoryListFieldValue implements FieldValue, Serializable {
 			s.append(", ");
 		}
 		return s.toString().substring(0, s.length() - 2);
+	}
+	
+	public void initializeValue(UserInterface userInterface) {
+		// Inizializzo le variabili ausiliarie
+		int option = 0;
+		Category [] categories = Category.values();
+		boolean [] checksArray = new boolean[categories.length];
+		
+		// Ciclo di interazione con l'utente
+		do {
+			userInterface.renderer().renderText("Seleziona le categorie da aggiungere:");
+			// Per ciascuna categoria creo e visualizzo l'opzione relativa
+			for (int i = 0; i < categories.length; i++) {
+				userInterface.renderer().renderText(String.format(
+						"%3d) %-50s [%s]",
+						(i + 1),
+						categories[i].getName(),
+						(checksArray[i] ? "X" : " ")
+						));
+			}
+			userInterface.renderer().renderText(String.format("%3d) %-50s", 0, "Esci e conferma"));
+			userInterface.renderer().renderLineSpace();
+			option = userInterface.getter().getInteger(0, categories.length);
+			
+			// Inverto il check dell'opzione selezionata
+			if (option != 0) {
+				checksArray[option - 1] ^= true;
+			}
+			// Continuo finché l'utente non decide di uscire
+		} while (option != 0);
+
+		for (int i = 0; i < categories.length; i++) {
+			if (checksArray[i]) {
+				this.addCategory(categories[i]);
+			} else {
+				this.removeCategory(categories[i]);
+			}
+		}
 	}
 }

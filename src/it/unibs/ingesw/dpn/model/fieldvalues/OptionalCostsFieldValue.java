@@ -5,10 +5,12 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 import java.util.List;
 import java.util.Collections;
 
 import it.unibs.ingesw.dpn.model.users.User;
+import it.unibs.ingesw.dpn.ui.UserInterface;
 
 public class OptionalCostsFieldValue implements FieldValue, Serializable {
 
@@ -198,6 +200,76 @@ public class OptionalCostsFieldValue implements FieldValue, Serializable {
 		}
 		
 		return amount;
+	}
+
+	@Override
+	public void initializeValue(UserInterface userInterface) {
+		
+		// Variabili ausiliarie
+		int option = 0;
+		LinkedHashMap<String, Float> entriesBuffer = new LinkedHashMap<>();
+		Stack<String> entriesOrder = new Stack<String>();
+		
+		
+		// Ciclo di acquisizione
+		do {
+			
+			// Stampa il riepilogo delle voci aggiunte
+			userInterface.renderer().renderText("Voci di spesa opzionali:");
+			for (String s : entriesBuffer.keySet()) {
+				userInterface.renderer().renderText(String.format(" - %s : %.2f €", s, entriesBuffer.get(s)));
+			}
+			userInterface.renderer().renderText("");
+			
+			// Stampa le opzioni disponibili all'utente
+			userInterface.renderer().renderText(" 1 - Aggiungi una voce");
+			
+			// Visualizzo l'opzione solo se ho gia' aggiunto almeno una voce
+			if (!entriesOrder.isEmpty()) {
+				userInterface.renderer().renderText(" 2 - Rimuovi l'ultima voce");
+			}
+			
+			userInterface.renderer().renderText(" 0 - Conferma");
+			
+			option = userInterface.getter().getInteger(0, 2);
+			
+			// Aggiunta di una nuova voce
+			if (option == 1) {
+				
+				userInterface.renderer().renderText("Inserisci la ragione della spesa");
+				String reason = userInterface.getter().getString();
+				userInterface.renderer().renderText("Inserisci l'ammontare della spesa");
+				float amount = userInterface.getter().getFloat();
+				
+				if (entriesBuffer.containsKey(reason)) {
+					userInterface.renderer().renderError("La voce di spesa inserita risulta gia' definita");
+				}
+				else {
+					entriesBuffer.put(reason, amount);
+					entriesOrder.push(reason);
+				}
+						
+			}
+			// Rimozione dell'ultima voce aggiunta
+			else if (option == 2) {
+				
+				entriesBuffer.remove(entriesOrder.pop());
+			}
+			
+			userInterface.renderer().renderText("");
+			
+		} while (option != 0);
+		
+		if (entriesOrder.size() > 0) {
+			
+			for (String s : entriesBuffer.keySet()) {
+			
+				this.addEntry(s, entriesBuffer.get(s));
+				
+			}
+	
+		}
+		
 	}
 	
 

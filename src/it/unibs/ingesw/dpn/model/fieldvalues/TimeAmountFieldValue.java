@@ -67,6 +67,15 @@ public class TimeAmountFieldValue implements FieldValue, Serializable {
 	private long seconds;
 	
 	/**
+	 * Costruttore che crea una istanza "vuota". Tale istanza dovra' quindi, prima di poter essere utilizzata, inizializzata
+	 * mediante la chiamata al metodo initializeValue().
+	 * 
+	 */
+	public TimeAmountFieldValue() {
+		
+	}
+	
+	/**
 	 * Costruttore che costruisce un periodo come intervallo temporale tra due date.
 	 * 
 	 * @param start L'istante di partenza, come oggetto {@link Date}
@@ -134,11 +143,10 @@ public class TimeAmountFieldValue implements FieldValue, Serializable {
 	 * Per fare ciò, viene chiesto di selezionare l'unità di tempo che più si adatta a rappresentare il periodo
 	 * di tempo, e dopo viene chiesto di selezionare il multiplo di tale unità.
 	 * 
-	 * @param renderer Il renderizzatore dei messaggi
-	 * @param getter L'acquisitore di dati
+	 * @param userInterface L'interfaccia utente da usare
 	 * @return Un valore di tipo "TimeAmountFieldValue"
 	 */
-	public static TimeAmountFieldValue acquireValue(UserInterface userInterface) {
+	public void initializeValue(UserInterface userInterface) {
 		// Seleziono unità di misura
 		userInterface.renderer().renderText("Seleziona l'unità di misura temporale:");
 		userInterface.renderer().renderLineSpace();
@@ -152,12 +160,12 @@ public class TimeAmountFieldValue implements FieldValue, Serializable {
 		
 		// Acquisisco la quantità
 		userInterface.renderer().renderText(String.format(
-				"Inserisci la durata dell'evento come numero di %s:", 
+				"Inserisci il numero di %s:",
 				chosenUnit.getName().toLowerCase()));
 		long unitAmount = userInterface.getter().getInteger(0, chosenUnit.getMaxUnitAmount());
 		
-		// Restituisco il nuovo PeriodFieldValue
-		return new TimeAmountFieldValue(unitAmount, chosenUnit);
+		this.seconds = unitAmount * chosenUnit.getUnit().getDuration().getSeconds();
+		
 	}
 	
 }

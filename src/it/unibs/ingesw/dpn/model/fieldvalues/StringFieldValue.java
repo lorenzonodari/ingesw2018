@@ -11,7 +11,16 @@ public class StringFieldValue implements FieldValue, Serializable {
 	 */
 	private static final long serialVersionUID = -5576058610748280117L;
 	
-	private String value; 
+	private String value;
+	
+	/**
+	 * Costruttore che crea una istanza "vuota". Tale istanza dovra' quindi, prima di poter essere utilizzata, inizializzata
+	 * mediante la chiamata al metodo initializeValue().
+	 * 
+	 */
+	public StringFieldValue() {
+		this.value = null;
+	}
 	
 	public StringFieldValue(String value) {
 		this.value = value;
@@ -22,9 +31,9 @@ public class StringFieldValue implements FieldValue, Serializable {
 		return this.value;
 	}
 	
-	public static StringFieldValue acquireValue(UserInterface userInterface) {
-		userInterface.renderer().renderText("Inserisci il valore testuale del campo");
-		return new StringFieldValue(userInterface.getter().getString());
+	@Override
+	public void initializeValue(UserInterface userInterface) {
+		this.value = userInterface.getter().getString();
 	}
 
 }
