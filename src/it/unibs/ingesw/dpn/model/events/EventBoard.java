@@ -1,10 +1,9 @@
-package it.unibs.ingesw.dpn.model;
+package it.unibs.ingesw.dpn.model.events;
 
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
-import it.unibs.ingesw.dpn.model.events.Event;
-import it.unibs.ingesw.dpn.model.events.EventState;
+
 import it.unibs.ingesw.dpn.model.users.User;
 
 /**
@@ -138,6 +137,18 @@ public class EventBoard implements Serializable {
 			}			
 		}
 		return subscribers;
+	}
+	
+	/**
+	 * Reimposta lo stato degli eventi contenuti nell bacheca. Tale metodo deve essere chiamato dopo aver caricato
+	 * la event board da disco in modo che gli eventi in essa contenuti siano posti in uno stato consistente con quello
+	 * che avevano precedentemente al salvataggio persistente
+	 */
+	public void resetEventStates() {
+		
+		for (Event e : this.events) {
+			e.resetState();
+		}
 	}
 	
 }

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import it.unibs.ingesw.dpn.Main;
-import it.unibs.ingesw.dpn.model.ModelManager;
 import it.unibs.ingesw.dpn.model.users.UsersRepository;
 import it.unibs.ingesw.dpn.model.users.Invite;
 import it.unibs.ingesw.dpn.model.users.LoginManager;
@@ -20,6 +19,7 @@ import it.unibs.ingesw.dpn.model.fields.UserField;
 import it.unibs.ingesw.dpn.model.fields.ConferenceField;
 import it.unibs.ingesw.dpn.model.fieldvalues.DateFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.OptionalCostsFieldValue;
+import it.unibs.ingesw.dpn.model.persistence.Model;
 
 /**
  * Classe adibita alla gestione dell'interfaccia utente. In particolare, alle istanze
@@ -32,7 +32,7 @@ public class UIManager {
 	
 	private UIRenderer renderer;
 	private InputGetter inputManager;
-	private ModelManager model;
+	private Model model;
 	private UsersRepository users;
 	private LoginManager loginManager;
 	private Menu currentMenu;
@@ -46,7 +46,7 @@ public class UIManager {
 	 * 
 	 * @param model Il gestore dei dati di dominio da utilizzare
 	 */
-	public UIManager(ModelManager model) {
+	public UIManager(Model model) {
 		
 		// Verifica della precondizione
 		if (model == null) {
@@ -56,7 +56,7 @@ public class UIManager {
 		this.renderer = new TextRenderer();
 		this.inputManager = new ConsoleInputGetter(renderer);
 		this.model = model;
-		this.users = model.getUsersManager();
+		this.users = model.getUsersRepository();
 		this.loginManager = new LoginManager();
 		this.currentMenu = null;
 		this.builderAssistant = new BuilderUIAssistant(renderer, inputManager);
@@ -367,7 +367,7 @@ public class UIManager {
 		Menu categoriesMenu = new Menu("Menu categorie", "Categorie di eventi disponibili:", Menu.BACK_ENTRY_TITLE, backAction);
 		
 		// Callback categorie
-		for (Category c : model.getAllCategories()) {
+		for (Category c : Category.values()) {
 			
 			MenuAction categoryAction = () -> {this.categoryMenu(c);};
 			categoriesMenu.addEntry(c.getName(), categoryAction);

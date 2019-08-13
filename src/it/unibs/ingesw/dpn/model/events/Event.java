@@ -265,7 +265,7 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 	 * Reimposta lo stato corretto dell'evento. Questo metodo DEVE essere invocato su ogni evento
 	 * quando questi sono caricati da disco mediante serializzazione.
 	 */
-	public void resetState() {
+	 void resetState() {
 		this.state.resetState(this);
 	}
 	

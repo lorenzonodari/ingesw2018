@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
-import it.unibs.ingesw.dpn.model.ModelManager;
 import it.unibs.ingesw.dpn.model.fields.CommonField;
+import it.unibs.ingesw.dpn.model.persistence.Model;
 import it.unibs.ingesw.dpn.model.users.Invite;
 import it.unibs.ingesw.dpn.model.users.Notification;
 import it.unibs.ingesw.dpn.model.users.User;
@@ -20,10 +20,10 @@ import it.unibs.ingesw.dpn.model.users.User;
 public class Inviter {
 	
 	private Event target;
-	private ModelManager model;
+	private Model model;
 	private HashMap<User, Boolean> invited = new HashMap<>();
 		
-	public Inviter(Event target, ModelManager model) {
+	public Inviter(Event target, Model model) {
 		this.model = model;
 		this.target = target;
 		for (User u : model.getEventBoard().getListOfOldSubscribersFromPastEvents(target.getCreator())) {
@@ -143,7 +143,7 @@ public class Inviter {
 		StringBuffer notificationContent = new StringBuffer("Un evento appartenente ad una tua categoria di interesse è appena stato creato: ");
 		notificationContent.append(target.getFieldValue(CommonField.TITOLO));
 		
-		for(User u : model.getUsersManager().getUserByCategoryOfInterest(target.getCategory())) {
+		for(User u : model.getUsersRepository().getUserByCategoryOfInterest(target.getCategory())) {
 			
 			if (u == target.getCreator()) {
 				continue;
