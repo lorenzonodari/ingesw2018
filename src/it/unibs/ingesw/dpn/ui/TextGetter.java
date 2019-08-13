@@ -285,8 +285,8 @@ public class TextGetter implements UIGetter {
 		renderer.renderDialog(dialogAction);
 		
 		// acquisizione di un valore qualsiasi
-		renderer.renderEmptyPrompt();
-		input.next(); // TODO Potrebbe richiedere una correzione
+//		renderer.renderEmptyPrompt();
+		input.nextLine(); // TODO Potrebbe richiedere una correzione
 	}
 
 }

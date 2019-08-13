@@ -16,7 +16,7 @@ public class TextRenderer implements UIRenderer {
 	private static final String ENTRY_NUM_SEPARATOR = " - ";
 	
 	private static final int HORIZ_PADDING = 3;
-	private static final int MAX_WIDTH = 200;
+	private static final int MAX_WIDTH = 100;
 
 	private static final char [] BOX_DRAWING_CHARS_BOLD = {'═', '║', '╔', '╗', '╚', '╝'};
 	private static final char [] BOX_DRAWING_CHARS_SINGLE = {'─', '│', '┌', '┐', '└', '┘'};
@@ -133,9 +133,12 @@ public class TextRenderer implements UIRenderer {
 	 */
 	@Override
 	public void renderDialog(DialogAction dialog) {
-		// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-		this.renderTextInFrame("ERRORE! Metodo per la visualizzazione ancora da implementare");
-		// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+		StringBuffer text = new StringBuffer(" \n" + dialog.getMessage());
+		text.append("\n\n");
+		text.append(">> " + dialog.getOption());
+		text.append(" [premi INVIO]\n ");
+		
+		this.renderLongTextInFrame(text.toString(), MAX_WIDTH);
 	}
 	
 	/**

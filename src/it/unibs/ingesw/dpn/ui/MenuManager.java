@@ -94,6 +94,7 @@ public class MenuManager {
 			String username = userInterface.getter().getString();
 			// Provo a loggare
 			if (loginManager.login(users, username)) {
+				userInterface.renderer().renderTextInFrame("Login effettuato con successo!");
 				getHomeMenuAction().execute(userInterface);
 			} else {
 				userInterface.renderer().renderError("Login fallito");
@@ -191,6 +192,11 @@ public class MenuManager {
 		// Callback per la proposta di un evento
 		SimpleAction eventCreationAction = (userInterface) -> {
 			Event newEvent = this.builderAssistant.createEvent(loginManager);
+			
+			// Se l'acquisizione è stata annullata
+			if (newEvent == null) {
+				return; // Termino immediatamente
+			}
 
 			// Aggiungo l'evento alla bacheca
 			this.model.getEventBoard().addEvent(newEvent, loginManager.getCurrentUser());

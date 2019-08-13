@@ -196,6 +196,7 @@ public class BuilderUIAssistant {
 		// Callback per abortire la creazione dell'utente
 		SimpleAction abortAction = (userInterface) -> {
 			builder.cancel();
+			finalisedAuxiliaryFieldable = null;
 			userInterface.renderer().renderTextInFrame("Creazione annullata");
 			};
 		// Aggiunta dell'opzione di uscita

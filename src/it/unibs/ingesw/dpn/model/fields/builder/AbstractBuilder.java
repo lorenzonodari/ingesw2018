@@ -153,7 +153,7 @@ public abstract class AbstractBuilder implements FieldableBuilder {
 	@Override
 	public void cancel() {
 		// Gestione dello stato
-		this.state.onFinalisation(this);
+		this.state.onCancelation(this);
 		
 		if (this.backupValuesMap != null) {
 			// Se termino la modalità di editing, ripristino l'oggetto dal backup
