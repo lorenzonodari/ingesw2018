@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import it.unibs.ingesw.dpn.Main;
-import it.unibs.ingesw.dpn.model.ModelManager;
+import it.unibs.ingesw.dpn.model.persistence.Model;
 import it.unibs.ingesw.dpn.model.users.UsersRepository;
 import it.unibs.ingesw.dpn.model.users.Invite;
 import it.unibs.ingesw.dpn.model.users.LoginManager;
@@ -32,7 +32,7 @@ public class MenuManager {
 	private UserInterface userInterface;
 	
 	/** Riferimento agli oggetti del Model */
-	private ModelManager model;
+	private Model model;
 	
 	/** Riferimento al DB di utenti */
 	private UsersRepository users;
@@ -53,7 +53,7 @@ public class MenuManager {
 	 * @param model Il gestore dei dati di dominio da utilizzare
 	 * @param userInterface L'interfaccia utente da utilizzare per i menu
 	 */
-	public MenuManager(ModelManager model, UserInterface userInterface) {
+	public MenuManager(Model model, UserInterface userInterface) {
 		
 		// Verifica della precondizione
 		if (model == null || userInterface == null) {
@@ -62,7 +62,7 @@ public class MenuManager {
 		
 		this.userInterface = userInterface;
 		this.model = model;
-		this.users = model.getUsersManager();
+		this.users = model.getUsersRepository();
 		this.loginManager = new LoginManager(); // TODO Non dovrebbe essere il sistema di menu a crearlo
 		this.builderAssistant = new BuilderUIAssistant(this.userInterface);
 		
@@ -180,7 +180,7 @@ public class MenuManager {
 		MenuAction categoriesViewMenuAction = new MenuAction("Menu categorie", "Categorie di eventi disponibili:");
 		
 		// Callback categorie
-		for (Category category : model.getAllCategories()) {
+		for (Category category : Category.values()) {
 			// Associo al nome della categoria l'azione del menu relativo ad essa
 			categoriesViewMenuAction.addEntry(category.getName(), getCategoryMenuAction(category));
 		}

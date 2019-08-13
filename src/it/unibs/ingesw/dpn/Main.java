@@ -2,10 +2,14 @@ package it.unibs.ingesw.dpn;
 
 import java.io.File;
 
+import it.unibs.ingesw.dpn.model.persistence.DiskSerializationStrategy;
+import it.unibs.ingesw.dpn.model.persistence.PersistenceException;
+import it.unibs.ingesw.dpn.model.persistence.PersistenceManager;
 import it.unibs.ingesw.dpn.ui.MenuManager;
 import it.unibs.ingesw.dpn.ui.TextUI;
 import it.unibs.ingesw.dpn.ui.UserInterface;
-import it.unibs.ingesw.dpn.model.ModelManager;
+
+
 
 public class Main {
 	
@@ -14,25 +18,26 @@ public class Main {
 	public static final int DB_SAVE_ERROR_EXIT_CODE = 2;
 	
 	public static final File DEFAULT_DATABASE = new File(System.getProperty("user.home"), "socialnetwork.db");
-	
-	private static ModelManager modelManager = null;
+
+	private static PersistenceManager persistenceManager = null;
 	private static UserInterface userInterface = null;
 	private static MenuManager menuManager = null;
 
 	public static void main(String[] args) {
 		
-		if (DEFAULT_DATABASE.exists() && DEFAULT_DATABASE.canRead()) {
-			
-			modelManager = ModelManager.loadFromDisk(DEFAULT_DATABASE);
-			
+
+		try {
+			persistenceManager = new PersistenceManager(new DiskSerializationStrategy(DEFAULT_DATABASE));
+			persistenceManager.load();
 		}
-		else {
-			
-			modelManager = new ModelManager();
+		catch (PersistenceException ex) {
+			System.err.println("Errore durante la lettura del database di dominio: impossibile avviare l'applicazione");
+			ex.printStackTrace();
+			System.exit(DB_LOAD_ERROR_EXIT_CODE);
 		}
-		
+
 		userInterface = new TextUI();
-		menuManager = new MenuManager(modelManager, userInterface);
+		menuManager = new MenuManager(persistenceManager.getModel(), userInterface);
 		
 		// Avvio del menu
 		menuManager.getStartMenuAction().execute(userInterface);
@@ -41,7 +46,14 @@ public class Main {
 	
 	public static void terminate(int status) {
 		
-		modelManager.saveToDisk(DEFAULT_DATABASE);
+		try {
+			persistenceManager.save();
+		}
+		catch (PersistenceException ex) {
+			System.err.println("Errore durante la scrittura del database di dominio: impossibile salvare i dati");
+			status = DB_SAVE_ERROR_EXIT_CODE;
+		}
+		
 		System.exit(status);
 		
 	}
