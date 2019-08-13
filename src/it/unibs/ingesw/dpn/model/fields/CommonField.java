@@ -440,7 +440,7 @@ public enum CommonField implements Field, Serializable {
 				// Verifico che il valore del campo di comparazione sia presente
 				fieldable.getFieldValue(comparingDateField) != null && 
 				// Verifico che la data da controllare sia successiva o contemporanea al valore del campo
-				date.getValue().compareTo((Date) fieldable.getFieldValue(comparingDateField)) >= 0
+				date.getValue().compareTo(((DateFieldValue) fieldable.getFieldValue(comparingDateField)).getValue()) >= 0
 				);
 	}
 
@@ -465,7 +465,7 @@ public enum CommonField implements Field, Serializable {
 				// Verifico che il valore del campo di comparazione sia presente
 				fieldable.getFieldValue(comparingDateField) != null && 
 				// Verifico che la data da controllare sia successiva o contemporanea al valore del campo
-				date.getValue().compareTo((Date) fieldable.getFieldValue(comparingDateField)) <= 0
+				date.getValue().compareTo(((DateFieldValue) fieldable.getFieldValue(comparingDateField)).getValue()) <= 0
 				);
 	}
 	

@@ -68,7 +68,7 @@ public interface Field {
 	
 	/**
 	 * Crea e restituisce un'istanza "vuota" di FieldValue. Con vuota si intende che tale 
-	 * instanza non contiene ancora alcun valore. Affinche' tale istanza rappresenti un valore
+	 * istanza non contiene ancora alcun valore. Affinché tale istanza rappresenti un valore
 	 * effettivo, dovra' quindi essere inizializzata mediante il metodo initializeFieldValue()
 	 */
 	public FieldValue createBlankFieldValue();

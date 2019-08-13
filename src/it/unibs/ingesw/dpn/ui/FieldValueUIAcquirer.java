@@ -56,8 +56,8 @@ public class FieldValueUIAcquirer {
 			// Tento di acquisire un valore
 			try {
 				// Il primo livello di verifica che faccio è sul valore stesso, deve essere accettabile in quanto tale
-				
 				value = field.createBlankFieldValue();
+				value.initializeValue(userInterface);
 					
 				// Il secondo livello di verifica coinvolge anche il Field e l'oggetto Fieldable interessato,
 				// e si compone di tre fasi:
