@@ -8,7 +8,6 @@ import it.unibs.ingesw.dpn.model.categories.Category;
 import it.unibs.ingesw.dpn.model.events.Event;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fields.Fieldable;
-import it.unibs.ingesw.dpn.model.fields.UserField;
 import it.unibs.ingesw.dpn.model.fields.builder.EventBuilder;
 import it.unibs.ingesw.dpn.model.fields.builder.FieldableBuilder;
 import it.unibs.ingesw.dpn.model.fields.builder.UserBuilder;
@@ -114,7 +113,7 @@ public class BuilderUIAssistant {
 		
 			if (this.finalisedAuxiliaryFieldable != null &&
 					usersManager.isNicknameExisting(
-							this.finalisedAuxiliaryFieldable.getFieldValue(UserField.NICKNAME).toString())) {
+							((User) this.finalisedAuxiliaryFieldable).getNickname())) {
 				userInterface.renderer().renderError("Il nickname scelto è già in uso.\nSelezionare un altro nickname.");
 			} else {
 				repeatFlag = false;

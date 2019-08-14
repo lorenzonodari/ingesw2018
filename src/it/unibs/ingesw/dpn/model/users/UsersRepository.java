@@ -41,7 +41,7 @@ public class UsersRepository implements Serializable {
 		
 		User result = null;
 		for (User user : this.users) {
-			if (user.getFieldValue(UserField.NICKNAME).toString().equals(nickname)) {
+			if (user.getNickname().equals(nickname)) {
 				result = user;
 				break;
 			}
@@ -91,7 +91,7 @@ public class UsersRepository implements Serializable {
 	 */
 	public boolean isNicknameExisting(String nickname) {
 		for (User u : this.users) {
-			if (u.getFieldValue(UserField.NICKNAME).toString().equals(nickname)) {
+			if (u.getNickname().toString().equals(nickname)) {
 				return true;
 			}
 		}

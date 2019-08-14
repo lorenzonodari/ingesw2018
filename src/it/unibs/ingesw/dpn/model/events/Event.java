@@ -560,7 +560,7 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 		String categoryName = this.category.getName();
 		description.append(String.format("Categoria   : %s\n", categoryName));
 		// Creatore
-		description.append(String.format("Creatore    : %s\n", this.getCreator().getFieldValue(UserField.NICKNAME)));
+		description.append(String.format("Creatore    : %s\n", this.getCreator().getNickname()));
 		// Valori dei campi
 		description.append("Campi       :\n");
 		for (Field f : this.category.getFields()) {

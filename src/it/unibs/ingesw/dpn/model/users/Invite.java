@@ -6,7 +6,6 @@ import java.util.Date;
 
 import it.unibs.ingesw.dpn.model.events.Event;
 import it.unibs.ingesw.dpn.model.fields.CommonField;
-import it.unibs.ingesw.dpn.model.fields.UserField;
 
 /**
  * Classe utilizzata per rappresentare gli inviti scambiati tra gli utenti.
@@ -57,7 +56,7 @@ public class Invite implements Serializable {
 		buffer.append(DATE_FORMAT.format(this.date));
 		buffer.append(" : ");
 		buffer.append(String.format("%s ti ha invitato all'evento \"%s\"", 
-				                    event.getCreator().getFieldValue(UserField.NICKNAME),
+				                    event.getCreator().getNickname(),
 				                    event.getFieldValue(CommonField.TITOLO)));
 		
 		return buffer.toString();

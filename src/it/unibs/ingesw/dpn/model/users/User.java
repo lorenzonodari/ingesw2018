@@ -5,9 +5,15 @@ import java.util.List;
 import it.unibs.ingesw.dpn.model.fields.AbstractFieldable;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fields.UserField;
+import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
 
 /**
- * Classe utilizzata per contenere i dati relativi ad un singolo utente
+ * Classe utilizzata per contenere i dati relativi ad un singolo utente.<br>
+ * <br>
+ * Un utente si differenzia sulla base del nickname, una stringa con la quale
+ * è identificato univocamente all'interno del database del programma.
+ * 
+ * @author Michele Dusi, Lorenzo Nodari, Emanuele Poggi
  */
 public class User extends AbstractFieldable {
 	
@@ -43,6 +49,19 @@ public class User extends AbstractFieldable {
 	@Override
 	public void setDefaultFieldValues() {
 		// Al momento non esistono campi da impostare in maniera automatica con valori di default
+	}
+	
+	/**
+	 * Restituisce il nickname dell'utente.<br>
+	 * Questo metodo non richiede che il metodo chiamante conosca la composizione in Field della classe utente,
+	 * e pertanto rende più agevole la chiamata.<br>
+	 * Inoltre, questo metodo è spesso utilizzato all'esterno proprio perché un oggetto {@link User}
+	 * si differenzia sulla base del nickname.
+	 * 
+	 * @return Il nickname dell'utente
+	 */
+	public String getNickname() {
+		return ((StringFieldValue) this.getFieldValue(UserField.NICKNAME)).toString();
 	}
 	
 	/**

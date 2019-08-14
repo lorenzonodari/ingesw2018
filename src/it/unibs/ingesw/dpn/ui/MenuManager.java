@@ -24,9 +24,7 @@ import it.unibs.ingesw.dpn.model.events.Event;
 import it.unibs.ingesw.dpn.model.events.EventState;
 import it.unibs.ingesw.dpn.model.events.Inviter;
 import it.unibs.ingesw.dpn.model.fields.CommonField;
-import it.unibs.ingesw.dpn.model.fields.UserField;
 import it.unibs.ingesw.dpn.model.fields.Field;
-import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
 
 /**
  * Classe adibita alla gestione e alla creazione del sistema dei menu.
@@ -362,7 +360,7 @@ public class MenuManager {
 		Set<User> candidates = inviter.getCandidates();
 		Map<User, String> candidatesNicknames = new LinkedHashMap<>();
 		for (User candidate : candidates) {
-			candidatesNicknames.put(candidate, ((StringFieldValue) candidate.getFieldValue(UserField.NICKNAME)).toString());
+			candidatesNicknames.put(candidate, candidate.getNickname());
 		}
 		// Menu di selezione
 		CheckboxListMenuAction<User> userInvitationsMenuAction = new CheckboxListMenuAction<User>(
