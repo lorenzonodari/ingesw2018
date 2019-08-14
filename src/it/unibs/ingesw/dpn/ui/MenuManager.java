@@ -290,14 +290,12 @@ public class MenuManager {
 		MenuAction subscriptionsMenuAction = new MenuAction("Le mie iscrizioni", null);
 		
 		// Callback per ogni evento al quale l'utente e' iscritto ma del quale non e' creatore
-		
-		// TODO Creare nella EventBoard un metodo che filtri già gli eventi a cui si è iscritti ma senza essere creatori.
-		List<Event> subscriptions = model.getEventBoard().getUserSubscriptions(loginManager.getCurrentUser());
+		List<Event> subscriptions = model.getEventBoard().getOpenSubscriptionsNotProposedByUser(loginManager.getCurrentUser());
 		for (Event event : subscriptions) {
 			// Per ciascuna iscrizione aggiungo un'opzione al menu
-			if (event.getCreator() != loginManager.getCurrentUser()) {
-				subscriptionsMenuAction.addEntry(event.getFieldValue(CommonField.TITOLO).toString(), getEventMenuAction(event));
-			}
+			subscriptionsMenuAction.addEntry(
+					event.getFieldValue(CommonField.TITOLO).toString(), 
+					getEventMenuAction(event));
 		}
 		
 		return subscriptionsMenuAction;

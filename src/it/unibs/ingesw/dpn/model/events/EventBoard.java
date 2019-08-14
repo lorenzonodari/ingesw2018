@@ -105,18 +105,35 @@ public class EventBoard implements Serializable {
 				.filter(event -> event.getCreator() == author)
 				.collect(Collectors.toCollection(ArrayList::new));
 	}
+
 	/**
-	 * Restituisce la lista degli aperti a cui l'utente è iscritto
+	 * Restituisce la lista degli eventi aperti a cui l'utente è iscritto.
 	 * 
-	 * @param user : utente su cui avviene la ricerca 
+	 * @param user L'utente su cui avviene la ricerca 
 	 */
-	public List<Event> getUserSubscriptions(User user) {
+	public List<Event> getOpenSubscriptionsByUser(User user) {
 		return events
 				.stream()
 				.filter(event -> event.hasSubscriber(user))
 				.filter(event -> event.getState().equals(EventState.OPEN))
 				.collect(Collectors.toCollection(ArrayList::new));
 	}
+	
+	/**
+	 * Restituisce la lista degli eventi aperti a cui l'utente è iscritto e di cui l'utente NON è autore.
+	 * 
+	 * @param user L'utente su cui avviene la ricerca 
+	 */
+	public List<Event> getOpenSubscriptionsNotProposedByUser(User user) {
+		return events
+				.stream()
+				.filter(event -> event.hasSubscriber(user))
+				.filter(event -> !event.getCreator().equals(user))
+				.filter(event -> event.getState().equals(EventState.OPEN))
+				.collect(Collectors.toCollection(ArrayList::new));
+	}
+	
+	
 	/**
 	 * Funzione che prende in ingresso un utente e restituisce una lista di 
 	 * tutti gli utenti che hanno partecipato a eventi precedentemente creati
