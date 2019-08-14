@@ -136,7 +136,7 @@ public class MenuManager {
 			userInterface.renderer().renderTextInFrame("Logout effettuato");
 		};
 		
-		return new ConfirmAction("Procedere con il logout?", logoutAction);
+		return logoutAction;
 	}
 	
 	private Action getBoardMenuAction() {
