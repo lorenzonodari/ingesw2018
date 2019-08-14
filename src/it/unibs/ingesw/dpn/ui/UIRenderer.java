@@ -56,6 +56,19 @@ public interface UIRenderer {
 	 * @param text Il testo da renderizzare
 	 */
 	public void renderTextInFrame(String text);
+
+	/**
+	 * Renderizza un testo con intorno una cornice.
+	 * Il testo può essere lungo a piacere, può contenere caratteri di "newline" che il metodo
+	 * gestirà in maniera automatica. In caso una riga di testo avesse una lunghezza superiore al valore
+	 * massimo di default, questa verrà renderizzata su più linee.
+	 * <br><br>
+	 * Questo metodo equivale al corrispondente metodo <code>renderLongTextInFrame(String, int)</code>
+	 * ma dove il parametro sulla lunghezza è impostato di default.
+	 * 
+	 * @param text Il testo da renderizzare
+	 */
+	public void renderLongTextInFrame(String text);
 	
 	/**
 	 * Renderizza un testo con intorno una cornice.
@@ -77,6 +90,6 @@ public interface UIRenderer {
 	 * 
 	 * @param errorText Il messaggio d'errore da visualizzare
 	 */
-	void renderError(String errorText);
+	public void renderError(String errorText);
 
 }

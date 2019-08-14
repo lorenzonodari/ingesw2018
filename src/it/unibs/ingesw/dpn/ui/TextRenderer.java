@@ -17,18 +17,59 @@ public class TextRenderer implements UIRenderer {
 	
 	private static final int HORIZ_PADDING = 3;
 	private static final int MAX_WIDTH = 100;
-
-	private static final char [] BOX_DRAWING_CHARS_BOLD = {'═', '║', '╔', '╗', '╚', '╝'};
-	private static final char [] BOX_DRAWING_CHARS_SINGLE = {'─', '│', '┌', '┐', '└', '┘'};
+	
+	private static final char [] BOX_DRAWING_CHARS_DOUBLE = {'═', '║', '╝', '╚', '╗', '╔'};
+	private static final char [] BOX_DRAWING_CHARS_SINGLE = {'─', '│', '┘', '└', '┐', '┌'};
 	private static final char T_EAST = '╟';
 	private static final char T_WEST = '╢';
-	private static final int HORIZ = 0;
-	private static final int VERTI = 1;
-	private static final int NO_WE = 2;
-	private static final int NO_EA = 3;
-	private static final int SO_WE = 4;
-	private static final int SO_EA = 5;
+	
+	/** Stili di default. */
+	private static final CharStyle DEFAULT_FRAME_STYLE = CharStyle.SINGLE;
+	private static final CharStyle DEFAULT_CONFIRM_STYLE = CharStyle.SINGLE;
+	private static final CharStyle DEFAULT_DIALOG_STYLE = CharStyle.SINGLE;
+	
+	/**
+	 * Rappresenta un pezzo di cornice.
+	 */
+	private static enum CharFrame {
+		HORIZONTAL,
+		VERTICAL,
+		NORTH_WEST,
+		NORTH_EAST,
+		SOUTH_WEST,
+		SOUTH_EAST
+	}
+	
+	/**
+	 * Rappresenta uno stile di cornice.
+	 */
+	public static enum CharStyle {
+		SINGLE (BOX_DRAWING_CHARS_SINGLE),
+		DOUBLE (BOX_DRAWING_CHARS_DOUBLE);
+		
+		private char [] charSet;
+		
+		private CharStyle(char [] charSet) {
+			this.charSet = charSet;
+		}
+		
+		/**
+		 * Restituisce il carattere di cornice selezionato.
+		 * 
+		 * @param framePiece Il pezzo di cornice da ottenere
+		 * @return Il pezzo di cornice dello stile corrispondente
+		 */
+		public char get(CharFrame framePiece) {
+			return this.charSet[framePiece.ordinal()];
+		}
+		
+	}
 
+	/**
+	 * Metodo adibito al rendering dell'intero menu.
+	 * 
+	 * @param menu Il menu da renderizzare
+	 */
 	@Override
 	public void renderMenu(MenuAction menu) {
 		
@@ -36,7 +77,7 @@ public class TextRenderer implements UIRenderer {
 		StringBuffer result = new StringBuffer();
 		
 	// Preparo il contenuto dell'intestazione
-		String titleLine = addHorizPadding(menu.getTitle());
+		String titleLine = addHorizontalPadding(menu.getTitle());
 		
 	// Preparo il corpo
 		StringBuffer body = new StringBuffer("\n");
@@ -67,39 +108,42 @@ public class TextRenderer implements UIRenderer {
 		}
 		int bodyOverwidth = bodyWidth - titleWidth - 2;
 		
+		// Stile del menu
+		CharStyle titleStyle = CharStyle.DOUBLE;
+		CharStyle boxStyle = CharStyle.SINGLE;
 		
 		// Costruisco il bordo superiore
-		result.append(" " + getTopFrame(titleWidth, BOX_DRAWING_CHARS_BOLD) + "\n");
+		result.append(" " + getFrameTopLine(titleWidth, titleStyle) + "\n");
 		
 		// Costruisco la riga centrale
-		result.append(BOX_DRAWING_CHARS_SINGLE[NO_WE]);
+		result.append(boxStyle.get(CharFrame.SOUTH_EAST));
 		result.append(T_WEST);
 		result.append(titleLine);
 		result.append(T_EAST);
 		result.append(iterateChar(
-				BOX_DRAWING_CHARS_SINGLE[HORIZ], 
+				boxStyle.get(CharFrame.HORIZONTAL), 
 				bodyOverwidth));
-		result.append(BOX_DRAWING_CHARS_SINGLE[NO_EA]);
+		result.append(boxStyle.get(CharFrame.SOUTH_WEST));
 		result.append("\n");
 		
 		// Costruisco la riga di chiusura del titolo
-		result.append(BOX_DRAWING_CHARS_SINGLE[VERTI]);
-		result.append(getBottomFrame(titleLine.length() + 2, BOX_DRAWING_CHARS_BOLD));
+		result.append(boxStyle.get(CharFrame.VERTICAL));
+		result.append(getFrameBottomLine(titleLine.length() + 2, titleStyle));
 		result.append(iterateChar(' ', bodyOverwidth));
-		result.append(BOX_DRAWING_CHARS_SINGLE[VERTI]);
+		result.append(boxStyle.get(CharFrame.VERTICAL));
 		result.append("\n");
 		
+		// RIghe centrali del corpo del menu
 		for (String line : bodyLines) {
-			result.append(BOX_DRAWING_CHARS_SINGLE[VERTI]);
-			result.append(addHorizPadding(String.format("%-" + bodyTextWidth + "s", line)));
-			result.append(BOX_DRAWING_CHARS_SINGLE[VERTI]);
+			result.append(getFrameMiddleLine(bodyWidth, boxStyle, line));
 			result.append("\n");
 		}
 		
-		result.append(getBottomFrame(bodyWidth, BOX_DRAWING_CHARS_SINGLE));
+		// Riga di chiusura
+		result.append(getFrameBottomLine(bodyWidth, boxStyle));
 		
+		// Stampo tutto
 		System.out.println(result.toString());
-		
 		
 	}
 
@@ -122,7 +166,7 @@ public class TextRenderer implements UIRenderer {
 		
 		result.append(" "); // Aggiungo una riga vuota finale
 	
-		this.renderLongTextInFrame(result.toString(), MAX_WIDTH);
+		this.renderLongTextInFrame(result.toString(), MAX_WIDTH, DEFAULT_CONFIRM_STYLE);
 		
 	}
 
@@ -138,7 +182,7 @@ public class TextRenderer implements UIRenderer {
 		text.append(">> " + dialog.getOption());
 		text.append(" [premi INVIO]\n ");
 		
-		this.renderLongTextInFrame(text.toString(), MAX_WIDTH);
+		this.renderLongTextInFrame(text.toString(), MAX_WIDTH, DEFAULT_DIALOG_STYLE);
 	}
 	
 	/**
@@ -148,7 +192,7 @@ public class TextRenderer implements UIRenderer {
 	 * @param text La stringa di testo
 	 * @return La stringa con la spaziatura corretta a lato
 	 */
-	private String addHorizPadding(String text) {
+	private String addHorizontalPadding(String text) {
 		if (text == null) {
 			throw new IllegalArgumentException("Impossibile accettare una stringa nulla");
 		}
@@ -167,18 +211,18 @@ public class TextRenderer implements UIRenderer {
 	 * Precondizione: la larghezza "width" deve essere almeno 2.
 	 * 
 	 * @param width La larghezza della cornice, compresi i due angoli
-	 * @param charSet
+	 * @param style Lo stile di caratteri da utilizzare
 	 * @return
 	 */
-	private String getTopFrame(int width, char [] charSet) {
+	private String getFrameTopLine(int width, CharStyle style) {
 		if (width < 2) {
 			throw new IllegalArgumentException("Impossibile creare una cornice con larghezza inferiore a 2");
 		}
 		
 		StringBuffer s = new StringBuffer();
-		s.append(charSet[NO_WE]);
-		s.append(iterateChar(charSet[HORIZ], width - 2));
-		s.append(charSet[NO_EA]);
+		s.append(style.get(CharFrame.SOUTH_EAST));
+		s.append(iterateChar(style.get(CharFrame.HORIZONTAL), width - 2));
+		s.append(style.get(CharFrame.SOUTH_WEST));
 		// Restituisco il valore
 		return s.toString();
 	}
@@ -190,20 +234,52 @@ public class TextRenderer implements UIRenderer {
 	 * Precondizione: la larghezza "width" deve essere almeno 2.
 	 * 
 	 * @param width La larghezza della cornice, compresi i due angoli
-	 * @param charSet Il set di caratteri da utilizzare
+	 * @param style Lo stile di caratteri da utilizzare
 	 * @return La stringa formattata correttamente
 	 */
-	private String getBottomFrame(int width, char [] charSet) {
+	private String getFrameBottomLine(int width, CharStyle style) {
 		if (width < 2) {
 			throw new IllegalArgumentException("Impossibile creare una cornice con larghezza inferiore a 2");
 		}
 		
 		StringBuffer s = new StringBuffer();
-		s.append(charSet[SO_WE]);
-		s.append(iterateChar(charSet[HORIZ], width - 2));
-		s.append(charSet[SO_EA]);
+		s.append(style.get(CharFrame.NORTH_EAST));
+		s.append(iterateChar(style.get(CharFrame.HORIZONTAL), width - 2));
+		s.append(style.get(CharFrame.NORTH_WEST));
 		// Restituisco il valore
 		return s.toString();
+	}
+	
+	/**
+	 * Restituisce una linea "di mezzo" di una cornice, eventualmente con testo.
+	 * 
+	 * Precondizione: Il testo deve avere una lunghezza sufficiente per stare nella cornice, comprensiva di padding.
+	 * 
+	 * @param width La larghezza delle "box" (comprensiva di estremi)
+	 * @param style Lo stile della "box"/cornice
+	 * @param text Il testo da inserire
+	 * @return La stringa rappresentante la linea
+	 */
+	private String getFrameMiddleLine(int width, CharStyle style, String text) {
+		// Calcolo la dimensione massima che può prendere il testo
+		int maxTextWidth = width - HORIZ_PADDING * 2 - 2;
+		// Eventualmente, in caso di testo nullo, visualizzo una riga vuota
+		if (text == null) {
+			text = "";
+		}
+		// Verifica delle precondizioni
+		if (text.trim().length() > maxTextWidth) {
+			throw new IllegalArgumentException("Dimensione del testo eccessiva");
+		}
+		
+		StringBuffer s = new StringBuffer();
+		s.append(style.get(CharFrame.VERTICAL));
+		s.append(iterateChar(' ', HORIZ_PADDING));
+		s.append(String.format("%-" + maxTextWidth + "s", text.trim()));
+		s.append(iterateChar(' ', HORIZ_PADDING));
+		s.append(style.get(CharFrame.VERTICAL));
+		
+		return s.toString();		
 	}
 	
 	/**
@@ -266,44 +342,6 @@ public class TextRenderer implements UIRenderer {
 	public void renderLineSpace() {
 		System.out.println();
 	}
-
-	@Override
-	public void renderText(String text) {
-		System.out.println(text);		
-	}
-	
-	@Override
-	public void renderTextInFrame(String text) {
-		int len = text.trim().length();
-		StringBuffer orizLine = new StringBuffer();
-		for (int i = 0; i < len + HORIZ_PADDING * 2; i++) {
-			orizLine.append(BOX_DRAWING_CHARS_BOLD[HORIZ]);
-		}
-		// Costruisco la stringa finale
-		StringBuffer result = new StringBuffer();
-		
-		// Costruisco la prima riga, la cornice orizzontale di apertura
-		result.append(BOX_DRAWING_CHARS_BOLD[NO_WE]);
-		result.append(orizLine.toString());
-		result.append(BOX_DRAWING_CHARS_BOLD[NO_EA]);
-		result.append("\n");
-		
-		// Costruisco la riga centrale
-		result.append(BOX_DRAWING_CHARS_BOLD[VERTI]);
-		for (int i = 0; i < HORIZ_PADDING; i++) { result.append(" "); }
-		result.append(text.trim());
-		for (int i = 0; i < HORIZ_PADDING; i++) { result.append(" "); }
-		result.append(BOX_DRAWING_CHARS_BOLD[VERTI]);
-		result.append("\n");
-		
-		// Costruisco la riga di chiusura
-		result.append(BOX_DRAWING_CHARS_BOLD[SO_WE]);
-		result.append(orizLine.toString());
-		result.append(BOX_DRAWING_CHARS_BOLD[SO_EA]);
-		
-		// Stampo tutto
-		System.out.println(result.toString());
-	}
 	
 	/**
 	 * Separa un testo lungo, passato come parametro in un'unica stringa, in più sotto-stringhe
@@ -363,47 +401,125 @@ public class TextRenderer implements UIRenderer {
 				.get()
 				.length();
 	}
+
+	/**
+	 * Stampa il testo su una linea vuota.
+	 * 
+	 * @param Il testo da visualizzare
+	 */
+	@Override
+	public void renderText(String text) {
+		System.out.println(text);		
+	}
+
+	/**
+	 * Renderizza un testo con intorno una cornice.
+	 * Utilizzato solitamente per titoli o testi particolarmente importanti.
+	 * 
+	 * Precondizione: il testo NON deve contenere caratteri speciali come "\n" o "\t".
+	 * In altre parole, deve essere contenuto in un'unica linea compatta.
+	 * 
+	 * @param text Il testo da renderizzare
+	 */
+	@Override
+	public void renderTextInFrame(String text) {
+		this.renderTextInFrame(text, DEFAULT_FRAME_STYLE);
+	}
 	
+	/**
+	 * Stampa il testo in una cornice con stile predefinito.
+	 * La cornice NON ha una lunghezza massima, ma si adatta al testo.
+	 * Il testo NON deve contenere caratteri speciali come "\n" o "\t", ma <em>deve essere contenuto su un'unica linea</em>.
+	 * 
+	 * @param text Il testo da visualizzare
+	 * @param style Lo stile della cornice
+	 */
+	private void renderTextInFrame(String text, CharStyle style) {
+		// Calcolo delle dimensioni
+		int frameWidth = text.trim().length() + HORIZ_PADDING * 2 + 2;
+		// Costruisco la stringa finale
+		StringBuffer result = new StringBuffer();
+		
+		// Costruisco la cornice, aggregando tre linee di testo 
+		result.append(getFrameTopLine(frameWidth, style));
+		result.append("\n");
+		result.append(getFrameMiddleLine(frameWidth, style, text.trim()));
+		result.append("\n");
+		result.append(getFrameBottomLine(frameWidth, style));
+		
+		// Stampo tutto
+		System.out.println(result.toString());
+	}
+
+	/**
+	 * Renderizza un testo con intorno una cornice.
+	 * Il testo può essere lungo a piacere, può contenere caratteri di "newline" che il metodo
+	 * gestirà in maniera automatica. In caso una riga di testo avesse una lunghezza superiore al valore
+	 * massimo di default, questa verrà renderizzata su più linee.
+	 * <br><br>
+	 * Questo metodo equivale al corrispondente metodo <code>renderLongTextInFrame(String, int)</code>
+	 * ma dove il parametro sulla lunghezza è impostato di default.
+	 * 
+	 * @param text Il testo da renderizzare
+	 */
+	@Override
+	public void renderLongTextInFrame(String text) {
+		this.renderLongTextInFrame(text, MAX_WIDTH);
+	}
+
+	/**
+	 * Renderizza un testo con intorno una cornice.
+	 * Il testo può essere lungo a piacere, può contenere caratteri di "newline" che il metodo
+	 * gestirà in maniera automatica. In caso una riga di testo avesse una lunghezza superiore al valore di 
+	 * "maxLenght", questa verrà spezzata (con "\n") al primo spazio (" ") disponibile.
+	 * 
+	 * Nota: il parametro maxLenght NON indica l'ampiezza massima della cornice, bensì la massima lunghezza 
+	 * (in numero di caratteri) di una singola riga di testo, esclusi appunto i caratteri necessari per la 
+	 * visualizzazione grafica.
+	 * 
+	 * @param text Il testo da renderizzare
+	 * @param maxLenght La massima lunghezza di una riga di testo
+	 */
 	@Override
 	public void renderLongTextInFrame(String text, int maxLenght) {
+		this.renderLongTextInFrame(text, maxLenght, DEFAULT_FRAME_STYLE);
+	}
+	
+	/**
+	 * Renderizza un testo in una finestra di dimensione massima prefissata,
+	 * con lo stile predefinito.
+	 * 
+	 * @param text Il testo da renderizzare
+	 * @param maxLenght La massima lunghezza di una riga di testo
+	 * @param style Lo stile della finestra
+	 */
+	private void renderLongTextInFrame(String text, int maxLenght, CharStyle style) {
 		// Spezzo il testo in linee di una certa massima lunghezza
 		List<String> textLines = getStringLines(text, maxLenght);
 		
 		// A questo punto textLines contiene tutte le righe perfettamente formate
 		// Ne calcolo la massima lunghezza
 		int textWidth = getMaxLength(textLines);
-
-		StringBuffer orizLine = new StringBuffer();
-		for (int i = 0; i < textWidth + HORIZ_PADDING * 2; i++) {
-			orizLine.append(BOX_DRAWING_CHARS_BOLD[HORIZ]);
-		}
+		int boxWidth = textWidth + HORIZ_PADDING * 2 + 2;
+		
 		// Costruisco la stringa finale
 		StringBuffer result = new StringBuffer();
 		
-		// Costruisco la prima riga, la cornice orizzontale di apertura
-		result.append(BOX_DRAWING_CHARS_BOLD[NO_WE]);
-		result.append(orizLine.toString());
-		result.append(BOX_DRAWING_CHARS_BOLD[NO_EA]);
+		// Cornice superiore
+		result.append(getFrameTopLine(boxWidth, style));
 		result.append("\n");
 
 		// Costruisco le righe centrali
 		for (String line : textLines) {
-			result.append(BOX_DRAWING_CHARS_BOLD[VERTI]);
-			for (int i = 0; i < HORIZ_PADDING; i++) { result.append(" "); }
-			result.append(String.format("%-" + textWidth + "s", line.trim()));
-			for (int i = 0; i < HORIZ_PADDING; i++) { result.append(" "); }
-			result.append(BOX_DRAWING_CHARS_BOLD[VERTI]);
+			result.append(getFrameMiddleLine(boxWidth, style, line.trim()));
 			result.append("\n");
 		}
 		
-		// Costruisco la riga finale
-		result.append(BOX_DRAWING_CHARS_BOLD[SO_WE]);
-		result.append(orizLine.toString());
-		result.append(BOX_DRAWING_CHARS_BOLD[SO_EA]);
+		// Cornice inferiore
+		result.append(getFrameBottomLine(boxWidth, style));
 		
 		// Stampo tutto
 		System.out.println(result.toString());
-
 	}
 
 	@Override
