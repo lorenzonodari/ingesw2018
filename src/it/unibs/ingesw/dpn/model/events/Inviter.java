@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
-import it.unibs.ingesw.dpn.model.fields.CommonField;
 import it.unibs.ingesw.dpn.model.persistence.Model;
 import it.unibs.ingesw.dpn.model.users.Invite;
 import it.unibs.ingesw.dpn.model.users.Notification;
@@ -164,7 +163,7 @@ public class Inviter {
 	public void sendNotifications() {
 		
 		StringBuffer notificationContent = new StringBuffer("Un evento appartenente ad una tua categoria di interesse è appena stato creato: ");
-		notificationContent.append(target.getFieldValue(CommonField.TITOLO));
+		notificationContent.append(target.getTitle());
 		
 		for(User u : model.getUsersRepository().getUserByCategoryOfInterest(target.getCategory())) {
 			

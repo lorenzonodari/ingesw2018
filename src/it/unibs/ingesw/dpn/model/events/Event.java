@@ -12,7 +12,6 @@ import it.unibs.ingesw.dpn.model.fields.AbstractFieldable;
 import it.unibs.ingesw.dpn.model.fields.CommonField;
 import it.unibs.ingesw.dpn.model.fields.ConferenceField;
 import it.unibs.ingesw.dpn.model.fields.Field;
-import it.unibs.ingesw.dpn.model.fields.UserField;
 import it.unibs.ingesw.dpn.model.fieldvalues.IntegerFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.MoneyAmountFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.OptionalCostsFieldValue;
@@ -117,7 +116,7 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 		this.setState(new ValidState());
 
 		// Comunico all'utente che ha creato l'evento
-		notifyCreator(String.format(EVENT_CREATION_MESSAGE, this.getFieldValue(CommonField.TITOLO)));	
+		notifyCreator(String.format(EVENT_CREATION_MESSAGE, this.getTitle()));	
 		
 	}
 	
@@ -171,6 +170,19 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 	 */
 	public Category getCategory() {
 		return this.category;
+	}
+	
+	/**
+	 * Restituisce il titolo dell'evento.<br>
+	 * Questo metodo maschera la struttura interna fatta di Field evitanto una troppo
+	 * frequente chiamata al metodo "getFieldValue".<br>
+	 * Poiché il titolo è un valore che sicuramente ogni evento possiede, visto che è impostato
+	 * di default, questo metodo restituisce sempre un valore attendibile.
+	 * 
+	 * @return Il titolo di questo evento
+	 */
+	public String getTitle() {
+		return this.getFieldValue(CommonField.TITOLO).toString();
 	}
 	
 	/**
@@ -391,7 +403,7 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 			StringBuffer message = new StringBuffer(
 					String.format(
 							EVENT_SUBSCRIPTION_MESSAGE, 
-							this.getFieldValue(CommonField.TITOLO)));
+							this.getTitle()));
 			message.append(String.format("; Importo dovuto: %.2f €", this.getExpensesForUser(subscriber)));
 		
 			subscriber.receive(new Notification(message.toString()));
@@ -446,7 +458,7 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 		
 		// Notifica l'utente che la disiscrizione è andata a buon fine
 		unsubscriber.receive(new Notification(
-				String.format(EVENT_UNSUBSCRIPTION_MESSAGE, this.getFieldValue(CommonField.TITOLO))
+				String.format(EVENT_UNSUBSCRIPTION_MESSAGE, this.getTitle())
 				));
 		return true;
 	}
@@ -530,9 +542,7 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 	 * @return Un valore numerico per capire l'ordinamento dei due eventi
 	 */
 	public int compareByTitleTo(Event e) {
-		String thisTitle = this.getFieldValue(CommonField.TITOLO).toString();
-		String otherTitle = e.getFieldValue(CommonField.TITOLO).toString();
-		return thisTitle.compareTo(otherTitle);
+		return this.getTitle().compareTo(e.getTitle());
 	}
 	
 	/**

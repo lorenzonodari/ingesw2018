@@ -45,7 +45,7 @@ public class ClosedState implements EventState, Serializable {
 		
 		// Invia promemoria agli iscritti
 		StringBuilder message = new StringBuilder(String.format(MEMO_NOTIFICATION_MESSAGE, 
-									   							e.getFieldValue(CommonField.TITOLO),
+									   							e.getTitle(),
 									   							e.getFieldValue(CommonField.DATA_E_ORA),
 									   							e.getFieldValue(CommonField.LUOGO)));
 		

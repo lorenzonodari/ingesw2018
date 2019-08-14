@@ -5,7 +5,6 @@ import java.util.List;
 import it.unibs.ingesw.dpn.model.fields.AbstractFieldable;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fields.UserField;
-import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
 
 /**
  * Classe utilizzata per contenere i dati relativi ad un singolo utente.<br>
@@ -61,7 +60,7 @@ public class User extends AbstractFieldable {
 	 * @return Il nickname dell'utente
 	 */
 	public String getNickname() {
-		return ((StringFieldValue) this.getFieldValue(UserField.NICKNAME)).toString();
+		return this.getFieldValue(UserField.NICKNAME).toString();
 	}
 	
 	/**

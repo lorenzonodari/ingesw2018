@@ -23,7 +23,6 @@ import it.unibs.ingesw.dpn.model.categories.Category;
 import it.unibs.ingesw.dpn.model.events.Event;
 import it.unibs.ingesw.dpn.model.events.EventState;
 import it.unibs.ingesw.dpn.model.events.Inviter;
-import it.unibs.ingesw.dpn.model.fields.CommonField;
 import it.unibs.ingesw.dpn.model.fields.Field;
 
 /**
@@ -176,7 +175,7 @@ public class MenuManager {
 		// Callback per gli eventi
 		for (Event open : model.getEventBoard().getEventsByState(EventState.OPEN)) {
 			// Associo al titolo dell'evento l'azione del menu relativo ad esso
-			eventsViewMenuAction.addEntry(open.getFieldValue(CommonField.TITOLO).toString(), getEventMenuAction(open));
+			eventsViewMenuAction.addEntry(open.getTitle(), getEventMenuAction(open));
 		}
 		
 		return eventsViewMenuAction;
@@ -292,7 +291,7 @@ public class MenuManager {
 		for (Event event : subscriptions) {
 			// Per ciascuna iscrizione aggiungo un'opzione al menu
 			subscriptionsMenuAction.addEntry(
-					event.getFieldValue(CommonField.TITOLO).toString(), 
+					event.getTitle(), 
 					getEventMenuAction(event));
 		}
 		
@@ -307,7 +306,7 @@ public class MenuManager {
 		List<Event> proposals = model.getEventBoard().getEventsByAuthor(loginManager.getCurrentUser());
 		for (Event event : proposals) {
 			// Per ciascuna proposta aggiungo un'opzione al menu
-			proposalsMenuAction.addEntry(event.getFieldValue(CommonField.TITOLO).toString(), getEventMenuAction(event));
+			proposalsMenuAction.addEntry(event.getTitle(), getEventMenuAction(event));
 		}
 		
 		return proposalsMenuAction;

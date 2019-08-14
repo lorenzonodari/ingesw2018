@@ -2,9 +2,6 @@ package it.unibs.ingesw.dpn.model.events;
 
 import java.io.Serializable;
 
-import it.unibs.ingesw.dpn.model.fields.CommonField;
-import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
-
 /**
  * Classe che modellizza il comportamento di un evento {@link Event} nello stato VALID.
  * 
@@ -25,7 +22,7 @@ public class WithdrawnState implements EventState, Serializable {
 	
 	public void onEntry(Event e) {
 		
-		FieldValue eventName = e.getFieldValue(CommonField.TITOLO);
+		String eventName = e.getTitle();
 		
 		String partecipantsMessage = String.format("L'evento \"%s\", al quale eri iscritto, e' stato ritirato", eventName);
 		e.notifyPartecipants(partecipantsMessage);
