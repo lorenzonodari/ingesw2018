@@ -12,14 +12,6 @@ package it.unibs.ingesw.dpn.ui;
  */
 @FunctionalInterface
 public interface SimpleAction extends Action {
-	
-	/**
-	 * Azione di default utile nel caso in cui non serva eseguire nulla.
-	 */
-	public static final SimpleAction EMPTY_ACTION = new SimpleAction() {
-		@Override
-		public void execute(UserInterface userInterface) {}
-	};
 
 	@Override
 	public void execute(UserInterface userInterface);

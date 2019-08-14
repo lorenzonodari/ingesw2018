@@ -11,6 +11,16 @@ package it.unibs.ingesw.dpn.ui;
  *
  */
 public interface Action {
+	
+	/**
+	 * Azione pre-costruita che non esegue nulla.<br>
+	 * E' implementata come istanza anonima di {@link SimpleAction}.
+	 */
+	public static final Action EMPTY_ACTION = new SimpleAction() {
+		// Azione vuota, non fa nulla.
+		@Override
+		public void execute(UserInterface userInterface) {}
+	};
 
 	/**
 	 * Metodo dell'interfaccia funzionale che esegue l'azione prevista.

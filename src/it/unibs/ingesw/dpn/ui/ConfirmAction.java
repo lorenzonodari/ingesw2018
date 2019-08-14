@@ -10,8 +10,10 @@ package it.unibs.ingesw.dpn.ui;
  * </ul>
  * Se confermata, procede poi all'esecuzione dell'azione {@link Action} a cui 
  * fa riferimento. <br>
- * L'esecuzione di questa Action termina dopo l'esecuzione (eventuale) dell'azione a cui 
- * fa riferimento. Si differenzia dalla classe {@link MenuAction} poiché quest'ultima forza 
+ * In caso contrario, non effettua azioni a meno che non venga impostata un'azione di "uscita".<br>
+ * L'esecuzione di questa Action termina dopo l'esecuzione dell'azione a cui 
+ * fa riferimento o dell'eventuale azione di uscita. 
+ * Si differenzia dalla classe {@link MenuAction} poiché quest'ultima forza 
  * l'utente a rimanere nel menu finché non viene selezionata l'opzione di uscita.
  * <br>
  * Nota: segue il pattern <em>Composite</em> insieme alla classe {@link Action}.
@@ -22,7 +24,8 @@ package it.unibs.ingesw.dpn.ui;
 public class ConfirmAction implements Action {
 	
 	private String message;
-	private Action referredAction;
+	private Action confirmAction;
+	private Action cancelAction;
 	private OptionStrings options;
 	
 	/**
@@ -69,8 +72,26 @@ public class ConfirmAction implements Action {
 		}
 		
 		this.message = message;
-		this.referredAction = actionToConfirm;
+		this.confirmAction = actionToConfirm;
+		this.cancelAction = Action.EMPTY_ACTION; // Azione vuota di default
 		this.options = OptionStrings.CONFIRM_CANCEL_OPTIONS;
+	}
+	
+	/**
+	 * Permette di impostare un'azione da eseguire quando viene selezionata l'opzione di "uscita".<br>
+	 * Anche in questo caso, come nel caso dell'azione di conferma, l'esecuzione provoca la terminazione; 
+	 * in altre parole -a differenza della classe {@link MenuAction}- non viene eseguito alcun ciclo che ripropone
+	 * le opzioni finché non si seleziona quella di uscita.
+	 * 
+	 * @param cancelAction L'azione da eseguire in caso di annullamento
+	 */
+	public void setCancelAction(Action cancelAction) {
+		// Verifica delle precondizioni
+		if (cancelAction == null) {
+			throw new IllegalArgumentException("Impossibile impostare un'azione nulla");
+		}
+		
+		this.cancelAction = cancelAction;
 	}
 	
 	/**
@@ -134,9 +155,9 @@ public class ConfirmAction implements Action {
 	public void execute(UserInterface userInterface) {
 		boolean selection = userInterface.getter().getConfirmChoice(this);
 		if (selection) {
-			this.referredAction.execute(userInterface);
+			this.confirmAction.execute(userInterface);
 		} else {
-			SimpleAction.EMPTY_ACTION.execute(userInterface);
+			this.cancelAction.execute(userInterface);
 		}
 	}
 
