@@ -1,5 +1,10 @@
 package it.unibs.ingesw.dpn.ui;
 
+import it.unibs.ingesw.dpn.ui.actions.Action;
+import it.unibs.ingesw.dpn.ui.actions.ConfirmAction;
+import it.unibs.ingesw.dpn.ui.actions.DialogAction;
+import it.unibs.ingesw.dpn.ui.actions.MenuAction;
+
 /**
  * Interfaccia utilizzata dalle classi adibite all'acquisizione di input dall'utente
  */

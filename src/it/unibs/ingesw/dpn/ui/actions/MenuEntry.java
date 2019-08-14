@@ -1,8 +1,7 @@
-package it.unibs.ingesw.dpn.ui;
+package it.unibs.ingesw.dpn.ui.actions;
 
 /**
  * Classe rappresentante una delle possibili scelte presentate in un menu dell'interfaccia utente.
- * Si noti che le istanze di questa classe sono immutabili.
  */
 public class MenuEntry {
 	
@@ -29,7 +28,7 @@ public class MenuEntry {
 		this.name = name;
 		this.entryAction = entryAction;
 	}
-	
+
 	/**
 	 * Restituisce il nome, ossia il messaggio, contenuto in questa entry.
 	 * 
@@ -40,6 +39,17 @@ public class MenuEntry {
 	}
 	
 	/**
+	 * Imposta il nome, ossia il messaggio, contenuto in questa entry.<br>
+	 * Se già presente, il nome precedente viene sovrascritto.<br>
+	 * Questo metodo è utilizzabile solo all'interno di questo package, per ragioni di sicurezza.
+	 * 
+	 * @param Il nuovo nome dell'entry.
+	 */
+	void setName(String name) {
+		this.name = name;
+	}
+	
+	/**
 	 * Restituisce l'azione contenuta in questa entry, ossia un oggetto {@link Action}
 	 * che poi può essere eseguita.
 	 * 
@@ -47,6 +57,16 @@ public class MenuEntry {
 	 */
 	public Action getAction() {
 		return this.entryAction;
+	}
+	
+	/**
+	 * Imposta l'azione contenuta in questa entry, ossia un oggetto {@link Action}.<br>
+	 * Questo metodo è utilizzabile solo all'interno di questo package, per ragioni di sicurezza.
+	 * 
+	 * @param La nuova azione dell'entry.
+	 */
+	void setAction(Action action) {
+		this.entryAction = action;
 	}
 	
 }

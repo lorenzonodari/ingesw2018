@@ -1,6 +1,9 @@
-package it.unibs.ingesw.dpn.ui;
+package it.unibs.ingesw.dpn.ui.actions;
 
 import java.util.List;
+
+import it.unibs.ingesw.dpn.ui.UserInterface;
+
 import java.util.LinkedList;
 import java.util.Collections;
 
@@ -83,17 +86,50 @@ public class MenuAction implements Action {
 		
 		// Verifica delle precondizioni
 		if (entryText == null || entryAction == null) {
-			throw new NullPointerException("Impossibile aggiungere una entry con componenti nulle");
+			throw new IllegalArgumentException("Impossibile aggiungere una entry con componenti nulle");
 		} else {
 			// Verifico che non esista già una entry con testo uguale
 			for (MenuEntry me : this.entries) {
 				if (me.getName().equals(entryText)) {
-					throw new NullPointerException("Impossibile aggiungere una entry con testo duplicato");
+					throw new IllegalArgumentException("Impossibile aggiungere una entry con testo duplicato");
 				}
 			}
 		}
 		
 		MenuEntry entry = new MenuEntry(entryText, entryAction);
+		this.entries.add(entry);
+		
+		// Verifica della postcondizione
+		assert this.entries.contains(entry);
+	}
+	
+	/**
+	 * Aggiungo una entry alla lista delle entry del menu.
+	 * Questo metodo dipende da {@link MenuEntry}, quindi per ragioni di sicurezza è 
+	 * utilizzabile solo all'interno di questo package.
+	 * 
+	 * Precondizione: entry != null<br>
+	 * Precondizione: Non esistono altre entry con lo stesso testo<br>
+	 * 
+	 * Postcondizione: Questo menu contiene la entry passata come parametro<br>
+	 * 
+	 * @param entry L'entry da aggiungere
+	 */
+	void addEntry(MenuEntry entry) {
+		
+		// Verifica delle precondizioni
+		if (entry == null) {
+			throw new IllegalArgumentException("Impossibile aggiungere una entry nulla");
+		} else {
+			// Verifico che non esista già una entry con testo uguale
+			for (MenuEntry me : this.entries) {
+				if (me.getName().equals(entry.getName())) {
+					throw new IllegalArgumentException("Impossibile aggiungere una entry con testo duplicato");
+				}
+			}
+		}
+		
+		// Aggiungo la entry
 		this.entries.add(entry);
 		
 		// Verifica della postcondizione

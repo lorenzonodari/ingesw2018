@@ -1,4 +1,6 @@
-package it.unibs.ingesw.dpn.ui;
+package it.unibs.ingesw.dpn.ui.actions;
+
+import it.unibs.ingesw.dpn.ui.UserInterface;
 
 /**
  * Quest'interfaccia rappresenta in maniera standard una qualunque azione

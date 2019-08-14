@@ -16,6 +16,10 @@ import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
 import it.unibs.ingesw.dpn.model.users.LoginManager;
 import it.unibs.ingesw.dpn.model.users.User;
 import it.unibs.ingesw.dpn.model.users.UsersRepository;
+import it.unibs.ingesw.dpn.ui.actions.Action;
+import it.unibs.ingesw.dpn.ui.actions.MenuAction;
+import it.unibs.ingesw.dpn.ui.actions.MenuEntry;
+import it.unibs.ingesw.dpn.ui.actions.SimpleAction;
 
 /**
  * Classe che si occupa di visualizzare l'interfaccia utente necessaria per il processo

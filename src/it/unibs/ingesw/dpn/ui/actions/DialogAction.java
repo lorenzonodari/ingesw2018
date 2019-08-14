@@ -1,4 +1,6 @@
-package it.unibs.ingesw.dpn.ui;
+package it.unibs.ingesw.dpn.ui.actions;
+
+import it.unibs.ingesw.dpn.ui.UserInterface;
 
 /**
  * Classe che implementa l'interfaccia {@link Action}. <br>

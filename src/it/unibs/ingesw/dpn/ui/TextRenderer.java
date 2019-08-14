@@ -3,6 +3,11 @@ package it.unibs.ingesw.dpn.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import it.unibs.ingesw.dpn.ui.actions.ConfirmAction;
+import it.unibs.ingesw.dpn.ui.actions.DialogAction;
+import it.unibs.ingesw.dpn.ui.actions.MenuAction;
+import it.unibs.ingesw.dpn.ui.actions.MenuEntry;
+
 /**
  * Implementazione dell'interfaccia UIRenderer utilizzata per realizzare un'interfaccia
  * utente da riga di comando.

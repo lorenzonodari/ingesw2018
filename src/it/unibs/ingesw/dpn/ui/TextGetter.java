@@ -2,6 +2,11 @@ package it.unibs.ingesw.dpn.ui;
 
 import java.util.Scanner;
 
+import it.unibs.ingesw.dpn.ui.actions.Action;
+import it.unibs.ingesw.dpn.ui.actions.ConfirmAction;
+import it.unibs.ingesw.dpn.ui.actions.DialogAction;
+import it.unibs.ingesw.dpn.ui.actions.MenuAction;
+
 /**
  * Implementazione dell'interfaccia InputGetter per la gestione dell'input da tastiera.
  * Offre i pruncipali metodi per l'acquisizione di input da tastiera in maniera "sicura", 
