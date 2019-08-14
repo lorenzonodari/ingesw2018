@@ -5,6 +5,7 @@ import java.io.File;
 import it.unibs.ingesw.dpn.model.persistence.DiskSerializationStrategy;
 import it.unibs.ingesw.dpn.model.persistence.PersistenceException;
 import it.unibs.ingesw.dpn.model.persistence.PersistenceManager;
+import it.unibs.ingesw.dpn.model.users.LoginManager;
 import it.unibs.ingesw.dpn.ui.MenuManager;
 import it.unibs.ingesw.dpn.ui.TextUI;
 import it.unibs.ingesw.dpn.ui.UserInterface;
@@ -36,8 +37,9 @@ public class Main {
 			System.exit(DB_LOAD_ERROR_EXIT_CODE);
 		}
 
+		LoginManager loginManager = new LoginManager();
 		userInterface = new TextUI();
-		menuManager = new MenuManager(persistenceManager.getModel(), userInterface);
+		menuManager = new MenuManager(persistenceManager.getModel(), userInterface, loginManager);
 		
 		// Avvio del menu
 		menuManager.getStartMenuAction().execute(userInterface);

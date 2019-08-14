@@ -31,6 +31,7 @@ public class Inviter {
 		}
 		
 	}
+	
 	/**
 	 * Imposta l'utente dato come utente da invitare
 	 * 
@@ -51,6 +52,28 @@ public class Inviter {
 		invited.put(user, true);
 		return true;
 		
+	}
+	
+	/**
+	 * Imposta tutti gli utenti passati come parametro come utenti da invitare.<br>
+	 * 
+	 * Precondizione: tutti devono essere contenuti nella lista di utenti invitabili.
+	 * Se la precondizione non viene soddisfatta, il metodo NON termina, ma si limita a non invitare il dato utente.
+	 * Dopodiché procede con i successivi utenti della lista.
+	 * Solamente alla fine, se almeno un utente era fra i non invitabili, viene restituito "false".
+	 * 
+	 * @param users La lista di utenti da invitare.
+	 * @return "true" se tutti gli utenti sono stati invitati
+	 */
+	public boolean addAllInvitations(Set<User> users) {
+		boolean check = true;
+		
+		for (User u : users) {
+			// Check verifica che ogni utente sia invitabile
+			check &= addInvitation(u);
+		}
+		
+		return check;
 	}
 	
 	/**

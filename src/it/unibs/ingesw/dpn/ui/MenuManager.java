@@ -1,13 +1,17 @@
 package it.unibs.ingesw.dpn.ui;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import it.unibs.ingesw.dpn.Main;
 import it.unibs.ingesw.dpn.model.persistence.Model;
 import it.unibs.ingesw.dpn.model.users.UsersRepository;
 import it.unibs.ingesw.dpn.ui.actions.Action;
+import it.unibs.ingesw.dpn.ui.actions.CheckboxListMenuAction;
 import it.unibs.ingesw.dpn.ui.actions.ConfirmAction;
+import it.unibs.ingesw.dpn.ui.actions.ConfirmAction.OptionStrings;
 import it.unibs.ingesw.dpn.ui.actions.DialogAction;
 import it.unibs.ingesw.dpn.ui.actions.MenuAction;
 import it.unibs.ingesw.dpn.ui.actions.SimpleAction;
@@ -21,8 +25,8 @@ import it.unibs.ingesw.dpn.model.events.EventState;
 import it.unibs.ingesw.dpn.model.events.Inviter;
 import it.unibs.ingesw.dpn.model.fields.CommonField;
 import it.unibs.ingesw.dpn.model.fields.UserField;
-import it.unibs.ingesw.dpn.model.fields.ConferenceField;
-import it.unibs.ingesw.dpn.model.fieldvalues.OptionalCostsFieldValue;
+import it.unibs.ingesw.dpn.model.fields.Field;
+import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
 
 /**
  * Classe adibita alla gestione e alla creazione del sistema dei menu.
@@ -58,17 +62,17 @@ public class MenuManager {
 	 * @param model Il gestore dei dati di dominio da utilizzare
 	 * @param userInterface L'interfaccia utente da utilizzare per i menu
 	 */
-	public MenuManager(Model model, UserInterface userInterface) {
+	public MenuManager(Model model, UserInterface userInterface, LoginManager loginManager) {
 		
 		// Verifica della precondizione
-		if (model == null || userInterface == null) {
+		if (model == null || userInterface == null || loginManager == null) {
 			throw new IllegalArgumentException("Impossibile istanziare un nuovo MenuManager con parametri nulli");
 		}
 		
 		this.userInterface = userInterface;
 		this.model = model;
 		this.users = model.getUsersRepository();
-		this.loginManager = new LoginManager(); // TODO Non dovrebbe essere il sistema di menu a crearlo
+		this.loginManager = loginManager;
 		this.builderAssistant = new BuilderUIAssistant(this.userInterface);
 		
 	}
@@ -161,7 +165,7 @@ public class MenuManager {
 		
 		personalSpaceMenuAction.addEntry("Notifiche", getNotificationsMenuAction());
 		personalSpaceMenuAction.addEntry("Inviti", getInvitationsMenuAction());
-		personalSpaceMenuAction.addEntry("Le mie iscrizioni", getSubscriptionMenuAction());
+		personalSpaceMenuAction.addEntry("Le mie iscrizioni", getSubscriptionsMenuAction());
 		personalSpaceMenuAction.addEntry("Le mie proposte", getProposalsMenuAction());
 		personalSpaceMenuAction.addEntry("Modifica profilo", getUserEditingAction());
 		
@@ -205,37 +209,32 @@ public class MenuManager {
 
 			// Aggiungo l'evento alla bacheca
 			this.model.getEventBoard().addEvent(newEvent, loginManager.getCurrentUser());
-			
-			//TODO Da qui in poi sarebbe da fare meglio con un InviterUIAssistant
+			// Messaggio di conferma
+			(new DialogAction("L'evento è stato creato e pubblicato correttamente.\n"
+					+ "Sei stato iscritto/a in automatico al tuo evento.", 
+					"Avanti")).execute(userInterface);
 			
 			// Preparo il menu degli inviti
 			Inviter inviter = new Inviter(newEvent, model);
 			
-			Action invitationsAction = null;
-			StringBuffer dialogMessage = new StringBuffer(
-					"L'evento è stato creato e pubblicato correttamente.\n"
-					+ "Sei stato iscritto/a in automatico al tuo evento.");
-			String dialogOption = null;
-			
 			// Se sono presenti utenti invitabili
 			if (inviter.getCandidates().size() > 0) {
-				invitationsAction = getUserInvitationsMenuAction(newEvent, inviter);
-				dialogOption = "Vai al menu degli inviti";
+				// Preparo l'azione di invito
+				Action invitationsAction = getUserInvitationsMenuAction(newEvent, inviter);
+				// Inglobo l'azione in un'azione di conferma
+				ConfirmAction confirmInvitationsAction = new ConfirmAction(
+						"Vuoi procedere con l'invio di inviti all'evento?", 
+						invitationsAction);
+				confirmInvitationsAction.setOptionStrings(OptionStrings.YES_NO_OPTIONS);
+				confirmInvitationsAction.execute(userInterface);
 				
 			} // Se non ci sono candidati all'invito
 			else {
-				invitationsAction = SimpleAction.EMPTY_ACTION;
-				dialogMessage.append("\nNon sono presenti utenti invitabili all'evento.");
-				dialogOption = "Torna al menu principale";
-				
+				(new DialogAction(
+						"Non sono presenti utenti invitabili all'evento.", 
+						"Torna al menu principale"))
+				.execute(userInterface);
 			}
-			
-			// Costruisco ed eseguo la finestra di dialogo
-			DialogAction dialogAction = new DialogAction(dialogMessage.toString(), dialogOption);
-			dialogAction.execute(userInterface);
-			
-			// Eseguo l'azione degli inviti (se possibile)
-			invitationsAction.execute(userInterface);
 			
 			// Alla fine, notifico gli utenti che sono interessati alla categoria dell'evento
 			inviter.sendNotifications();
@@ -280,13 +279,13 @@ public class MenuManager {
 		
 		for (Invite invite : userInvites) {
 			// Aggiunge l'opzione per il menu di gestione dell'invito
-			invitationsMenuAction.addEntry(invite.toString(), getInviteMenuAction(invite));
+			invitationsMenuAction.addEntry(invite.toString(), getInviteConfirmAction(invite));
 		}
 		
 		return invitationsMenuAction;
 	}
 	
-	private Action getSubscriptionMenuAction() {
+	private Action getSubscriptionsMenuAction() {
 		// Menu di gestione delle iscrizioni
 		MenuAction subscriptionsMenuAction = new MenuAction("Le mie iscrizioni", null);
 		
@@ -328,7 +327,8 @@ public class MenuManager {
 	}
 	
 	private Action getEventMenuAction(Event event) {	
-		// Menu di visualizzazione di un evento (dal punto di vista dell'utente corrente)
+		// Menu di visualizzazione di un evento 
+		// (dal punto di vista dell'utente corrente, quindi visualizzando anche i campi dipendenti dall'utente)
 		MenuAction eventMenuAction = new MenuAction("Visualizzazione evento", event.toString(loginManager.getCurrentUser()));
 		
 		// Se l'evento è creato dall'utente corrente
@@ -346,33 +346,6 @@ public class MenuManager {
 				eventMenuAction.addEntry("Iscriviti", getSubscriptionAction(event));
 			}
 		}
-
-		// Aggiungo le opzioni relative alle spese
-		// TODO TODO SISTEMARE IN MANIERA PIU' SENSATA TUTTO IL DISCORSO DEI FIELD USER-DEPENDANT
-		OptionalCostsFieldValue costsFieldValue = (OptionalCostsFieldValue) event.getFieldValue(ConferenceField.SPESE_OPZIONALI);
-		Map<String, Float> costs = costsFieldValue.getValue();
-		
-		for (String cost : costs.keySet()) {
-			
-			// Callback seleziona spesa aggiuntiva
-			SimpleAction selectAction = (userInterface) -> {
-				costsFieldValue.registerUserToCost(loginManager.getCurrentUser(), cost);
-			};
-			
-			// Callback rimuovi spesa aggiuntiva
-			SimpleAction removeAction = (userInterface) -> {
-				costsFieldValue.removeUserFromCost(loginManager.getCurrentUser(), cost);
-			};
-			
-			if (!costsFieldValue.userHasCost(loginManager.getCurrentUser(), cost)) {
-				String entryName = String.format("Desidero sostenere la spesa: \"%s\"", cost);
-				eventMenuAction.addEntry(entryName, selectAction);
-			}
-			else {
-				String entryName = String.format("Non desidero sostenere la spesa: \"%s\"", cost);
-				eventMenuAction.addEntry(entryName, removeAction);
-			}
-		}
 		
 		return eventMenuAction;
 	}
@@ -387,51 +360,32 @@ public class MenuManager {
 	}
 	
 	private Action getUserInvitationsMenuAction(Event event, Inviter inviter) {
-		// Menu di selezione degli utenti da invitare
-		MenuAction userInvitationsMenuAction = new MenuAction("Menu di selezione degli invitati", "Seleziona gli utenti che desideri invitare:");
-
-		// Creo l'azione di invio degli inviti
-		SimpleAction sendInvitationsAction = (userInterface) -> {
+		// Lista di candidati
+		Set<User> candidates = inviter.getCandidates();
+		Map<User, String> candidatesNicknames = new LinkedHashMap<>();
+		for (User candidate : candidates) {
+			candidatesNicknames.put(candidate, ((StringFieldValue) candidate.getFieldValue(UserField.NICKNAME)).toString());
+		}
+		// Menu di selezione
+		CheckboxListMenuAction<User> userInvitationsMenuAction = new CheckboxListMenuAction<User>(
+				"Menu di selezione degli invitati",
+				"Seleziona gli utenti che desideri invitare:",
+				candidatesNicknames);
+		
+		// Creo l'azione di conferma degli inviti
+		SimpleAction finishInvitationsAction = (userInterface) -> {
+			// Aggiungo gli inviti
+			inviter.addAllInvitations(candidates);
 			// Invia gli inviti
 			inviter.sendInvites();
 			// Presenta una finestra di dialogo per confermare
-			DialogAction resultDialog = new DialogAction(
+			(new DialogAction(
 					"Procedura di invito terminata correttamente.\n" + 
 				    String.format("Hai inviato %d inviti", inviter.getInvited().size()),
-				    "Torna al menu principale [????? DEBUG: CONTROLLARE]");
-			resultDialog.execute(userInterface);
+				    "Torna al menu principale"))
+			.execute(userInterface);
 		};
-		// Incapsulo l'azione di invio all'interno di un'azione di conferma
-		ConfirmAction confirmInvitationsAction = new ConfirmAction("Invitare gli utenti selezionati?", sendInvitationsAction);
-		confirmInvitationsAction.setOptionStrings(ConfirmAction.OptionStrings.YES_NO_OPTIONS);
-		
-		userInvitationsMenuAction.setBackEntry("Conferma ed invia gli inviti", confirmInvitationsAction);
-
-		// Per ciascun utente creo un'opzione di invito
-		for (User u : inviter.getCandidates()) {
-			// Ad eccezione del creatore
-			if (u == event.getCreator()) {
-				continue;
-			}
-			
-			StringBuffer entryTitle = new StringBuffer(u.getFieldValue(UserField.NICKNAME).toString());
-			SimpleAction userAction = null;
-			
-			if (inviter.isInvited(u)) {
-				entryTitle.append(" [X]");
-				userAction = (userInterface) -> {
-					inviter.removeInvitation(u);
-				};
-			}
-			else {
-				entryTitle.append(" [ ]");
-				userAction = (userInterface) -> {
-					inviter.addInvitation(u);
-				};
-			}
-			
-			userInvitationsMenuAction.addEntry(entryTitle.toString(), userAction);
-		}
+		userInvitationsMenuAction.setBackEntry("Conferma ed invia gli inviti", finishInvitationsAction);
 		
 		return userInvitationsMenuAction;
 	}
@@ -469,6 +423,21 @@ public class MenuManager {
 					"Non e' stato possibile registrare correttamente l'iscrizione.\nE' possibile iscriversi solamente entro il \"Termine ultimo di iscrizione\".", 
 					null);
 			dialogResult.execute(userInterface);
+			
+			// Se l'iscrizione non ha avuto successo, termino qui l'azione
+			if (!success) {
+				return;
+			}
+			
+			// Se l'iscrizione ha avuto successo, imposto i valori dipendenti dall'utente
+			// TODO TODO TODO {{
+			for (Field f : event.getUserDependantFields()) {
+				(new DialogAction(
+						String.format("[DEBUG]\nPersonalizzazione del campo %s in base all'utente corrente.\n[DEBUG]", f.getName()),
+						"Prossimo campo"
+						)).execute(userInterface);
+			}
+			// TODO TODO TODO }}
 		};
 		return subscriptionAction;
 	}
@@ -505,99 +474,28 @@ public class MenuManager {
 		return withdrawAction;
 	}
 	
-	private Action getInviteMenuAction(Invite invite) {
-		/*
-		StringBuffer menuContent = new StringBuffer(event.toString());
+	private Action getInviteConfirmAction(Invite invite) {
+		// Menu di accettazione		
+		ConfirmAction inviteMenuAction = new ConfirmAction(
+				"Sei stato/a invitato/a al seguente evento:\n\n" 
+						+ invite.getEvent().toString(loginManager.getCurrentUser())
+						+ "\n\nVuoi accettare l'invito ed iscriverti all'evento?",
+				getInviteAcceptationAction(invite));
+		// In caso di rifiuto
+		inviteMenuAction.setCancelAction(getInviteDeclinationAction(invite));
+		// Personalizzazione delle opzioni
+		inviteMenuAction.setOptionStrings(OptionStrings.YES_NO_OPTIONS);
 		
-		if (invite.getEvent().hasUserDependantFields() && loginManager.getCurrentUser() != invite.getEvent().getCreator()) { 
-			// NElla riga sopra c'è un errore:
-			// Non deve succedere che un utente riceva inviti per un evento che ha creato lui stesso.
-			menuContent.append("\n");
-			menuContent.append("Spese opzionali scelte: \n");
-			
-			OptionalCostsFieldValue costsFieldValue = (OptionalCostsFieldValue) invite.getEvent().getFieldValue(ConferenceField.SPESE_OPZIONALI);
-			Map<String, Float> costs = costsFieldValue.getValue();
-			
-			for (String cost : costs.keySet()) {
-				
-				menuContent.append(cost);
-				menuContent.append(String.format(" : %.2f € ", costs.get(cost)));
-				
-				if (!costsFieldValue.userHasCost(loginManager.getCurrentUser(), cost)) {
-					menuContent.append("[ ]");
-				}
-				else {
-					menuContent.append("[X]");
-				}
-				
-				menuContent.append("\n");
-			}
-			menuContent.append("\n");
-			
-			menuContent.append(String.format("Costo complessivo di partecipazione: %.2f €", event.getExpensesForUser(loginManager.getCurrentUser())));
-		}
-		
-		if (event.hasUserDependantFields() && loginManager.getCurrentUser() != event.getCreator()) {
-			
-			OptionalCostsFieldValue costsFieldValue = (OptionalCostsFieldValue) event.getFieldValue(ConferenceField.SPESE_OPZIONALI);
-			Map<String, Float> costs = costsFieldValue.getValue();
-			
-			for (String cost : costs.keySet()) {
-				
-				// Callback seleziona spesa aggiuntiva
-				SimpleAction selectAction = () -> {
-					costsFieldValue.registerUserToCost(loginManager.getCurrentUser(), cost);
-					this.inviteMenu(i);
-				};
-				
-				// Callback rimuovi spesa aggiuntiva
-				SimpleAction removeAction = () -> {
-					costsFieldValue.removeUserFromCost(loginManager.getCurrentUser(), cost);
-					this.inviteMenu(i);
-				};
-				
-				if (!costsFieldValue.userHasCost(loginManager.getCurrentUser(), cost)) {
-					String entryName = String.format("Desidero sostenere la spesa: \"%s\"", cost);
-					inviteMenu.addEntry(entryName, selectAction);
-				}
-				else {
-					String entryName = String.format("Non desidero sostenere la spesa: \"%s\"", cost);
-					inviteMenu.addEntry(entryName, removeAction);
-				}
-			}
-		
-		
-		}
-		*/
-		
-		MenuAction inviteMenu = new MenuAction("Sei stato invitato/a al seguente evento:", invite.getEvent().toString());
-		inviteMenu.addEntry("Accetta invito ed iscriviti all'evento", getInviteAcceptationAction(invite));
-		inviteMenu.addEntry("Rifiuta ed elimina invito", getInviteDeclinationAction(invite));
-		
-		// TODO Qui c'è un errore. Alla selezione di una delle due opzioni il menu dovrebbe TERMINARE, come se fosse stata selezionata un'opzione di uscita
-		
-		return inviteMenu;
+		return inviteMenuAction;
 	}
 
 	private Action getInviteAcceptationAction(Invite invite) {
 		// Azione per l'accettazione dell'invito
 		SimpleAction inviteAcceptationAction = (userInterface) -> {
-			// Se la procedura di iscrizione termina correttamente
-			if (invite.getEvent().subscribe(loginManager.getCurrentUser())) {
-				(new DialogAction(
-						"Invito accettato correttamente!\nIscrizione all'evento effettuata.", 
-						"Prosegui"))
-				.execute(userInterface);	
-				// In questo caso elimino l'invito
-				loginManager.getCurrentUser().delete(invite);	
-				
-			} // Altrimenti, l'invito rimane finché non viene eliminato
-			else {
-				(new DialogAction(
-						"Non è stato possibile accettare l'invito.\nControllare la data \"Termine ultimo di iscrizione\" o il numero massimo di partecipanti.", 
-						"Torna all'elenco degli inviti"))
-				.execute(userInterface);	
-			}			
+			// Eseguo la procedura di iscrizione
+			getSubscriptionAction(invite.getEvent()).execute(userInterface);
+			// Elimino l'invito
+			loginManager.getCurrentUser().delete(invite);		
 		};
 		
 		return inviteAcceptationAction;
