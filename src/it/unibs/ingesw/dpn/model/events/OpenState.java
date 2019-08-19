@@ -256,8 +256,8 @@ public class OpenState implements EventState, Serializable {
 		this.subscriptionTimeoutTimer = new Timer(SUBS_TIMER_NAME + e.hashCode(), true);
 		
 		// Ricavo la data del termine ultimo di iscrizione
-		Date unsubscriptionTimeoutDate = (Date) e.getFieldValue(CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE);
-		Date subscriptionTimeoutDate = (Date) e.getFieldValue(CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE);
+		Date unsubscriptionTimeoutDate = ((DateFieldValue) e.getFieldValue(CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE)).getValue();
+		Date subscriptionTimeoutDate = ((DateFieldValue) e.getFieldValue(CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE)).getValue();
 		
 		// Semaforo per le precedenze
 		// Mi assicuro che "unsubscriptionTimeoutTimer" venga eseguito prima di "subscriptionTimeoutTimer".

@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.Timer;
 
 import it.unibs.ingesw.dpn.model.fields.CommonField;
+import it.unibs.ingesw.dpn.model.fieldvalues.DateFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.MoneyAmountFieldValue;
 
 /**
@@ -93,7 +94,7 @@ public class ClosedState implements EventState, Serializable {
 		this.ongoingTimer = new Timer(TIMER_NAME + e.hashCode(), true);
 		
 		// Ricavo la data di inizio dell'evento
-		Date ongoingDate = (Date) e.getFieldValue(CommonField.DATA_E_ORA);
+		Date ongoingDate = ((DateFieldValue) e.getFieldValue(CommonField.DATA_E_ORA)).getValue();
 				
 		// Verifico se effettuare il passaggio a ONGOING o a ENDED
 		if (e.getFieldValue(CommonField.DATA_E_ORA_CONCLUSIVE) != null) {

@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.Timer;
 
 import it.unibs.ingesw.dpn.model.fields.CommonField;
+import it.unibs.ingesw.dpn.model.fieldvalues.DateFieldValue;
 
 /**
  * Classe che modellizza il comportamento di un evento {@link Event} nello stato ONGOING.
@@ -41,7 +42,7 @@ public class OngoingState implements EventState, Serializable {
 		this.endingTimer = new Timer(TIMER_NAME + e.hashCode(), true);
 		
 		// Ricavo la data della conclusione dell'evento
-		Date endingDate = (Date) e.getFieldValue(CommonField.DATA_E_ORA_CONCLUSIVE);
+		Date endingDate = ((DateFieldValue) e.getFieldValue(CommonField.DATA_E_ORA_CONCLUSIVE)).getValue();
 		
 		// Schedulo il cambiamento di stato da ONGOING a ENDED
 		EventState.scheduleStateChange(e, EventState.ENDED, endingTimer, endingDate);
@@ -62,7 +63,7 @@ public class OngoingState implements EventState, Serializable {
 		this.endingTimer = new Timer(TIMER_NAME + e.hashCode(), true);
 		
 		// Ricavo la data della conclusione dell'evento
-		Date endingDate = (Date) e.getFieldValue(CommonField.DATA_E_ORA_CONCLUSIVE);
+		Date endingDate = ((DateFieldValue) e.getFieldValue(CommonField.DATA_E_ORA_CONCLUSIVE)).getValue();
 				
 		// Schedulo il cambiamento di stato da ONGOING a ENDED
 		EventState.scheduleStateChange(e, EventState.ENDED, endingTimer, endingDate);
