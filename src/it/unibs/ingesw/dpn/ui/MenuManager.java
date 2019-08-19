@@ -1,5 +1,6 @@
 package it.unibs.ingesw.dpn.ui;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import it.unibs.ingesw.dpn.model.events.Event;
 import it.unibs.ingesw.dpn.model.events.EventState;
 import it.unibs.ingesw.dpn.model.events.Inviter;
 import it.unibs.ingesw.dpn.model.fields.Field;
+import it.unibs.ingesw.dpn.model.fieldvalues.UserDependantFieldValue;
 
 /**
  * Classe adibita alla gestione e alla creazione del sistema dei menu.
@@ -370,7 +372,7 @@ public class MenuManager {
 		// Creo l'azione di conferma degli inviti
 		SimpleAction finishInvitationsAction = (userInterface) -> {
 			// Aggiungo gli inviti
-			inviter.addAllInvitations(candidates);
+			inviter.addAllInvitations(new HashSet<>(userInvitationsMenuAction.getSelectedObjects()));
 			// Invia gli inviti
 			inviter.sendInvites();
 			// Presenta una finestra di dialogo per confermare
@@ -425,14 +427,12 @@ public class MenuManager {
 			}
 			
 			// Se l'iscrizione ha avuto successo, imposto i valori dipendenti dall'utente
-			// TODO TODO TODO {{
+
 			for (Field f : event.getUserDependantFields()) {
-				(new DialogAction(
-						String.format("[DEBUG]\nPersonalizzazione del campo %s in base all'utente corrente.\n[DEBUG]", f.getName()),
-						"Prossimo campo"
-						)).execute(userInterface);
+				UserDependantFieldValue fieldValue = (UserDependantFieldValue) event.getFieldValue(f);
+				fieldValue.userCustomization(loginManager.getCurrentUser(), userInterface);
 			}
-			// TODO TODO TODO }}
+
 		};
 		return subscriptionAction;
 	}
