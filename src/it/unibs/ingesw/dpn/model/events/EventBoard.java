@@ -149,7 +149,7 @@ public class EventBoard implements Serializable {
 				.filter(event -> event.getCreator() == user)
 				.collect(Collectors.toCollection(ArrayList::new))) {
 			for(User u : e.getSubscribers()) {
-				if(!subscribers.contains(u))
+				if(!subscribers.contains(u) && u != e.getCreator())
 					subscribers.add(u);
 			}			
 		}
