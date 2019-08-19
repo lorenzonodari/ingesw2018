@@ -12,6 +12,7 @@ import it.unibs.ingesw.dpn.model.fields.AbstractFieldable;
 import it.unibs.ingesw.dpn.model.fields.CommonField;
 import it.unibs.ingesw.dpn.model.fields.ConferenceField;
 import it.unibs.ingesw.dpn.model.fields.Field;
+import it.unibs.ingesw.dpn.model.fieldvalues.DateFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.IntegerFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.MoneyAmountFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.OptionalCostsFieldValue;
@@ -518,8 +519,8 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 	 * @return Un valore numerico per capire l'ordinamento dei due eventi
 	 */
 	public int compareByEventDateTo(Event e) {
-		Date thisDate = (Date) this.getFieldValue(CommonField.DATA_E_ORA);
-		Date otherDate = (Date) e.getFieldValue(CommonField.DATA_E_ORA);
+		Date thisDate = ((DateFieldValue) this.getFieldValue(CommonField.DATA_E_ORA)).getValue();
+		Date otherDate = ((DateFieldValue) e.getFieldValue(CommonField.DATA_E_ORA)).getValue();
 		// Se l'evento corrente è più recente come data di creazione dell'evento passato come parametro
 		if (thisDate.after(otherDate)) {
 			return +1;
