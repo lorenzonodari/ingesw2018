@@ -113,10 +113,7 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 		this.partecipants = new LinkedList<>();
 		
 		// A questo punto posso settare lo stato come "valido".
-		this.setState(new ValidState());
-
-		// Comunico all'utente che ha creato l'evento
-		notifyCreator(String.format(EVENT_CREATION_MESSAGE, this.getTitle()));	
+		this.setState(new ValidState());	
 		
 	}
 	
@@ -312,7 +309,10 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 	 * @return true se l'evento viene pubblicato, false altrimenti.
 	 */
 	public boolean publish() {
-		// Qui andranno eventuali azioni aggiuntive alla pubblicazione
+		
+		// Comunico all'utente che ha creato l'evento
+		notifyCreator(String.format(EVENT_CREATION_MESSAGE, this.getTitle()));
+				
 		try {
 			this.state.onPublication(this);
 			this.subscribe(this.creator);
