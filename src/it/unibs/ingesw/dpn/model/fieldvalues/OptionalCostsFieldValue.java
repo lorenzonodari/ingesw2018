@@ -11,8 +11,10 @@ import java.util.Collections;
 
 import it.unibs.ingesw.dpn.model.users.User;
 import it.unibs.ingesw.dpn.ui.UserInterface;
+import it.unibs.ingesw.dpn.ui.actions.CheckboxListMenuAction;
+import it.unibs.ingesw.dpn.ui.actions.SimpleAction;
 
-public class OptionalCostsFieldValue implements FieldValue, Serializable {
+public class OptionalCostsFieldValue implements UserDependantFieldValue, Serializable {
 
 	/**
 	 * 
@@ -269,6 +271,35 @@ public class OptionalCostsFieldValue implements FieldValue, Serializable {
 			}
 	
 		}
+		
+	}
+
+	@Override
+	public void userCustomization(User user, UserInterface ui) {
+		
+		Map<String, String> choicesDescriptors = new HashMap<>();
+		for (String cost : costs.keySet()) {
+			StringBuilder sb = new StringBuilder(cost);
+			sb.append(": ");
+			sb.append(String.format("%.2f €", costs.get(cost)));
+			sb.append("; ");
+			
+			choicesDescriptors.put(cost, sb.toString());
+		}
+		
+		CheckboxListMenuAction<String> choicesMenu = new CheckboxListMenuAction<>("Personalizzazione delle spese opzionali",
+																				  "Selezionare le spese che si desidera sostenere",
+																				  choicesDescriptors);
+		
+		SimpleAction confirmAction = (userInterface) -> {
+			for (String chosenCost : choicesMenu.getSelectedObjects()) {
+				this.registerUserToCost(user, chosenCost);
+			}
+		};
+		choicesMenu.setBackEntry("Conferma", confirmAction);
+		
+		ui.renderer().renderMenu(choicesMenu);
+		choicesMenu.execute(ui);
 		
 	}
 	
