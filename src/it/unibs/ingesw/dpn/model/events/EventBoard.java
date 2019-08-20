@@ -32,7 +32,7 @@ public class EventBoard implements Serializable {
 	 * @param event L'evento da aggiungere alla bacheca
 	 * @param creator Il creatore dell'evento
 	 */
-	public void addEvent(Event event, User creator) {
+	public void addEvent(Event event) {
 		// verifica precondizione
 		if (event == null) {
 			throw new IllegalStateException();

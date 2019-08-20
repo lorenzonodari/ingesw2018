@@ -207,7 +207,7 @@ public class MenuManager {
 			}
 
 			// Aggiungo l'evento alla bacheca
-			this.model.getEventBoard().addEvent(newEvent, loginManager.getCurrentUser());
+			this.model.getEventBoard().addEvent(newEvent);
 			// Messaggio di conferma
 			(new DialogAction("L'evento è stato creato e pubblicato correttamente.\n"
 					+ "Sei stato iscritto/a in automatico al tuo evento.", 
