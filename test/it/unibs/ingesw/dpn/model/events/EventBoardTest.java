@@ -2,6 +2,7 @@ package it.unibs.ingesw.dpn.model.events;
 
 import static org.mockito.Mockito.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -248,8 +249,42 @@ public class EventBoardTest {
 		
 	}
 	
-	
-
-	
+	@Test
+	public void oldSubscribersFromPastEventsTest() {
+		
+		// Mock configuration
+		User creator = mock(User.class);
+		User user1 = mock(User.class);
+		User user2 = mock(User.class);
+		User user3 = mock(User.class);
+		
+		Event event1 = mock(Event.class);
+		when(event1.getCreator()).thenReturn(creator);
+		when(event1.getSubscribers()).thenReturn(Arrays.asList(user1, creator));
+		when(event1.getState()).thenReturn(EventState.ENDED);
+		
+		Event event2 = mock(Event.class);
+		when(event2.getCreator()).thenReturn(creator);
+		when(event2.getSubscribers()).thenReturn(Arrays.asList(user3, creator));
+		when(event2.getState()).thenReturn(EventState.OPEN);
+		
+		Event event3 = mock(Event.class);
+		when(event3.getCreator()).thenReturn(creator);
+		when(event3.getSubscribers()).thenReturn(Arrays.asList(user2, creator));
+		when(event3.getState()).thenReturn(EventState.ENDED);
+		
+		// Test code
+		EventBoard board = new EventBoard();
+		board.addEvent(event1);
+		board.addEvent(event2);
+		board.addEvent(event3);
+		List<User> results = board.getListOfOldSubscribersFromPastEvents(creator);
+		
+		assertTrue(results.contains(user1));
+		assertTrue(results.contains(user2));
+		assertFalse(results.contains(creator));
+		assertFalse(results.contains(user3));
+		
+	}
 
 }
