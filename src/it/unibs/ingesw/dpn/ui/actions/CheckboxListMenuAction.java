@@ -25,7 +25,7 @@ public class CheckboxListMenuAction<T> extends MenuAction {
 	private Map<T, Boolean> checkboxSelections;
 	
 	private static final boolean DEFAULT_SELECTION = false;
-	private static final String CHECKBOX_ENTRY_FORMAT = "[%c]\t%s";
+	private static final String CHECKBOX_ENTRY_FORMAT = "[%c]  %s";
 	
 	/**
 	 * Costruttore.
