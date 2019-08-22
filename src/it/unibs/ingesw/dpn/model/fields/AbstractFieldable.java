@@ -51,25 +51,8 @@ public abstract class AbstractFieldable implements Fieldable, Serializable {
 		this.valuesMap = new LinkedHashMap<>();
 		// Per ciascun campo, lo aggiungo come chiave alla HashMap
 		for (Field f : fieldsList) {
-			this.addField(f);
+			this.valuesMap.put(f, null);
 		}
-	}
-	
-	/**
-	 * Aggiunge un campo alla lista dei campi dell'oggetto. Si noti che, poiche' si assume
-	 * che gli oggetti AbstractFieldable non mutino la loro lista dei campi a runtime, questo
-	 * metodo andrebbe utilizzato unicamente all'interno del costruttore delle sottoclassi
-	 *  
-	 * @param newField Il nuovo Field da aggiungere
-	 */
-	protected void addField(Field newField) {
-		
-		if (newField == null) {
-			throw new IllegalArgumentException();
-		}
-		
-		this.valuesMap.put(newField, null);
-		
 	}
 
 	/**

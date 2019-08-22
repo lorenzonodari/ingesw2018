@@ -27,10 +27,6 @@ public class SoccerMatchEvent extends Event {
 	 */
 	public SoccerMatchEvent(User creator) {
 		super(creator, Category.PARTITA_DI_CALCIO);
-		
-		for (Field f : SoccerMatchField.values()) {
-			this.addField(f);
-		}
 	}
 	
 }

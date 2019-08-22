@@ -29,10 +29,6 @@ public class ConferenceEvent extends Event {
 	 */
 	public ConferenceEvent(User creator) {
 		super(creator, Category.CONFERENZA);
-		
-		for (Field f : ConferenceField.values()) {
-			this.addField(f);
-		}
 	}
 	
 	@Override

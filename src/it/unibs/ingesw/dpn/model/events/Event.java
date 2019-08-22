@@ -97,7 +97,7 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 	 * @param category La categoria prescelta
 	 */
 	public Event(User creator, Category category) {
-		super(Arrays.asList(CommonField.values()));
+		super(category.getFields());
 		
 		// Verifico che i parametri non siano nulli
 		if (creator == null || category == null) {
