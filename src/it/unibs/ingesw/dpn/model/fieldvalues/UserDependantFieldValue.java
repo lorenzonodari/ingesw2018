@@ -16,5 +16,12 @@ public interface UserDependantFieldValue extends FieldValue {
 	 * @param ui L'interfaccia utente da utilizzare per la personalizzazione
 	 */
 	public void userCustomization(User user, UserInterface ui);
+	
+	/**
+	 * Rimuove le personalizzazioni dell'utente dato dal FieldValue
+	 * 
+	 * @param user L'utente per il quale vanno cancellate le personalizzazioni
+	 */
+	public void forgetUserCustomization(User user);
 
 }

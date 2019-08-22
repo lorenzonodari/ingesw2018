@@ -303,5 +303,12 @@ public class OptionalCostsFieldValue implements UserDependantFieldValue, Seriali
 		
 	}
 	
+	@Override
+	public void forgetUserCustomization(User user) {
+		
+		userChoices.remove(user);
+		
+	}
+	
 
 }

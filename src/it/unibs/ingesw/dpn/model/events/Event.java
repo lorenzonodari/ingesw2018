@@ -18,6 +18,7 @@ import it.unibs.ingesw.dpn.model.fieldvalues.IntegerFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.MoneyAmountFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.OptionalCostsFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
+import it.unibs.ingesw.dpn.model.fieldvalues.UserDependantFieldValue;
 import it.unibs.ingesw.dpn.model.users.Notification;
 import it.unibs.ingesw.dpn.model.users.User;
 
@@ -448,13 +449,11 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 		// Rimuove l'iscritto dalla mailing list
 		this.partecipants.remove(unsubscriber);
 		
-		for (Field userDependantField : this.getUserDependantFields()) {
-			// TODO Qui andrebbe usato il polimorfismo su Field e FieldValue
-			if (userDependantField == ConferenceField.SPESE_OPZIONALI) {
-				// Campo "Spese opzionali"
-				OptionalCostsFieldValue costsFieldValue = (OptionalCostsFieldValue) this.getFieldValue(ConferenceField.SPESE_OPZIONALI);
-				costsFieldValue.removeUserFromAllCosts(unsubscriber);
-			}
+		for (Field field : this.getUserDependantFields()) {
+			
+			UserDependantFieldValue fieldValue = (UserDependantFieldValue) this.getFieldValue(field);
+			fieldValue.forgetUserCustomization(unsubscriber);
+			
 		}
 		
 		// Notifica l'utente che la disiscrizione è andata a buon fine
