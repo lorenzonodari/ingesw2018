@@ -22,17 +22,17 @@ public class ConferenceEvent extends Event {
 	private static final long serialVersionUID = -9171544783647521694L;
 
 	/**
-	 * Costruttore della classe ConferenceEvent, che verrà invocato dalla classe
-	 * apposita {@link it.unibs.ingesw.dpn.model.fields.builder.EventBuilder} la cui responsabilità principale è creare eventi.
-	 * 
-	 * Precondizione: i valori dei campi devono essere uguali come numero e come tipo ai campi
-	 * previsti dalla categoria. Questo viene garantito dalla classe adibita alla creazione degli eventi.
+	 * Costruttore della classe ConferenceEvent.
 	 * 
 	 * @param creator Il creatore dell'evento
 	 * @param fieldsList La lista di campi previsti per un evento "Conferenza"
 	 */
-	public ConferenceEvent(User creator, List<Field> fieldsList) {
-		super(creator, Category.CONFERENZA, fieldsList);
+	public ConferenceEvent(User creator) {
+		super(creator, Category.CONFERENZA);
+		
+		for (Field f : ConferenceField.values()) {
+			this.addField(f);
+		}
 	}
 	
 	@Override

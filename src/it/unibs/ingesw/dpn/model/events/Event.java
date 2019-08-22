@@ -1,6 +1,7 @@
 package it.unibs.ingesw.dpn.model.events;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
@@ -81,10 +82,10 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 	private final List<User> partecipants;
 	
 	/**
-	 * Crea un nuovo evento con la relativa categoria.
-	 * Tale costruttore (o meglio, i costruttori delle classi figlie che fanno affidamento su
-	 * questo costruttore di Event) dovrà essere chiamato da una classe apposita, la cui responsabilità 
-	 * principale sarà creare gli eventi nella maniera prevista dal programma.
+	 * Crea un nuovo evento con la relativa categoria. Tutti i campi definiti in CommonField sono automaticamente
+	 * aggiunti all'evento. Eventuali sottoclassi che desiderassero aggiungere dei propri field a questi dovranno
+	 * farlo manualmente mediante invocazioni del metodo addField() all'interno del loro costruttore. Si veda la classe
+	 * {@link SoccerMatchEvent} per un esempio.
 	 * 
 	 * Precondizione: il creatore dell'evento non deve essere un valore nullo. In questo caso verrebbe lanciata un'eccezione.
 	 * 
@@ -93,10 +94,9 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 	 * 
 	 * @param creator L'utente {@link User} creatore dell'evento
 	 * @param category La categoria prescelta
-	 * @param fieldsList La lista di campi previsti per questo evento
 	 */
-	public Event(User creator, Category category, List<Field> fieldsList) {
-		super(fieldsList);
+	public Event(User creator, Category category) {
+		super(Arrays.asList(CommonField.values()));
 		
 		// Verifico che i parametri non siano nulli
 		if (creator == null || category == null) {

@@ -49,18 +49,15 @@ public class EventBuilder extends AbstractBuilder {
 			throw new IllegalArgumentException("Impossibile creare un evento con creatore o categoria nulli");
 		}
 		
-		// Preparo la lista di campi previsti
-		List<Field> categoryFields = category.getFields();
-		
 		// A seconda della categoria, istanzio una classe differente
 		switch (category) {
 		
 		case CONFERENZA :
-			super.startCreation(new ConferenceEvent(creator, categoryFields));
+			super.startCreation(new ConferenceEvent(creator));
 			break;
 			
 		case PARTITA_DI_CALCIO :
-			super.startCreation(new SoccerMatchEvent(creator, categoryFields));
+			super.startCreation(new SoccerMatchEvent(creator));
 			break;
 			
 		}
