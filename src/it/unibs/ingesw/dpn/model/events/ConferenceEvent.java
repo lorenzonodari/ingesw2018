@@ -1,10 +1,8 @@
 package it.unibs.ingesw.dpn.model.events;
 
-import java.util.List;
 
 import it.unibs.ingesw.dpn.model.categories.Category;
 import it.unibs.ingesw.dpn.model.fields.ConferenceField;
-import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fieldvalues.OptionalCostsFieldValue;
 import it.unibs.ingesw.dpn.model.users.User;
 

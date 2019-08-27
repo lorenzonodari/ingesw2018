@@ -1,7 +1,6 @@
 package it.unibs.ingesw.dpn.model.events;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
@@ -11,12 +10,10 @@ import java.util.stream.Collectors;
 import it.unibs.ingesw.dpn.model.categories.Category;
 import it.unibs.ingesw.dpn.model.fields.AbstractFieldable;
 import it.unibs.ingesw.dpn.model.fields.CommonField;
-import it.unibs.ingesw.dpn.model.fields.ConferenceField;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fieldvalues.DateFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.IntegerFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.MoneyAmountFieldValue;
-import it.unibs.ingesw.dpn.model.fieldvalues.OptionalCostsFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.UserDependantFieldValue;
 import it.unibs.ingesw.dpn.model.users.Notification;
@@ -193,11 +190,8 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 	 * @param message Il messaggio da inviare agli iscritti
 	 */
 	 void notifyEveryone(String message) {
-		// Cicla su tutte le mailbox
-		for (User u : this.partecipants) {
-			// Recapita il messaggio impostato
-			u.receive(new Notification(message));
-		}
+		notifyCreator(message);
+		notifyPartecipants(message);
 	 }
 	 
 	 /**

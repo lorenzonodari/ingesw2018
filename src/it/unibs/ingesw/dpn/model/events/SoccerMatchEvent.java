@@ -1,10 +1,6 @@
 package it.unibs.ingesw.dpn.model.events;
 
-import java.util.List;
-
 import it.unibs.ingesw.dpn.model.categories.Category;
-import it.unibs.ingesw.dpn.model.fields.Field;
-import it.unibs.ingesw.dpn.model.fields.SoccerMatchField;
 import it.unibs.ingesw.dpn.model.users.User;
 
 /**

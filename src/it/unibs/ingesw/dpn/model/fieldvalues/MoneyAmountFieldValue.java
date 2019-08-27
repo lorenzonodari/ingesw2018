@@ -13,6 +13,14 @@ public class MoneyAmountFieldValue implements FieldValue, Serializable {
 	
 	private float value;
 	
+	public MoneyAmountFieldValue() {
+		this.value = 0.0f;
+	}
+	
+	public MoneyAmountFieldValue(float value) {
+		this.value = value;
+	}
+	
 	@Override
 	public String toString() {
 		return String.format("%.2f €", this.value);
