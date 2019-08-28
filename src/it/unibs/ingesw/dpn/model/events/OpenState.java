@@ -61,41 +61,7 @@ public class OpenState implements EventState, Serializable {
 		this.minSubscribers = ((IntegerFieldValue) e.getFieldValue(CommonField.NUMERO_DI_PARTECIPANTI)).getValue();
 		this.maxSubscribers = this.minSubscribers + ((IntegerFieldValue) e.getFieldValue(CommonField.TOLLERANZA_NUMERO_DI_PARTECIPANTI)).getValue();
 		
-		// Preparo i due timer:
-		// - quello del termine ultimo di ritiro delle iscrizioni
-		// - quello del termine ultimo di iscrizioni
-		
-		// Configuro i timer in modo che vengano eseguiti come daemon (grazie al parametro con valore true).
-		this.unsubscriptionTimeoutTimer = new Timer(UNSUBS_TIMER_NAME + e.hashCode(), true);
-		this.subscriptionTimeoutTimer = new Timer(SUBS_TIMER_NAME + e.hashCode(), true);
-		
-		// Ricavo la data del termine ultimo di iscrizione
-		Date unsubscriptionTimeoutDate = ((DateFieldValue) e.getFieldValue(CommonField.TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE)).getValue();
-		Date subscriptionTimeoutDate = ((DateFieldValue) e.getFieldValue(CommonField.TERMINE_ULTIMO_DI_ISCRIZIONE)).getValue();
-		
-		// Semaforo per le precedenze
-		// Mi assicuro che "unsubscriptionTimeoutTimer" venga eseguito prima di "subscriptionTimeoutTimer".
-		this.timerSemaphore = new Semaphore(0);
-		
-		// Schedulo l'azione da effettuare al "Termine ultimo di ritiro iscrizione"
-		this.unsubscriptionTimeoutTimer.schedule(new TimerTask() {
-			
-			@Override
-			public void run() {
-				// Tutte le azioni da effettuare sono contenute nel seguente metodo:
-				onUnsubscriptionTimeout(e);
-			}
-		}, unsubscriptionTimeoutDate);
-		
-		// Schedulo l'azione da effettuare al "Termine ultimo di iscrizione"
-		this.subscriptionTimeoutTimer.schedule(new TimerTask() {
-			
-			@Override
-			public void run() {
-				// Tutte le azioni da effettuare sono contenute nel seguente metodo:
-				onSubscriptionTimeout(e);
-			}
-		}, subscriptionTimeoutDate);
+		this.setTimers(e);
 		
 	}
 	
@@ -246,11 +212,16 @@ public class OpenState implements EventState, Serializable {
 	@Override
 	public void resetState(Event e) {
 		
+		this.setTimers(e);
+		
+	}
+	
+	private void setTimers(Event e) {
 		
 		// Preparo i due timer:
 		// - quello del termine ultimo di ritiro delle iscrizioni
 		// - quello del termine ultimo di iscrizioni
-				
+		
 		// Configuro i timer in modo che vengano eseguiti come daemon (grazie al parametro con valore true).
 		this.unsubscriptionTimeoutTimer = new Timer(UNSUBS_TIMER_NAME + e.hashCode(), true);
 		this.subscriptionTimeoutTimer = new Timer(SUBS_TIMER_NAME + e.hashCode(), true);
@@ -282,7 +253,6 @@ public class OpenState implements EventState, Serializable {
 				onSubscriptionTimeout(e);
 			}
 		}, subscriptionTimeoutDate);
-		
 	}
 		
 }

@@ -37,15 +37,8 @@ public class OngoingState implements EventState, Serializable {
 	 */
 	@Override
 	public void onEntry(Event e) {	
-		// Preparo il timer di scadenza della conclusione dell'evento
-		// Lo configuro in modo che venga eseguito come daemon (grazie al parametro con valore true).
-		this.endingTimer = new Timer(TIMER_NAME + e.hashCode(), true);
 		
-		// Ricavo la data della conclusione dell'evento
-		Date endingDate = ((DateFieldValue) e.getFieldValue(CommonField.DATA_E_ORA_CONCLUSIVE)).getValue();
-		
-		// Schedulo il cambiamento di stato da ONGOING a ENDED
-		EventState.scheduleStateChange(e, EventState.ENDED, endingTimer, endingDate);
+		this.setTimers(e);
 		
 	}
 	
@@ -58,6 +51,12 @@ public class OngoingState implements EventState, Serializable {
 	@Override
 	public void resetState(Event e) {
 		
+		this.setTimers(e);
+		
+	}
+	
+	private void setTimers(Event e) {
+		
 		// Preparo il timer di scadenza della conclusione dell'evento
 		// Lo configuro in modo che venga eseguito come daemon (grazie al parametro con valore true).
 		this.endingTimer = new Timer(TIMER_NAME + e.hashCode(), true);
@@ -66,7 +65,7 @@ public class OngoingState implements EventState, Serializable {
 		Date endingDate = ((DateFieldValue) e.getFieldValue(CommonField.DATA_E_ORA_CONCLUSIVE)).getValue();
 				
 		// Schedulo il cambiamento di stato da ONGOING a ENDED
-		EventState.scheduleStateChange(e, EventState.ENDED, endingTimer, endingDate);
+		EventState.scheduleStateChange(e, EventState.ENDED, endingTimer, endingDate);		
 		
 	}
 	

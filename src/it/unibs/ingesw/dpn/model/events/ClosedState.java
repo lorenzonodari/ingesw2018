@@ -58,25 +58,7 @@ public class ClosedState implements EventState, Serializable {
 		e.notifyEveryone(message.toString());
 		
 		
-		// Preparo il timer di scadenza della conclusione dell'evento
-		// Lo configuro in modo che venga eseguito come daemon (grazie al parametro con valore true).
-		this.ongoingTimer = new Timer(TIMER_NAME + e.hashCode(), true);
-		
-		// Ricavo la data di inizio dell'evento
-		Date ongoingDate = ((DateFieldValue) e.getFieldValue(CommonField.DATA_E_ORA)).getValue();
-		
-		// Verifico se effettuare il passaggio a ONGOING o a ENDED
-		if (e.getFieldValue(CommonField.DATA_E_ORA_CONCLUSIVE) != null) {
-
-			// Schedulo il cambiamento di stato da CLOSED a ONGOING
-			EventState.scheduleStateChange(e, EventState.ONGOING, ongoingTimer, ongoingDate);
-			
-		} else {
-		
-			// Schedulo il cambiamento di stato da CLOSED a ENDED
-			EventState.scheduleStateChange(e, EventState.ENDED, ongoingTimer, ongoingDate);
-			
-		}
+		this.setTimers(e);
 		
 	}
 	
@@ -89,6 +71,12 @@ public class ClosedState implements EventState, Serializable {
 	@Override
 	public void resetState(Event e) {
 		
+		this.setTimers(e);
+		
+	}
+	
+	private void setTimers(Event e) {
+		
 		// Preparo il timer di scadenza della conclusione dell'evento
 		// Lo configuro in modo che venga eseguito come daemon (grazie al parametro con valore true).
 		this.ongoingTimer = new Timer(TIMER_NAME + e.hashCode(), true);
@@ -98,7 +86,7 @@ public class ClosedState implements EventState, Serializable {
 				
 		// Verifico se effettuare il passaggio a ONGOING o a ENDED
 		if (e.getFieldValue(CommonField.DATA_E_ORA_CONCLUSIVE) != null) {
-
+	
 			// Programmo il passaggio di stato da CLOSED a ONGOING
 			EventState.scheduleStateChange(e, EventState.ONGOING, ongoingTimer, ongoingDate);
 					
@@ -108,6 +96,7 @@ public class ClosedState implements EventState, Serializable {
 			EventState.scheduleStateChange(e, EventState.ENDED, ongoingTimer, ongoingDate);
 			
 		}
+		
 	}
 
 }
