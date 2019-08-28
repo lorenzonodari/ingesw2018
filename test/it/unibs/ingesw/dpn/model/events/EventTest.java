@@ -12,8 +12,10 @@ import org.junit.Test;
 
 import it.unibs.ingesw.dpn.model.categories.Category;
 import it.unibs.ingesw.dpn.model.fields.CommonField;
+import it.unibs.ingesw.dpn.model.fields.ConferenceField;
 import it.unibs.ingesw.dpn.model.fieldvalues.IntegerFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.MoneyAmountFieldValue;
+import it.unibs.ingesw.dpn.model.fieldvalues.OptionalCostsFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.StringFieldValue;
 import it.unibs.ingesw.dpn.model.users.Notification;
 import it.unibs.ingesw.dpn.model.users.User;
@@ -217,6 +219,80 @@ public class EventTest {
 		
 		assertTrue(success);
 		assertTrue(event.hasSubscriber(user));
+		
+	}
+	
+	@Test
+	public void unsubscribeTest_firtReturn() {
+		
+		// Mocks configuration
+		User notSubscriber = mock(User.class);
+		
+		
+		// Test code
+		Event event = this.testEvent;
+		boolean success = event.unsubscribe(notSubscriber);
+		
+		assertFalse(success);
+		
+	}
+	
+	@Test
+	public void unsubscribeTest_secondReturn() throws Exception {
+		
+		// Mock configuration
+		User aSubscriber = mock(User.class);
+		EventState wrongState = mock(EventState.class);
+		doThrow(new IllegalStateException()).when(wrongState).onUnsubscription(this.testEvent);
+		when(wrongState.getStateName()).thenReturn("TEST STATE");
+		
+		// Test code
+		Event event = this.testEvent;
+		event.setState(wrongState);
+		
+		Field partecipantsField = Event.class.getDeclaredField("partecipants");
+		partecipantsField.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		List<User> partecipants = (List<User>) partecipantsField.get(event);
+		partecipants.add(aSubscriber);
+		
+		boolean success = event.unsubscribe(aSubscriber);
+		
+		assertFalse(success);
+		assertTrue(partecipants.contains(aSubscriber));
+		
+	}
+	
+	@Test
+	public void unsubscribeTest_thirdReturn() throws Exception {
+		
+		// Mock configuration
+		User aSubscriber = mock(User.class);
+		OptionalCostsFieldValue userDependantField = mock(OptionalCostsFieldValue.class);
+		EventState correctState = mock(EventState.class);
+		when(correctState.getStateName()).thenReturn("TEST STATE");
+		
+		// Test code
+		
+		// Abbiamo bisogno di un evento che contenga userDependantFields per testare
+		// completamente il metodo
+		Event event = new ConferenceEvent(TestEvent.CREATOR);
+		event.setState(correctState);
+		event.setFieldValue(ConferenceField.SPESE_OPZIONALI, userDependantField);
+		event.setFieldValue(CommonField.TITOLO, new StringFieldValue("TEST EVENT"));
+		
+		Field partecipantsField = Event.class.getDeclaredField("partecipants");
+		partecipantsField.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		List<User> partecipants = (List<User>) partecipantsField.get(event);
+		partecipants.add(aSubscriber);
+		
+		boolean success = event.unsubscribe(aSubscriber);
+		
+		verify(aSubscriber, times(1)).receive(isA(Notification.class));
+		verify(userDependantField, times(1)).forgetUserCustomization(aSubscriber);
+		assertFalse(partecipants.contains(aSubscriber));
+		assertTrue(success);
 		
 	}
 
