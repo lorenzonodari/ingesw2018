@@ -58,18 +58,12 @@ public class LoginManager {
 	/**
 	 * Restituisce l'utente attualmente connesso al sistema.
 	 * 
-	 * Precondizione: un utente deve essere attualmente connesso al sistema
-	 * 
 	 * @return L'utente attualmente connesso al sistema
 	 */
 	public User getCurrentUser() {
-		
-		// Verifica delle precondizioni
-		if (this.currentUser == null) {
-			throw new IllegalStateException();
-		}
 	
 		return this.currentUser;
+		
 	}
 
 }
