@@ -1,5 +1,6 @@
 package it.unibs.ingesw.dpn.model.users;
 
+import java.util.Arrays;
 import java.util.List;
 
 import it.unibs.ingesw.dpn.model.fields.AbstractFieldable;
@@ -33,8 +34,8 @@ public class User extends AbstractFieldable {
 	 * 
 	 * @param fieldValues La lista di campi previsti per un oggetto User
 	 */
-	public User(List<Field> fieldsList) {
-		super(fieldsList);
+	public User() {
+		super(Arrays.asList(UserField.values()));
 		
 		// Inizializzo una nuova mailbox
 		this.mailbox = new Mailbox();
