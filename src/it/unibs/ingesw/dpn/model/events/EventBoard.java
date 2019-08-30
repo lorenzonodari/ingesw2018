@@ -168,4 +168,8 @@ public class EventBoard implements Serializable {
 		}
 	}
 	
+	public boolean isEmpty() {
+		return this.events.isEmpty();
+	}
+	
 }

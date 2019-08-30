@@ -23,11 +23,11 @@ import it.unibs.ingesw.dpn.model.users.User;
 public class EventTest {
 	
 	@SuppressWarnings("serial")
-	private static class TestEvent extends Event {
+	public static class TestEvent extends Event {
 		
 		static final User CREATOR = mock(User.class);
 		
-		TestEvent() {
+		public TestEvent() {
 			super(CREATOR, Category.PARTITA_DI_CALCIO);
 		}
 		
