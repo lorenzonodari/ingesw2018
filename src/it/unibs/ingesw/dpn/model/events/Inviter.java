@@ -5,13 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
-import it.unibs.ingesw.dpn.model.persistence.Model;
 import it.unibs.ingesw.dpn.model.users.Invite;
-import it.unibs.ingesw.dpn.model.users.Notification;
 import it.unibs.ingesw.dpn.model.users.User;
 
 /**
- * Classe che si occupa di mandare notifiche e inviti legate alla creazione di un nuovo oggetto {@link Event}.
+ * Classe controller GRASP adibita alla gestione del processo di invio di inviti agli utenti
  * 
  * @author Emanuele Poggi
  *
@@ -19,13 +17,12 @@ import it.unibs.ingesw.dpn.model.users.User;
 public class Inviter {
 	
 	private Event target;
-	private Model model;
 	private HashMap<User, Boolean> invited = new HashMap<>();
 		
-	public Inviter(Event target, Model model) {
-		this.model = model;
+	public Inviter(Event target, EventBoard board) {
+		
 		this.target = target;
-		for (User u : model.getEventBoard().getListOfOldSubscribersFromPastEvents(target.getCreator())) {
+		for (User u : board.getListOfOldSubscribersFromPastEvents(target.getCreator())) {
 			invited.put(u, false);
 		}
 		
@@ -157,24 +154,7 @@ public class Inviter {
 		return invited.get(u);
 		
 	}
-	/**
-	 * Metodo che invia  notifiche agli utenti che hanno selezionato la categoria dell'evento come categoria di interesse
-	 */
-	public void sendNotifications() {
-		
-		StringBuffer notificationContent = new StringBuffer("Un evento appartenente ad una tua categoria di interesse è appena stato creato: ");
-		notificationContent.append(target.getTitle());
-		
-		for(User u : model.getUsersRepository().getUserByCategoryOfInterest(target.getCategory())) {
-			
-			if (u == target.getCreator()) {
-				continue;
-			}
-			
-			u.receive(new Notification(notificationContent.toString()));
-		}
-		
-	}
+	
 	/**
 	 * Invia gli inviti agli utenti selezionati
 	 */
