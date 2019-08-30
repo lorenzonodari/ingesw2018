@@ -14,11 +14,10 @@ import it.unibs.ingesw.dpn.ui.actions.MenuEntry;
  */
 public class TextRenderer implements UIRenderer {
 	
-	private static final String OPTION_FORMAT = "%2d%s%s\n";
+	private static final String OPTION_FORMAT = "%2d - %s\n";
 	
 	private static final String CLI_PROMPT = ">> ";
 	private static final String ERROR_PREFIX = "ERRORE: ";
-	private static final String ENTRY_NUM_SEPARATOR = " - ";
 	
 	private static final int HORIZ_PADDING = 3;
 	private static final int MAX_WIDTH = 100;
@@ -319,7 +318,6 @@ public class TextRenderer implements UIRenderer {
 		return String.format(
 				OPTION_FORMAT,
 				index,
-				ENTRY_NUM_SEPARATOR,
 				entry.getName());
 	}
 	
@@ -334,7 +332,6 @@ public class TextRenderer implements UIRenderer {
 		return String.format(
 				OPTION_FORMAT,
 				index,
-				ENTRY_NUM_SEPARATOR,
 				option);
 	}
 
@@ -379,7 +376,10 @@ public class TextRenderer implements UIRenderer {
 						// Resetto il buffer, aggiungendo la parola appena trovata
 						buffer = new StringBuffer(word + " ");
 						
-						// TODO : al momento il metodo si incasina se ho una parola più lunga del massimo numero di caratteri per riga
+						/* TODO : al momento il metodo si incasina se ho una parola più lunga 
+						 * del massimo numero di caratteri per riga. Tuttavia è un caso 
+						 * talmente specifico che dubito accada.
+						 */
 					}
 				}
 				// Aggiungo tutte le parole rimanenti

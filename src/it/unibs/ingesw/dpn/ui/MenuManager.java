@@ -77,7 +77,10 @@ public class MenuManager {
 		this.model = model;
 		this.users = model.getUsersRepository();
 		this.loginManager = loginManager;
+		
+		// Assistenti alla UI
 		this.builderAssistant = new BuilderUIAssistant(this.userInterface);
+		this.eventManagementAssistant = new EventManagementUIAssistant(this.userInterface, this.model.getEventBoard());
 		
 	}
 	
