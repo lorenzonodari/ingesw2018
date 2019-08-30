@@ -24,6 +24,7 @@ import it.unibs.ingesw.dpn.model.categories.Category;
 import it.unibs.ingesw.dpn.model.events.Event;
 import it.unibs.ingesw.dpn.model.events.EventState;
 import it.unibs.ingesw.dpn.model.events.Inviter;
+import it.unibs.ingesw.dpn.model.events.NewEventNotifier;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fields.builder.UserBuilder;
 import it.unibs.ingesw.dpn.model.fieldvalues.UserDependantFieldValue;
@@ -272,7 +273,8 @@ public class MenuManager {
 					"Avanti")).execute(userInterface);
 			
 			// Preparo il menu degli inviti
-			Inviter inviter = new Inviter(newEvent, model);
+			Inviter inviter = new Inviter(newEvent, model.getEventBoard());
+			NewEventNotifier notifier = new NewEventNotifier(newEvent, model.getUsersRepository());
 			
 			// Se sono presenti utenti invitabili
 			if (inviter.getCandidates().size() > 0) {
@@ -294,7 +296,7 @@ public class MenuManager {
 			}
 			
 			// Alla fine, notifico gli utenti che sono interessati alla categoria dell'evento
-			inviter.sendNotifications();
+			notifier.sendNotifications();
 		};
 		
 		return eventCreationAction;		
