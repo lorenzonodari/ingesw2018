@@ -97,5 +97,9 @@ public class UsersRepository implements Serializable {
 		}
 		return false;
 	}
+	
+	public boolean isEmpty() {
+		return this.users.isEmpty();
+	}
 
 }

@@ -26,8 +26,7 @@ public class DiskSerializationStrategy implements PersistenceStrategy {
 	 * che non siano presenti dati di dominio da caricare e provvede ad inizializzare un model vuoto.
 	 * 
 	 * Precondizione: databaseFile != null
-	 * Precondizione: databaseFile.canWrite()
-	 * 
+ 	 * 
 	 * @param databaseFile Il file di database da utilizzare per il caricamento e il salvataggio dei dati
 	 */
 	public DiskSerializationStrategy(File databaseFile) {
