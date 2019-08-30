@@ -134,6 +134,7 @@ public class DiskSerializationStrategyTest {
 		UsersRepository loadedUsers = (UsersRepository) input.readObject();
 		
 		input.close();
+		database.delete();
 		
 		assertEquals(loadedBoard.getEvents().size(), 1);
 		assertFalse(loadedUsers.isEmpty());
