@@ -52,6 +52,9 @@ public class MenuManager {
 	
 	/** Classe per la gestione dei processi di creazione/modifica di User e Event */
 	private BuilderUIAssistant builderAssistant;
+	
+	/** Classe per la gestione a livello UI di un evento */
+	private EventManagementUIAssistant eventManagementAssistant;
 		
 	/**
 	 * Crea un nuovo UIManager utilizzando il renderer dato per la creazione
@@ -377,6 +380,7 @@ public class MenuManager {
 	
 	/**
 	 * Restituisce il menu con la lista di eventi creati e pubblicati dall'utente.<br>
+	 * Si avvale dei metodi contenuti nella classe {@link EventManagementUIAssistant}.
 	 */
 	private Action getProposalsMenuAction() {
 		// Menu di gestione degli eventi proposti
@@ -384,7 +388,7 @@ public class MenuManager {
 
 		// Callback per ogni evento creato dall'utente
 		List<Event> proposals = model.getEventBoard().getEventsByAuthor(loginManager.getCurrentUser());
-		for (Event event : proposals) {
+		for (Event event : proposals) {			
 			// Per ciascuna proposta aggiungo un'opzione al menu
 			proposalsMenuAction.addEntry(event.getTitle(), getEventManagementMenuAction(event));
 		}
@@ -403,40 +407,6 @@ public class MenuManager {
 			};
 		
 		return userEditingAction;
-	}
-	
-	/**
-	 * Restituisce il menu di gestione di un evento, dato l'evento in questione.<br>
-	 * 
-		//	 * TODO NON FUNZIONA L'AGGIORNAMENTO DI QUESTO MENU.
-		//	 * L'UNICA SOLUZIONE È SPOSTARNE LA GESTIONE IN UNA CLASSE ESTERNA,
-		//	 * CHE ADATTI IL MENU VOLTA PER VOLTA ->> TODO
-	 * 
-	 * @param event L'evento in questione che si vuole gestire
-	 * @return Il menu di gestione di tale evento
-	 */
-	private Action getEventManagementMenuAction(Event event) {	
-		// Menu di visualizzazione di un evento 
-		// (dal punto di vista dell'utente corrente, quindi visualizzando anche i campi dipendenti dall'utente)
-		MenuAction eventMenuAction = new MenuAction("Visualizzazione evento", event.toString(loginManager.getCurrentUser()));
-		
-		// Se l'evento è creato dall'utente corrente
-		if (loginManager.getCurrentUser().equals(event.getCreator())) {
-			eventMenuAction.addEntry("Ritira proposta", getWithdrawnAction(event));
-			
-		} // Altrimenti, se l'evento NON è creato dall'utente corrente
-		else {
-			// Se l'utente corrente è iscritto
-			if (event.hasSubscriber(loginManager.getCurrentUser())) {
-				eventMenuAction.addEntry("Disiscriviti", getUnsubscriptionAction(event));
-			
-			} // Altrimenti, se l'utente corrente NON è iscritto
-			else {
-				eventMenuAction.addEntry("Iscriviti", getSubscriptionAction(event));
-			}
-		}
-		
-		return eventMenuAction;
 	}
 	
 	/**
@@ -521,84 +491,6 @@ public class MenuManager {
 	}
 	
 	/**
-	 * Azione di iscrizione di un utente ad un evento.
-	 * 
-	 * @param event
-	 * @return
-	 */
-	private Action getSubscriptionAction(Event event) {
-		// Azione di iscrizione ad un evento
-		SimpleAction subscriptionAction = (userInterface) -> {
-			boolean success = event.subscribe(loginManager.getCurrentUser());
-			// Mostro all'utente il risultato dell'iscrizione
-			DialogAction dialogResult = new DialogAction(
-					success ?
-					"Iscrizione effettuata correttamente." :
-					"Non e' stato possibile registrare correttamente l'iscrizione.\nE' possibile iscriversi solamente entro il \"Termine ultimo di iscrizione\".", 
-					null);
-			dialogResult.execute(userInterface);
-			
-			// Se l'iscrizione non ha avuto successo, termino qui l'azione
-			if (!success) {
-				return;
-			}
-			
-			// Se l'iscrizione ha avuto successo, imposto i valori dipendenti dall'utente
-
-			for (Field f : event.getUserDependantFields()) {
-				UserDependantFieldValue fieldValue = (UserDependantFieldValue) event.getFieldValue(f);
-				fieldValue.userCustomization(loginManager.getCurrentUser(), userInterface);
-			}
-
-		};
-		return subscriptionAction;
-	}
-	
-	/**
-	 * Azione di disiscrizione di un utente ad un evento.
-	 * 
-	 * @param event
-	 * @return
-	 */
-	private Action getUnsubscriptionAction(Event event) {
-		// Azione di disiscrizione da un evento
-		SimpleAction unsubscribeAction = (userInterface) -> {
-			boolean success = event.unsubscribe(loginManager.getCurrentUser());
-			// Mostro all'utente il risultato della disiscrizione
-			DialogAction dialogResult = new DialogAction(
-					success ?
-					"Iscrizione rimossa correttamente.\nPuoi iscriverti nuovamente entro il \"Termine ultimo di iscrizione\"." :
-					"Non è stato possibile annullare correttamente l'iscrizione.\nE' possibile disiscriversi solamente entro il \"Termine ultimo di ritiro iscrizione\".", 
-					null);
-			dialogResult.execute(userInterface);		
-		};
-		
-		return unsubscribeAction;
-	}
-	
-	/**
-	 * Azione di ritiro di un evento 
-	 * 
-	 * @param event
-	 * @return
-	 */
-	private Action getWithdrawnAction(Event event) {
-		// Azione di ritiro di una proposta di evento
-		SimpleAction withdrawAction = (userInterface) -> {
-			boolean success = model.getEventBoard().removeEvent(event);
-			// Mostro all'utente il risultato del ritiro
-			DialogAction dialogResult = new DialogAction(
-					success ?
-					"L'evento è stato annullato correttamente." :
-					"Non è stato possibile ritirare l'evento.\nRiprovare dopo la data \"Termine ultimo di ritiro iscrizione\".",
-					null);
-			dialogResult.execute(userInterface);
-		};
-		
-		return withdrawAction;
-	}
-	
-	/**
 	 * 
 	 * @param invite
 	 * @return
@@ -641,6 +533,54 @@ public class MenuManager {
 		};
 		
 		return inviteDeclinationAction;
+	}
+	
+	/**
+	 * Azione di iscrizione dell'utente corrente all'evento.
+	 * 
+	 * @param targetEvent L'evento in questione
+	 * @return L'azione di iscrizione all'evento come oggetto {@link Action}
+	 */
+	private Action getSubscriptionAction(Event targetEvent) {
+		// Azione di iscrizione ad un evento
+		SimpleAction subscriptionAction = (userInterface) -> {
+			boolean success = targetEvent.subscribe(loginManager.getCurrentUser());
+			// Mostro all'utente il risultato dell'iscrizione
+			DialogAction dialogResult = new DialogAction(
+					success ?
+					"Iscrizione effettuata correttamente." :
+					"Non e' stato possibile registrare correttamente l'iscrizione.\nE' possibile iscriversi solamente entro il \"Termine ultimo di iscrizione\".", 
+					null);
+			dialogResult.execute(userInterface);
+			
+			// Se l'iscrizione non ha avuto successo, termino qui l'azione
+			if (!success) {
+				return;
+			}
+			
+			// Se l'iscrizione ha avuto successo, imposto i valori dipendenti dall'utente
+
+			for (Field f : targetEvent.getUserDependantFields()) {
+				UserDependantFieldValue fieldValue = (UserDependantFieldValue) targetEvent.getFieldValue(f);
+				fieldValue.userCustomization(loginManager.getCurrentUser(), userInterface);
+			}
+
+		};
+		return subscriptionAction;
+	}
+	
+	/**
+	 * Restituisce l'azione di gestione evento.
+	 * 
+	 * @param event L'evento in questione
+	 */
+	private Action getEventManagementMenuAction(Event event) {
+		// Creo l'azione
+		SimpleAction eventManagementMenuAction = (userInterface) -> {
+			eventManagementAssistant.manageEvent(event, this.loginManager.getCurrentUser());
+		};	
+		
+		return eventManagementMenuAction;
 	}
 	
 	/**
