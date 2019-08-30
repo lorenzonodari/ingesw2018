@@ -55,12 +55,7 @@ public class UserRepositoryTest {
 	 */
 	@Test
 	public void testGetUserByCategoryOfInterest() {
-		/*
-		 * ERRORE!
-		 * Impossibile mockare un oggetto Category, poiché si tratta
-		 * di una classe final (più precisamente, di un enum).
-		 */
-		Category target = mock(Category.class);
+		Category target = Category.PARTITA_DI_CALCIO;
 		CategoryListFieldValue targetOnList = mock(CategoryListFieldValue.class);
 		when(targetOnList.contains(target)).thenReturn(true);
 		User t1 = mock(User.class);
@@ -76,9 +71,7 @@ public class UserRepositoryTest {
 		when(t4.getFieldValue(UserField.CATEGORIE_DI_INTERESSE)).thenReturn(null);
 		test.addUser(t4);
 		List<User> listatest = test.getUserByCategoryOfInterest(target);
-		assertTrue(listatest.contains(t1));
-		// TODO Verificare che cosa voglio che contenga listaTest
-		// Prima doveva contenere "target", che però è un oggetto category
+		assertTrue(listatest.contains(t3));
 		
 	}
 

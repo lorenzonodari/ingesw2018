@@ -1,9 +1,9 @@
 package it.unibs.ingesw.dpn.ui;
 
-import it.unibs.ingesw.dpn.ui.actions.Action;
 import it.unibs.ingesw.dpn.ui.actions.ConfirmAction;
 import it.unibs.ingesw.dpn.ui.actions.DialogAction;
 import it.unibs.ingesw.dpn.ui.actions.MenuAction;
+import it.unibs.ingesw.dpn.ui.actions.MenuEntry;
 
 /**
  * Interfaccia utilizzata dalle classi adibite all'acquisizione di input dall'utente
@@ -90,7 +90,7 @@ public interface UIGetter {
 	 * @param menu Il menu da cui attingere 
 	 * @return L'azione corrispondente all'opzione selezionata
 	 */
-	public Action getMenuChoice(MenuAction menu);
+	public MenuEntry getMenuChoice(MenuAction menu);
 
 	/**
 	 * Presenta un prompt di conferma e richiede all'utente di selezionare una delle due opzioni.<br>

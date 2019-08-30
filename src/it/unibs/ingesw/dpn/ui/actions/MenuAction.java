@@ -9,14 +9,22 @@ import java.util.Collections;
 
 /**
  * Classe rappresentante le informazioni contenute in un menu dell'interfaccia utente.
- * Si noti che le istanze di questa classe sono immutabili.
  * <br>
  * Questa classe, inoltre, partecipa all'implementazione del pattern <em>Composite</em>, 
  * implementando l'interfaccia {@link Action}.
  * <br>
- * Ogni menu e' caratterizzato da un titolo, un contenuto testuale opzionale, delle 
- * opzioni selezionabili ({@link MenuEntry}) e da una opzione speciale per l'uscita dal menu,
- * assegnata di default ad un'opzione nulla.
+ * Ogni menu e' caratterizzato da:
+ * <ul>
+ * 	<li> un titolo </li>
+ * 	<li> un contenuto testuale opzionale </li>
+ * 	<li> delle opzioni selezionabili come oggetti ({@link MenuEntry}), ciascuna delle quali è associata 
+ * ad un'{@link Action} e può essere terminante o no. </li>
+ * 	<li> un'opzione speciale per l'uscita dal menu, impostata automaticamente come terminante e associata ad un'azione nulla. </li>
+ * </ul>
+ * Questa particolare implementazione permette una maggiore flessibilità sulla permanenza o sull'uscita 
+ * dal menu. Inoltre, l'opzione di uscita assicura che il menu possa terminare in almeno un modo.
+ * 
+ * @author Lorenzo Nodari, Michele Dusi
  * 
  */
 public class MenuAction implements Action {
@@ -48,7 +56,8 @@ public class MenuAction implements Action {
 		this.title = title;
 		this.text = text != null ? text : "";
 		this.entries = new LinkedList<MenuEntry>();
-		this.backEntry = new MenuEntry(BACK_ENTRY_TITLE, SimpleAction.EMPTY_ACTION);
+		// Imposto l'opzione di uscita come azione vuota, ma terminante
+		this.backEntry = new MenuEntry(BACK_ENTRY_TITLE, SimpleAction.EMPTY_ACTION, true);
 	}
 	
 	/**
@@ -66,12 +75,14 @@ public class MenuAction implements Action {
 			throw new NullPointerException("Impossibile aggiungere una entry con componenti nulle");
 		}
 		
-		MenuEntry entry = new MenuEntry(backEntryText, backEntryAction);
+		// Imposto una nuova entry *terminante*
+		MenuEntry entry = new MenuEntry(backEntryText, backEntryAction, true);
 		this.backEntry = entry;
 	}
 	
 	/**
-	 * Aggiunge una nuova voce al menu, dato il nome e l'azione associata.
+	 * Aggiunge una nuova voce al menu, dato il nome, l'azione associata e 
+	 * se l'entry è terminante o no (vedi {@link MenuEntry} per maggiori informazioni).
 	 * 
 	 * Precondizione: title != null
 	 * Precondizione: action != null
@@ -81,8 +92,9 @@ public class MenuAction implements Action {
 	 * 
 	 * @param entryText Il testo della nuova voce del menu
 	 * @param entryAction L'azione associata alla nuova voce del menu
+	 * @param isTerminatingEntry Indica se l'entry provoca l'uscita del menu al termine della sua esecuzione
 	 */
-	public void addEntry(String entryText, Action entryAction) {
+	public void addEntry(String entryText, Action entryAction, boolean isTerminatingEntry) {
 		
 		// Verifica delle precondizioni
 		if (entryText == null || entryAction == null) {
@@ -96,11 +108,31 @@ public class MenuAction implements Action {
 			}
 		}
 		
-		MenuEntry entry = new MenuEntry(entryText, entryAction);
+		MenuEntry entry = new MenuEntry(entryText, entryAction, isTerminatingEntry);
 		this.entries.add(entry);
 		
 		// Verifica della postcondizione
 		assert this.entries.contains(entry);
+	}
+	
+	/**
+	 * Aggiunge una nuova voce al menu, dato il nome e l'azione associata.
+	 * Di default, l'entry creata NON termina l'esecuzione di questo menu.
+	 * 
+	 * Precondizione: title != null
+	 * Precondizione: action != null
+	 * Precondizione: Il testo dell'entry NON deve essere già presente nel menu
+	 * 
+	 * Postcondizione: this.entries.contains(entry) == true
+	 * 
+	 * @param entryText Il testo della nuova voce del menu
+	 * @param entryAction L'azione associata alla nuova voce del menu
+	 */
+	public void addEntry(String entryText, Action entryAction) {
+		
+		// Aggiungo un'entry di default NON TERMINANTE.
+		this.addEntry(entryText, entryAction, false);
+		
 	}
 	
 	/**
@@ -200,11 +232,11 @@ public class MenuAction implements Action {
 	 */
 	@Override
 	public void execute(UserInterface userInterface) {
-		Action selectedAction;
+		MenuEntry selectedEntry;
 		do {
-			selectedAction = userInterface.getter().getMenuChoice(this);
-			selectedAction.execute(userInterface);
-		} while (selectedAction != this.backEntry.getAction());
+			selectedEntry = userInterface.getter().getMenuChoice(this);
+			selectedEntry.getAction().execute(userInterface);
+		} while (!selectedEntry.isTerminatingAction());
 	}
 
 }

@@ -2,10 +2,10 @@ package it.unibs.ingesw.dpn.ui;
 
 import java.util.Scanner;
 
-import it.unibs.ingesw.dpn.ui.actions.Action;
 import it.unibs.ingesw.dpn.ui.actions.ConfirmAction;
 import it.unibs.ingesw.dpn.ui.actions.DialogAction;
 import it.unibs.ingesw.dpn.ui.actions.MenuAction;
+import it.unibs.ingesw.dpn.ui.actions.MenuEntry;
 
 /**
  * Implementazione dell'interfaccia InputGetter per la gestione dell'input da tastiera.
@@ -257,7 +257,7 @@ public class TextGetter implements UIGetter {
 	 * @param menu Il menu da cui attingere 
 	 * @return L'azione corrispondente all'opzione selezionata
 	 */
-	public Action getMenuChoice(MenuAction menu) {
+	public MenuEntry getMenuChoice(MenuAction menu) {
 		// Render del menu e del prompt
 		renderer.renderMenu(menu);
 		
@@ -266,9 +266,9 @@ public class TextGetter implements UIGetter {
 		
 		// Restituzione dell'opzione corrispondente
 		if (choice == 0) {
-			return menu.getBackEntry().getAction();
+			return menu.getBackEntry();
 		} else {
-			return menu.getEntries().get(choice - 1).getAction();
+			return menu.getEntries().get(choice - 1);
 		}
 	}
 

@@ -67,7 +67,7 @@ public class BuilderUIAssistant {
 	public Event createEvent(LoginManager loginManager) {
 		// Selezione della categoria
 		MenuAction categorySelectionMenu = prepareCategorySelectionMenu();
-		userInterface.getter().getMenuChoice(categorySelectionMenu).execute(userInterface);
+		userInterface.getter().getMenuChoice(categorySelectionMenu).getAction().execute(userInterface);
 		Category selectedCategory = this.auxiliaryCategory;
 		
 		// Se ho annullato la creazione, termino immediatamente
@@ -83,7 +83,7 @@ public class BuilderUIAssistant {
 
 		do {
 			MenuAction createUserMenu = prepareCreationMenu(eventBuilder);
-			Action action = userInterface.getter().getMenuChoice(createUserMenu);
+			Action action = userInterface.getter().getMenuChoice(createUserMenu).getAction();
 			action.execute(userInterface);
 		} while (!eventBuilder.isReady());
 
@@ -107,7 +107,7 @@ public class BuilderUIAssistant {
 			
 			do {
 				MenuAction createUserMenu = prepareCreationMenu(userBuilder);
-				Action action = userInterface.getter().getMenuChoice(createUserMenu);
+				Action action = userInterface.getter().getMenuChoice(createUserMenu).getAction();
 				action.execute(userInterface);
 			} while (!userBuilder.isReady());
 		
@@ -136,7 +136,7 @@ public class BuilderUIAssistant {
 		
 		do {
 			MenuAction createUserMenu = prepareEditingMenu(userBuilder);
-			Action action = userInterface.getter().getMenuChoice(createUserMenu);
+			Action action = userInterface.getter().getMenuChoice(createUserMenu).getAction();
 			try {
 				action.execute(userInterface);
 			}
