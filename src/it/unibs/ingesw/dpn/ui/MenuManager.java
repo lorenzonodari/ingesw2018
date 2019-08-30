@@ -25,6 +25,7 @@ import it.unibs.ingesw.dpn.model.events.Event;
 import it.unibs.ingesw.dpn.model.events.EventState;
 import it.unibs.ingesw.dpn.model.events.Inviter;
 import it.unibs.ingesw.dpn.model.fields.Field;
+import it.unibs.ingesw.dpn.model.fields.builder.UserBuilder;
 import it.unibs.ingesw.dpn.model.fieldvalues.UserDependantFieldValue;
 
 /**
@@ -76,6 +77,11 @@ public class MenuManager {
 		
 	}
 	
+	/**
+	 * Restituisce il menu d'avvio del programma.
+	 * 
+	 * @return Il menu d'avvio del programma.
+	 */
 	public Action getStartMenuAction() {
 		// Menu d'inizio
 		MenuAction startMenuAction = new MenuAction("Social Network per Eventi", "Benvenuto/a!");
@@ -94,6 +100,11 @@ public class MenuManager {
 		return startMenuAction;
 	}
 	
+	/**
+	 * Azione di login.<br>
+	 * Richiede il nickname all'utente che intende effettuare il login.
+	 * Se il nickname è presente nel database, allora il login termina con successo.
+	 */
 	private Action getLoginAction() {
 		// Callback di login di un utente
 		SimpleAction loginAction = (userInterface) -> {
@@ -112,6 +123,13 @@ public class MenuManager {
 		return loginAction;
 	}
 	
+	/**
+	 * Azione di registrazione.<br>
+	 * Permette ad un utente di iscriversi al social network,
+	 * impostando le proprie informazioni personali tramite i metodi
+	 * della classe {@link BuilderUIAssistant} che si intefracciano con il pattern
+	 * Builder {@link UserBuilder} per la classe {@link User}.
+	 */
 	private Action getRegisterAction() {
 		// Callback Registrazione di un nuovo User
 		SimpleAction registerAction = (userInterface) -> {
@@ -126,6 +144,11 @@ public class MenuManager {
 		return registerAction;
 	}
 	
+	/**
+	 * Menu home di un utente.<br>
+	 * Permette l'accesso alla bacheca o al proprio spazio personale.<br>
+	 * Uscendo viene effettuato il logout.
+	 */
 	private Action getHomeMenuAction() {
 		// Menu di home
 		MenuAction homeMenuAction = new MenuAction("Menu principale", null);
@@ -137,6 +160,10 @@ public class MenuManager {
 		return homeMenuAction;
 	}
 	
+	/**
+	 * Azione di logout.<br>
+	 * Effettua il logout dell'utente dal programma.
+	 */
 	private Action getLogoutAction() {
 		// Callback Logout effettiva
 		SimpleAction logoutAction = (userInterface) -> {
@@ -147,17 +174,33 @@ public class MenuManager {
 		return logoutAction;
 	}
 	
+	/**
+	 * Menu Bacheca degli eventi.<br>
+	 * Permette l'accesso ai sotto-menu per la visualizzazione degli eventi aperti
+	 * o della lista di categorie. Permette inoltre l'aggiunta di un nuovo evento.
+	 */
 	private Action getBoardMenuAction() {
 		// Menu per la bacheca
 		MenuAction boardMenuAction = new MenuAction("Bacheca", null);
 		
-		boardMenuAction.addEntry("Visualizza eventi", getEventsViewMenuAction());
+		boardMenuAction.addEntry("Visualizza eventi aperti", getEventsViewMenuAction());
 		boardMenuAction.addEntry("Visualizza categorie", getCategoriesViewMenuAction());
 		boardMenuAction.addEntry("Proponi evento", getEventCreationAction());
 		
 		return boardMenuAction;
 	}
 	
+	/**
+	 * Menu "Spazio personale".<br>
+	 * Permette l'accesso ai seguenti sottomenu:
+	 * <ul>
+	 * 	<li> Notifiche </li>
+	 * 	<li> Inviti </li>
+	 * 	<li> Le mie iscrizioni </li>
+	 * 	<li> Le mie proposte </li>
+	 * 	<li> Modifica profilo </li>
+	 * </ul>
+	 */
 	private Action getPersonalSpaceMenuAction() {
 		// Menu dello Spazio Personale
 		MenuAction personalSpaceMenuAction = new MenuAction("Spazio personale", null);
@@ -171,18 +214,27 @@ public class MenuManager {
 		return personalSpaceMenuAction;
 	}
 	
+	/**
+	 * Azione associata all'entry "Visualizza eventi aperti".<br>
+	 * Presenta un'opzione per ciascun evento aperto presente in bacheca.
+	 */
 	private Action getEventsViewMenuAction() {
 		MenuAction eventsViewMenuAction = new MenuAction("Lista eventi aperti", null);
 		
 		// Callback per gli eventi
 		for (Event open : model.getEventBoard().getEventsByState(EventState.OPEN)) {
 			// Associo al titolo dell'evento l'azione del menu relativo ad esso
-			eventsViewMenuAction.addEntry(open.getTitle(), getEventMenuAction(open));
+			eventsViewMenuAction.addEntry(open.getTitle(), getEventManagementMenuAction(open));
 		}
 		
 		return eventsViewMenuAction;
 	}
 	
+	/**
+	 * Menu di visualizzazione della lista di categorie<br>
+	 * Per ciascuna categoria presenta un'opzione per la visualizzazione delle sue informazioni
+	 * specifiche.
+	 */
 	private Action getCategoriesViewMenuAction() {
 		// Menu per la selezione delle categorie
 		MenuAction categoriesViewMenuAction = new MenuAction("Menu categorie", "Categorie di eventi disponibili:");
@@ -196,6 +248,12 @@ public class MenuManager {
 		return categoriesViewMenuAction;
 	}
 	
+	/**
+	 * Azione di creazione di un evento.<br>
+	 * Si avvale dei metodi di {@link BuilderUIAssistantAssistant} che fornisce
+	 * un'interfaccia utente comoda per utilizzare la classe {@link Builder} per creare
+	 * oggetti {@link Event}.
+	 */
 	private Action getEventCreationAction() {
 		// Callback per la proposta di un evento
 		SimpleAction eventCreationAction = (userInterface) -> {
@@ -219,7 +277,7 @@ public class MenuManager {
 			// Se sono presenti utenti invitabili
 			if (inviter.getCandidates().size() > 0) {
 				// Preparo l'azione di invito
-				Action invitationsAction = getUserInvitationsMenuAction(newEvent, inviter);
+				Action invitationsAction = getUserInvitationsMenuAction(inviter);
 				// Inglobo l'azione in un'azione di conferma
 				ConfirmAction confirmInvitationsAction = new ConfirmAction(
 						"Vuoi procedere con l'invio di inviti all'evento?", 
@@ -242,6 +300,10 @@ public class MenuManager {
 		return eventCreationAction;		
 	}
 	
+	/**
+	 * Menu delle notifiche.<br>
+	 * Per ciascuna notifica visualizza la entry per la visualizzazione della notifica.
+	 */
 	private Action getNotificationsMenuAction() {
 		// Recupero l'utente corrente
 		User currentUser = loginManager.getCurrentUser();
@@ -263,10 +325,18 @@ public class MenuManager {
 		
 		MenuAction notificationsMenu = new MenuAction("Notifiche Personali", menuContent);
 		notificationsMenu.addEntry("Cancella notifiche", getDeleteNotificationsMenu());
+		// TODO AGGIORNAMENTO DEL MENU
 		
 		return notificationsMenu;
 	}
 	
+	/**
+	 * Menu per la visualizzazione degli inviti.<br>
+	 * Se non sono presenti inviti, il menu presenta la scritta "Nessun invito da visualizzare".
+	 * 
+	 * TODO SOLITO PROBLEMA, SE ACCETTO O RIFIUTO UN INVITO IL MENU NON SI AGGIORNA
+	 * 
+	 */
 	private Action getInvitationsMenuAction() {
 		
 		String menuContent = null;
@@ -284,6 +354,9 @@ public class MenuManager {
 		return invitationsMenuAction;
 	}
 	
+	/**
+	 * Presenta la lista di eventi a cui un utente è iscritto.<br>
+	 */
 	private Action getSubscriptionsMenuAction() {
 		// Menu di gestione delle iscrizioni
 		MenuAction subscriptionsMenuAction = new MenuAction("Le mie iscrizioni", null);
@@ -294,12 +367,15 @@ public class MenuManager {
 			// Per ciascuna iscrizione aggiungo un'opzione al menu
 			subscriptionsMenuAction.addEntry(
 					event.getTitle(), 
-					getEventMenuAction(event));
+					getEventManagementMenuAction(event));
 		}
 		
 		return subscriptionsMenuAction;
 	}
 	
+	/**
+	 * Restituisce il menu con la lista di eventi creati e pubblicati dall'utente.<br>
+	 */
 	private Action getProposalsMenuAction() {
 		// Menu di gestione degli eventi proposti
 		MenuAction proposalsMenuAction = new MenuAction("Le mie proposte", null);
@@ -308,12 +384,16 @@ public class MenuManager {
 		List<Event> proposals = model.getEventBoard().getEventsByAuthor(loginManager.getCurrentUser());
 		for (Event event : proposals) {
 			// Per ciascuna proposta aggiungo un'opzione al menu
-			proposalsMenuAction.addEntry(event.getTitle(), getEventMenuAction(event));
+			proposalsMenuAction.addEntry(event.getTitle(), getEventManagementMenuAction(event));
 		}
 		
 		return proposalsMenuAction;
 	}
 	
+	/**
+	 * Restituisce l'azione per la modifica dei dati dell'utente.<br>
+	 * Si avvale dei metodi della classe {@link BuilderUIAssistant}.
+	 */
 	private Action getUserEditingAction() {
 		// Callback per la modifica dell'utente
 		SimpleAction userEditingAction = (userInterface) -> {
@@ -323,7 +403,17 @@ public class MenuManager {
 		return userEditingAction;
 	}
 	
-	private Action getEventMenuAction(Event event) {	
+	/**
+	 * Restituisce il menu di gestione di un evento, dato l'evento in questione.<br>
+	 * 
+		//	 * TODO NON FUNZIONA L'AGGIORNAMENTO DI QUESTO MENU.
+		//	 * L'UNICA SOLUZIONE È SPOSTARNE LA GESTIONE IN UNA CLASSE ESTERNA,
+		//	 * CHE ADATTI IL MENU VOLTA PER VOLTA ->> TODO
+	 * 
+	 * @param event L'evento in questione che si vuole gestire
+	 * @return Il menu di gestione di tale evento
+	 */
+	private Action getEventManagementMenuAction(Event event) {	
 		// Menu di visualizzazione di un evento 
 		// (dal punto di vista dell'utente corrente, quindi visualizzando anche i campi dipendenti dall'utente)
 		MenuAction eventMenuAction = new MenuAction("Visualizzazione evento", event.toString(loginManager.getCurrentUser()));
@@ -347,6 +437,16 @@ public class MenuManager {
 		return eventMenuAction;
 	}
 	
+	/**
+	 * Restituisce il menu relativo alla gestione di una categoria.<br>
+	 * Al momento, le azioni previste per una categoria sono:
+	 * <ul>
+	 * 	<li> Visualizza informazioni dettagliate </li>
+	 * </ul>
+	 * 
+	 * @param category La categoria che si vuole gestire
+	 * @return Il menu di una categoria.
+	 */
 	private Action getCategoryMenuAction(Category category) {
 		// Menu relativo ad una precisa categoria
 		MenuAction categoryMenuAction = new MenuAction("Menu di categoria", category.getName());
@@ -356,7 +456,12 @@ public class MenuManager {
 		return categoryMenuAction;
 	}
 	
-	private Action getUserInvitationsMenuAction(Event event, Inviter inviter) {
+	/**
+	 * Restituisce il menu per selezionare gli utenti da inviare.
+	 * 
+	 * @param inviter L'inviter
+	 */
+	private Action getUserInvitationsMenuAction(Inviter inviter) {
 		// Lista di candidati
 		Set<User> candidates = inviter.getCandidates();
 		Map<User, String> candidatesNicknames = new LinkedHashMap<>();
@@ -387,6 +492,10 @@ public class MenuManager {
 		return userInvitationsMenuAction;
 	}
 	
+	/**
+	 * Menu di eliminazione delle notifiche.
+	 * Al momento è sbagliato, perché il menu da cui arriva NON si aggiorna.
+	 */
 	private Action getDeleteNotificationsMenu() {
 		// Menu di eliminazione delle notifiche
 		MenuAction deleteNotificationsMenu = new MenuAction("Elimina notifiche", "Seleziona la notifica da eliminare");
@@ -409,6 +518,12 @@ public class MenuManager {
 		return deleteNotificationsMenu;
 	}
 	
+	/**
+	 * Azione di iscrizione di un utente ad un evento.
+	 * 
+	 * @param event
+	 * @return
+	 */
 	private Action getSubscriptionAction(Event event) {
 		// Azione di iscrizione ad un evento
 		SimpleAction subscriptionAction = (userInterface) -> {
@@ -437,6 +552,12 @@ public class MenuManager {
 		return subscriptionAction;
 	}
 	
+	/**
+	 * Azione di disiscrizione di un utente ad un evento.
+	 * 
+	 * @param event
+	 * @return
+	 */
 	private Action getUnsubscriptionAction(Event event) {
 		// Azione di disiscrizione da un evento
 		SimpleAction unsubscribeAction = (userInterface) -> {
@@ -453,6 +574,12 @@ public class MenuManager {
 		return unsubscribeAction;
 	}
 	
+	/**
+	 * Azione di ritiro di un evento 
+	 * 
+	 * @param event
+	 * @return
+	 */
 	private Action getWithdrawnAction(Event event) {
 		// Azione di ritiro di una proposta di evento
 		SimpleAction withdrawAction = (userInterface) -> {
@@ -469,6 +596,11 @@ public class MenuManager {
 		return withdrawAction;
 	}
 	
+	/**
+	 * 
+	 * @param invite
+	 * @return
+	 */
 	private Action getInviteConfirmAction(Invite invite) {
 		// Menu di accettazione		
 		ConfirmAction inviteMenuAction = new ConfirmAction(
@@ -509,6 +641,9 @@ public class MenuManager {
 		return inviteDeclinationAction;
 	}
 	
+	/**
+	 * Azione di visualizzazione delle info di una categoria.
+	 */
 	private Action getCategoryInfoMenuAction(Category category) {
 		// Azione di visualizzazione di tutte le info della categoria
 		DialogAction categoryInfoDialogAction = new DialogAction(category.toString(), "Indietro");
