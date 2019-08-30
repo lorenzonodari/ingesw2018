@@ -12,15 +12,18 @@ import it.unibs.ingesw.dpn.model.users.UsersRepository;
 public class ModelTest {
 	EventBoard mockEB = mock(EventBoard.class);
 	UsersRepository mockUR = mock(UsersRepository.class);
-	Model test = new Model(mockEB, mockUR);
+	Model modelTest = new Model(mockEB, mockUR);
+	
 	@Test
 	public void testGetEventBoard() {
-		fail("Not yet implemented");
+		EventBoard eb = modelTest.getEventBoard();
+		assertEquals(mockEB, eb);
 	}
 
 	@Test
 	public void testGetUsersRepository() {
-		fail("Not yet implemented");
+		UsersRepository ur = modelTest.getUsersRepository();
+		assertEquals(mockUR, ur);
 	}
 
 }

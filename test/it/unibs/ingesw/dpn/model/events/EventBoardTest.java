@@ -17,7 +17,7 @@ public class EventBoardTest {
 	public void noEventIsReturned_whenBoardIsEmpty() {
 		
 		EventBoard board = new EventBoard();
-		assertTrue(board.getEvents().size() == 0);
+		assertTrue(board.getEvents().isEmpty());
 		
 	}
 	
