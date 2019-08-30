@@ -469,26 +469,29 @@ public class MenuManager {
 	
 	/**
 	 * Menu di eliminazione delle notifiche.
-	 * Al momento è sbagliato, perché il menu da cui arriva NON si aggiorna.
+	 * L'eliminazione delle notifiche avviene selezionando quelle da cancellare e cliccando sul tasto per confermare.
 	 */
 	private Action getDeleteNotificationsMenu() {
-		// Menu di eliminazione delle notifiche
-		MenuAction deleteNotificationsMenu = new MenuAction("Elimina notifiche", "Seleziona la notifica da eliminare");
-		
-		User currentUser = loginManager.getCurrentUser();
-		
-		// Se l'utente ha delle notifiche
-		if (currentUser.hasNotifications()) {
-			// Per ciascuna notifica
-			for (Notification n : currentUser.getNotifications()) {
-				// Aggiungo l'opzione di cancellazione di tale notifica
-				SimpleAction deleteAction = (userInterface) -> {
-					currentUser.delete(n);
-				};
-				
-				deleteNotificationsMenu.addEntry(n.toString(), deleteAction);
-			}	
+		// Preparo la lista di notifiche e delle relative descrizioni da visualizzare
+		Map<Notification, String> notificationsDescriptions = new LinkedHashMap<>();
+		for (Notification notif : loginManager.getCurrentUser().getNotifications()) {
+			notificationsDescriptions.put(notif, notif.toString());
 		}
+		
+		// Menu di eliminazione delle notifiche
+		CheckboxListMenuAction<Notification> deleteNotificationsMenu = new CheckboxListMenuAction<>(
+				"Elimina notifiche",
+				"Selezione le notifiche da eliminare, quindi seleziona \"Conferma\":",
+				notificationsDescriptions);
+		
+		// Preparo l'azione di eliminazione delle notifiche
+		SimpleAction deleteNotificationsAction = (userInterface) -> {
+			for (Notification notif : deleteNotificationsMenu.getSelectedObjects()) {
+				loginManager.getCurrentUser().delete(notif);
+			}
+		};
+		
+		deleteNotificationsMenu.setBackEntry("Conferma ed elimina le notifiche selezionate", deleteNotificationsAction);
 		
 		return deleteNotificationsMenu;
 	}
