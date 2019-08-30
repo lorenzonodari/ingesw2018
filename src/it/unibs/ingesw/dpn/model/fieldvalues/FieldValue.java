@@ -21,8 +21,7 @@ public interface FieldValue {
 	/**
 	 * Inizializza il valore incapsulato dal FieldValue.
 	 * 
-	 * @param renderer Il renderer da utilizzare
-	 * @param input Il gestore dell'input da utilizzare
+	 * @param userInterface L'interfaccia utente a cui fare affidamento
 	 */
 	public void initializeValue(UserInterface userInterface);
 
