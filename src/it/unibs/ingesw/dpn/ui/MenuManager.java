@@ -16,6 +16,8 @@ import it.unibs.ingesw.dpn.ui.actions.ConfirmAction.OptionStrings;
 import it.unibs.ingesw.dpn.ui.actions.DialogAction;
 import it.unibs.ingesw.dpn.ui.actions.MenuAction;
 import it.unibs.ingesw.dpn.ui.actions.SimpleAction;
+import it.unibs.ingesw.dpn.ui.actions.UpdatingAction;
+import it.unibs.ingesw.dpn.ui.actions.UpdatingMenuAction;
 import it.unibs.ingesw.dpn.model.users.Invite;
 import it.unibs.ingesw.dpn.model.users.LoginManager;
 import it.unibs.ingesw.dpn.model.users.Notification;
@@ -80,7 +82,7 @@ public class MenuManager {
 		
 		// Assistenti alla UI
 		this.builderAssistant = new BuilderUIAssistant(this.userInterface);
-		this.eventManagementAssistant = new EventManagementUIAssistant(this.userInterface, this.model.getEventBoard());
+		this.eventManagementAssistant = new EventManagementUIAssistant(this.model.getEventBoard());
 		
 	}
 	
@@ -189,8 +191,10 @@ public class MenuManager {
 	private Action getBoardMenuAction() {
 		// Menu per la bacheca
 		MenuAction boardMenuAction = new MenuAction("Bacheca", null);
+
+		UpdatingAction eventsViewMenuAction = () -> { return getEventsViewMenuAction();	};
 		
-		boardMenuAction.addEntry("Visualizza eventi aperti", getEventsViewMenuAction());
+		boardMenuAction.addEntry("Visualizza eventi aperti", eventsViewMenuAction);
 		boardMenuAction.addEntry("Visualizza categorie", getCategoriesViewMenuAction());
 		boardMenuAction.addEntry("Proponi evento", getEventCreationAction());
 		
@@ -211,11 +215,19 @@ public class MenuManager {
 	private Action getPersonalSpaceMenuAction() {
 		// Menu dello Spazio Personale
 		MenuAction personalSpaceMenuAction = new MenuAction("Spazio personale", null);
+
+		UpdatingMenuAction notificationsMenuAction = () -> { return (MenuAction) getNotificationsMenuAction(); };
+		personalSpaceMenuAction.addEntry("Notifiche", notificationsMenuAction);
+
+		UpdatingMenuAction invitationsMenuAction = () -> { return (MenuAction) getInvitationsMenuAction(); };
+		personalSpaceMenuAction.addEntry("Inviti", invitationsMenuAction);
+
+		UpdatingMenuAction subscriptionMenuAction = () -> { return (MenuAction) getSubscriptionsMenuAction(); };
+		personalSpaceMenuAction.addEntry("Le mie iscrizioni", subscriptionMenuAction);
+
+		UpdatingMenuAction proposalsMenuAction = () -> { return (MenuAction) getProposalsMenuAction(); };
+		personalSpaceMenuAction.addEntry("Le mie proposte", proposalsMenuAction);
 		
-		personalSpaceMenuAction.addEntry("Notifiche", getNotificationsMenuAction());
-		personalSpaceMenuAction.addEntry("Inviti", getInvitationsMenuAction());
-		personalSpaceMenuAction.addEntry("Le mie iscrizioni", getSubscriptionsMenuAction());
-		personalSpaceMenuAction.addEntry("Le mie proposte", getProposalsMenuAction());
 		personalSpaceMenuAction.addEntry("Modifica profilo", getUserEditingAction());
 		
 		return personalSpaceMenuAction;
@@ -229,9 +241,11 @@ public class MenuManager {
 		MenuAction eventsViewMenuAction = new MenuAction("Lista eventi aperti", null);
 		
 		// Callback per gli eventi
-		for (Event open : model.getEventBoard().getEventsByState(EventState.OPEN)) {
+		for (Event openEvent : model.getEventBoard().getEventsByState(EventState.OPEN)) {
 			// Associo al titolo dell'evento l'azione del menu relativo ad esso
-			eventsViewMenuAction.addEntry(open.getTitle(), getEventManagementMenuAction(open));
+			eventsViewMenuAction.addEntry(
+					openEvent.getTitle(), 
+					this.eventManagementAssistant.getEventManagementMenuAction(openEvent, loginManager.getCurrentUser()));
 		}
 		
 		return eventsViewMenuAction;
@@ -285,7 +299,7 @@ public class MenuManager {
 			// Se sono presenti utenti invitabili
 			if (inviter.getCandidates().size() > 0) {
 				// Preparo l'azione di invito
-				Action invitationsAction = getUserInvitationsMenuAction(inviter);
+				UpdatingMenuAction invitationsAction = () -> { return (MenuAction) getUserInvitationsMenuAction(inviter); };
 				// Inglobo l'azione in un'azione di conferma
 				ConfirmAction confirmInvitationsAction = new ConfirmAction(
 						"Vuoi procedere con l'invio di inviti all'evento?", 
@@ -332,18 +346,18 @@ public class MenuManager {
 		}
 		
 		MenuAction notificationsMenu = new MenuAction("Notifiche Personali", menuContent);
-		notificationsMenu.addEntry("Cancella notifiche", getDeleteNotificationsMenu());
-		// TODO AGGIORNAMENTO DEL MENU
+		
+		// Solo se ho notifiche aggiungo l'opzione per la cancellazione
+		if (currentUser.hasNotifications()) {
+			notificationsMenu.addEntry("Cancella notifiche", getDeleteNotificationsMenu());
+		}
 		
 		return notificationsMenu;
 	}
 	
 	/**
 	 * Menu per la visualizzazione degli inviti.<br>
-	 * Se non sono presenti inviti, il menu presenta la scritta "Nessun invito da visualizzare".
-	 * 
-	 * TODO SOLITO PROBLEMA, SE ACCETTO O RIFIUTO UN INVITO IL MENU NON SI AGGIORNA
-	 * 
+	 * Se non sono presenti inviti, il menu presenta la scritta "Nessun invito da visualizzare". 
 	 */
 	private Action getInvitationsMenuAction() {
 		
@@ -375,7 +389,7 @@ public class MenuManager {
 			// Per ciascuna iscrizione aggiungo un'opzione al menu
 			subscriptionsMenuAction.addEntry(
 					event.getTitle(), 
-					getEventManagementMenuAction(event));
+					this.eventManagementAssistant.getEventManagementMenuAction(event, loginManager.getCurrentUser()));
 		}
 		
 		return subscriptionsMenuAction;
@@ -393,7 +407,11 @@ public class MenuManager {
 		List<Event> proposals = model.getEventBoard().getEventsByAuthor(loginManager.getCurrentUser());
 		for (Event event : proposals) {			
 			// Per ciascuna proposta aggiungo un'opzione al menu
-			proposalsMenuAction.addEntry(event.getTitle(), getEventManagementMenuAction(event));
+			proposalsMenuAction.addEntry(
+					event.getTitle(), 
+					this.eventManagementAssistant.getEventManagementMenuAction(
+							event, 
+							loginManager.getCurrentUser()));
 		}
 		
 		return proposalsMenuAction;
@@ -497,9 +515,9 @@ public class MenuManager {
 	}
 	
 	/**
+	 * Restituisce il menu di conferma per un invito.
 	 * 
-	 * @param invite
-	 * @return
+	 * @param invite L'invito in questione
 	 */
 	private Action getInviteConfirmAction(Invite invite) {
 		// Menu di accettazione		
@@ -516,6 +534,11 @@ public class MenuManager {
 		return inviteMenuAction;
 	}
 
+	/**
+	 * Azione di accettazione dell'invito.
+	 * 
+	 * @param invite L'invito che viene accettato
+	 */
 	private Action getInviteAcceptationAction(Invite invite) {
 		// Azione per l'accettazione dell'invito
 		SimpleAction inviteAcceptationAction = (userInterface) -> {
@@ -527,7 +550,12 @@ public class MenuManager {
 		
 		return inviteAcceptationAction;
 	}
-	
+
+	/**
+	 * Azione di rifiuto dell'invito.
+	 * 
+	 * @param invite L'invito che viene declinato
+	 */
 	private Action getInviteDeclinationAction(Invite invite) {
 		// Azione di cancellazione e declinazione dell'invito
 		SimpleAction inviteDeclinationAction = (userInterface) -> {
@@ -573,20 +601,6 @@ public class MenuManager {
 
 		};
 		return subscriptionAction;
-	}
-	
-	/**
-	 * Restituisce l'azione di gestione evento.
-	 * 
-	 * @param event L'evento in questione
-	 */
-	private Action getEventManagementMenuAction(Event event) {
-		// Creo l'azione
-		SimpleAction eventManagementMenuAction = (userInterface) -> {
-			eventManagementAssistant.manageEvent(event, this.loginManager.getCurrentUser());
-		};	
-		
-		return eventManagementMenuAction;
 	}
 	
 	/**

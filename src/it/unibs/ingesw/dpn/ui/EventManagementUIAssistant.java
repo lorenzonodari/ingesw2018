@@ -9,6 +9,7 @@ import it.unibs.ingesw.dpn.ui.actions.Action;
 import it.unibs.ingesw.dpn.ui.actions.DialogAction;
 import it.unibs.ingesw.dpn.ui.actions.MenuAction;
 import it.unibs.ingesw.dpn.ui.actions.SimpleAction;
+import it.unibs.ingesw.dpn.ui.actions.UpdatingMenuAction;
 
 /**
  * Affianca la classe {@link MenuManager} nella gestione di uno specifico menu
@@ -21,7 +22,6 @@ import it.unibs.ingesw.dpn.ui.actions.SimpleAction;
  */
 public class EventManagementUIAssistant {
 	
-	private UserInterface userInterface;
 	private EventBoard eventBoard;
 	
 	/**
@@ -33,13 +33,12 @@ public class EventManagementUIAssistant {
 	 * @param userInterface L'interfaccia utente attualmente in uso
 	 * @param eventBoard La bacheca attualmente in uso nel programma
 	 */
-	public EventManagementUIAssistant(UserInterface userInterface, EventBoard eventBoard) {
+	public EventManagementUIAssistant(EventBoard eventBoard) {
 		// Verifica delle precondizioni
-		if (userInterface == null || eventBoard == null) {
+		if (eventBoard == null) {
 			throw new IllegalArgumentException("Impossibile istanziare la classe EventManagementUIAssistant con parametri nulli");
 		}
 		
-		this.userInterface = userInterface;
 		this.eventBoard = eventBoard;
 	}
 	
@@ -60,17 +59,18 @@ public class EventManagementUIAssistant {
 	 * @param targetEvent L'evento target da gestire
 	 * @param currentUser L'utente corrente
 	 */
-	public void manageEvent(Event targetEvent, User currentUser) {
+	public Action getEventManagementMenuAction(Event targetEvent, User currentUser) {
 		// Verifica delle precondizioni
 		if (targetEvent == null || currentUser == null) {
 			throw new IllegalArgumentException("Impossibile procedere senza un riferimento valido all'utente corrente o all'evento target");
 		}
 		
 		// Preparo l'azione
-		Action eventManagementMenuAction = this.prepareEventManagementMenuAction(targetEvent, currentUser);
+		UpdatingMenuAction eventManagementMenuAction = () -> {
+			return prepareEventManagementMenuAction(targetEvent, currentUser);
+		};
 		
-		// Eseguo l'azione di gestione dell'evento
-		eventManagementMenuAction.execute(this.userInterface);
+		return eventManagementMenuAction;
 	}
 	
 	/**
@@ -90,7 +90,7 @@ public class EventManagementUIAssistant {
 	 * @param targetEvent L'evento in questione
 	 * @param currentUser L'utente corrente
 	 */
-	private Action prepareEventManagementMenuAction(Event targetEvent, User currentUser) {
+	private MenuAction prepareEventManagementMenuAction(Event targetEvent, User currentUser) {
 		// Verifica delle precondizioni
 		if (targetEvent == null || currentUser == null) {
 			throw new IllegalArgumentException("Impossibile procedere senza un riferimento valido all'utente corrente o all'evento target");
