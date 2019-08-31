@@ -32,6 +32,8 @@ public class TextGetter implements UIGetter {
 	private static final String UPPERBOUND_FLOAT_ERROR = "Il valore %f è superiore al massimo previsto %f";
 	private static final String INVALID_FORMAT_STRING_ERROR = "La stringa \"%s\" non corrisponde al formato atteso";
 
+	private static final float FLOAT_DELTA = 0.000001f;
+	
 	/**
 	 * Crea una nuova istanza di {@link TextGetter}.
 	 * Alla costruzione crea anche un nuovo oggetto UIRenderer per la segnalazione di errori.
@@ -144,12 +146,12 @@ public class TextGetter implements UIGetter {
 						userInput));
 				continue;
 			}			
-			if (parsedValue < min) {
+			if (parsedValue < (min - FLOAT_DELTA)) {
 				renderer.renderError(String.format(
 						LOWERBOUND_FLOAT_ERROR,
 						parsedValue,
 						min));
-			} else if (parsedValue > max) {
+			} else if (parsedValue > (max + FLOAT_DELTA)) {
 				renderer.renderError(String.format(
 						UPPERBOUND_FLOAT_ERROR,
 						parsedValue,
