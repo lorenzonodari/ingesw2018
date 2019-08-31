@@ -15,7 +15,12 @@ import it.unibs.ingesw.dpn.ui.actions.UpdatingMenuAction;
  * Affianca la classe {@link MenuManager} nella gestione di uno specifico menu
  * per la gestione di un evento.
  * Necessita di un riferimento all'interfaccia utente attualmente in uso, più
- * necessariamente il riferimento all'evento in questione.
+ * necessariamente il riferimento all'evento in questione.<br>
+ * <br>
+ * Il menu di gestione (compresi tutti i menu figli, secondo la struttura ad albero)
+ * è creato in modo da essere aggiornato ad ogni visualizzazione, grazie all'utilizzo dell'interfaccia
+ * funzionale {@link UpdatingMenuAction}.
+ *
  * 
  * @author Michele Dusi
  *

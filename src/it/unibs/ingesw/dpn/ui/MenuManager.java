@@ -18,18 +18,14 @@ import it.unibs.ingesw.dpn.ui.actions.MenuAction;
 import it.unibs.ingesw.dpn.ui.actions.SimpleAction;
 import it.unibs.ingesw.dpn.ui.actions.UpdatingAction;
 import it.unibs.ingesw.dpn.ui.actions.UpdatingMenuAction;
-import it.unibs.ingesw.dpn.model.users.Invite;
 import it.unibs.ingesw.dpn.model.users.LoginManager;
-import it.unibs.ingesw.dpn.model.users.Notification;
 import it.unibs.ingesw.dpn.model.users.User;
 import it.unibs.ingesw.dpn.model.categories.Category;
 import it.unibs.ingesw.dpn.model.events.Event;
 import it.unibs.ingesw.dpn.model.events.EventState;
 import it.unibs.ingesw.dpn.model.events.Inviter;
 import it.unibs.ingesw.dpn.model.events.NewEventNotifier;
-import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fields.builder.UserBuilder;
-import it.unibs.ingesw.dpn.model.fieldvalues.UserDependantFieldValue;
 
 /**
  * Classe adibita alla gestione e alla creazione del sistema dei menu.
@@ -37,8 +33,6 @@ import it.unibs.ingesw.dpn.model.fieldvalues.UserDependantFieldValue;
  * agli oggetti del model.
  */
 public class MenuManager {
-	
-	private static final String LIST_ELEMENT_PREFIX = " * ";
 	
 	/** Riferimento all'interfaccia utente */
 	private UserInterface userInterface;
@@ -54,9 +48,12 @@ public class MenuManager {
 	
 	/** Classe per la gestione dei processi di creazione/modifica di User e Event */
 	private BuilderUIAssistant builderAssistant;
-	
+
 	/** Classe per la gestione a livello UI di un evento */
 	private EventManagementUIAssistant eventManagementAssistant;
+	
+	/** Classe per la gestione a livello UI di un evento */
+	private MailboxUIAssistant mailboxAssistant;
 		
 	/**
 	 * Crea un nuovo UIManager utilizzando il renderer dato per la creazione
@@ -83,6 +80,7 @@ public class MenuManager {
 		// Assistenti alla UI
 		this.builderAssistant = new BuilderUIAssistant(this.userInterface);
 		this.eventManagementAssistant = new EventManagementUIAssistant(this.model.getEventBoard());
+		this.mailboxAssistant = new MailboxUIAssistant(this.loginManager);
 		
 	}
 	
@@ -216,11 +214,9 @@ public class MenuManager {
 		// Menu dello Spazio Personale
 		MenuAction personalSpaceMenuAction = new MenuAction("Spazio personale", null);
 
-		UpdatingMenuAction notificationsMenuAction = () -> { return (MenuAction) getNotificationsMenuAction(); };
-		personalSpaceMenuAction.addEntry("Notifiche", notificationsMenuAction);
+		personalSpaceMenuAction.addEntry("Notifiche", this.mailboxAssistant.getNotificationsManagementMenuAction());
 
-		UpdatingMenuAction invitationsMenuAction = () -> { return (MenuAction) getInvitationsMenuAction(); };
-		personalSpaceMenuAction.addEntry("Inviti", invitationsMenuAction);
+		personalSpaceMenuAction.addEntry("Inviti", this.mailboxAssistant.getInvitationsManagementMenuAction());
 
 		UpdatingMenuAction subscriptionMenuAction = () -> { return (MenuAction) getSubscriptionsMenuAction(); };
 		personalSpaceMenuAction.addEntry("Le mie iscrizioni", subscriptionMenuAction);
@@ -320,60 +316,6 @@ public class MenuManager {
 		};
 		
 		return eventCreationAction;		
-	}
-	
-	/**
-	 * Menu delle notifiche.<br>
-	 * Per ciascuna notifica visualizza la entry per la visualizzazione della notifica.
-	 */
-	private Action getNotificationsMenuAction() {
-		// Recupero l'utente corrente
-		User currentUser = loginManager.getCurrentUser();
-		String menuContent = null;
-		
-		if (currentUser.hasNotifications()) {
-			
-			StringBuffer notifications = new StringBuffer();
-			for (Notification n : currentUser.getNotifications()) {
-				notifications.append(LIST_ELEMENT_PREFIX);
-				notifications.append(n.toString());
-				notifications.append("\n");
-			}
-			menuContent = notifications.toString();
-			
-		} else {
-			menuContent = "Nessuna notifica";
-		}
-		
-		MenuAction notificationsMenu = new MenuAction("Notifiche Personali", menuContent);
-		
-		// Solo se ho notifiche aggiungo l'opzione per la cancellazione
-		if (currentUser.hasNotifications()) {
-			notificationsMenu.addEntry("Cancella notifiche", getDeleteNotificationsMenu());
-		}
-		
-		return notificationsMenu;
-	}
-	
-	/**
-	 * Menu per la visualizzazione degli inviti.<br>
-	 * Se non sono presenti inviti, il menu presenta la scritta "Nessun invito da visualizzare". 
-	 */
-	private Action getInvitationsMenuAction() {
-		
-		String menuContent = null;
-		List<Invite> userInvites = loginManager.getCurrentUser().getInvites();
-		if (userInvites.size() == 0) {
-			menuContent = "Nessun invito da visualizzare";
-		}
-		MenuAction invitationsMenuAction = new MenuAction("Inviti ricevuti", menuContent);
-		
-		for (Invite invite : userInvites) {
-			// Aggiunge l'opzione per il menu di gestione dell'invito
-			invitationsMenuAction.addEntry(invite.toString(), getInviteConfirmAction(invite));
-		}
-		
-		return invitationsMenuAction;
 	}
 	
 	/**
@@ -484,124 +426,7 @@ public class MenuManager {
 		
 		return userInvitationsMenuAction;
 	}
-	
-	/**
-	 * Menu di eliminazione delle notifiche.
-	 * L'eliminazione delle notifiche avviene selezionando quelle da cancellare e cliccando sul tasto per confermare.
-	 */
-	private Action getDeleteNotificationsMenu() {
-		// Preparo la lista di notifiche e delle relative descrizioni da visualizzare
-		Map<Notification, String> notificationsDescriptions = new LinkedHashMap<>();
-		for (Notification notif : loginManager.getCurrentUser().getNotifications()) {
-			notificationsDescriptions.put(notif, notif.toString());
-		}
-		
-		// Menu di eliminazione delle notifiche
-		CheckboxListMenuAction<Notification> deleteNotificationsMenu = new CheckboxListMenuAction<>(
-				"Elimina notifiche",
-				"Selezione le notifiche da eliminare, quindi seleziona \"Conferma\":",
-				notificationsDescriptions);
-		
-		// Preparo l'azione di eliminazione delle notifiche
-		SimpleAction deleteNotificationsAction = (userInterface) -> {
-			for (Notification notif : deleteNotificationsMenu.getSelectedObjects()) {
-				loginManager.getCurrentUser().delete(notif);
-			}
-		};
-		
-		deleteNotificationsMenu.setBackEntry("Conferma ed elimina le notifiche selezionate", deleteNotificationsAction);
-		
-		return deleteNotificationsMenu;
-	}
-	
-	/**
-	 * Restituisce il menu di conferma per un invito.
-	 * 
-	 * @param invite L'invito in questione
-	 */
-	private Action getInviteConfirmAction(Invite invite) {
-		// Menu di accettazione		
-		ConfirmAction inviteMenuAction = new ConfirmAction(
-				"Sei stato/a invitato/a al seguente evento:\n\n" 
-						+ invite.getEvent().toString(loginManager.getCurrentUser())
-						+ "\n\nVuoi accettare l'invito ed iscriverti all'evento?",
-				getInviteAcceptationAction(invite));
-		// In caso di rifiuto
-		inviteMenuAction.setCancelAction(getInviteDeclinationAction(invite));
-		// Personalizzazione delle opzioni
-		inviteMenuAction.setOptionStrings(OptionStrings.YES_NO_OPTIONS);
-		
-		return inviteMenuAction;
-	}
 
-	/**
-	 * Azione di accettazione dell'invito.
-	 * 
-	 * @param invite L'invito che viene accettato
-	 */
-	private Action getInviteAcceptationAction(Invite invite) {
-		// Azione per l'accettazione dell'invito
-		SimpleAction inviteAcceptationAction = (userInterface) -> {
-			// Eseguo la procedura di iscrizione
-			getSubscriptionAction(invite.getEvent()).execute(userInterface);
-			// Elimino l'invito
-			loginManager.getCurrentUser().delete(invite);		
-		};
-		
-		return inviteAcceptationAction;
-	}
-
-	/**
-	 * Azione di rifiuto dell'invito.
-	 * 
-	 * @param invite L'invito che viene declinato
-	 */
-	private Action getInviteDeclinationAction(Invite invite) {
-		// Azione di cancellazione e declinazione dell'invito
-		SimpleAction inviteDeclinationAction = (userInterface) -> {
-			loginManager.getCurrentUser().delete(invite); // Cancella l'invito dalla MailBox dell'utente
-			(new DialogAction(
-					"Invito cancellato correttamente.", 
-					"Torna all'elenco degli inviti"))
-			.execute(userInterface);
-		};
-		
-		return inviteDeclinationAction;
-	}
-	
-	/**
-	 * Azione di iscrizione dell'utente corrente all'evento.
-	 * 
-	 * @param targetEvent L'evento in questione
-	 * @return L'azione di iscrizione all'evento come oggetto {@link Action}
-	 */
-	private Action getSubscriptionAction(Event targetEvent) {
-		// Azione di iscrizione ad un evento
-		SimpleAction subscriptionAction = (userInterface) -> {
-			boolean success = targetEvent.subscribe(loginManager.getCurrentUser());
-			// Mostro all'utente il risultato dell'iscrizione
-			DialogAction dialogResult = new DialogAction(
-					success ?
-					"Iscrizione effettuata correttamente." :
-					"Non e' stato possibile registrare correttamente l'iscrizione.\nE' possibile iscriversi solamente entro il \"Termine ultimo di iscrizione\".", 
-					null);
-			dialogResult.execute(userInterface);
-			
-			// Se l'iscrizione non ha avuto successo, termino qui l'azione
-			if (!success) {
-				return;
-			}
-			
-			// Se l'iscrizione ha avuto successo, imposto i valori dipendenti dall'utente
-
-			for (Field f : targetEvent.getUserDependantFields()) {
-				UserDependantFieldValue fieldValue = (UserDependantFieldValue) targetEvent.getFieldValue(f);
-				fieldValue.userCustomization(loginManager.getCurrentUser(), userInterface);
-			}
-
-		};
-		return subscriptionAction;
-	}
 	
 	/**
 	 * Azione di visualizzazione delle info di una categoria.
