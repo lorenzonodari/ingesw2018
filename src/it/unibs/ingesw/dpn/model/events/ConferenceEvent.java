@@ -33,7 +33,13 @@ public class ConferenceEvent extends Event {
 	public float getExpensesForUser(User user) {
 		
 		float baseAmount = super.getExpensesForUser(user);
-		float extras = ((OptionalCostsFieldValue) this.getFieldValue(ConferenceField.SPESE_OPZIONALI)).getExpensesForUser(user);
+		float extras = 0.0f;
+		
+		if (this.hasFieldValue(ConferenceField.SPESE_OPZIONALI)) {
+			
+			extras = ((OptionalCostsFieldValue) this.getFieldValue(ConferenceField.SPESE_OPZIONALI)).getExpensesForUser(user);
+		
+		}
 		
 		return baseAmount + extras;
 	}
