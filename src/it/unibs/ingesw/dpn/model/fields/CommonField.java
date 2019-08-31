@@ -17,26 +17,14 @@ public enum CommonField implements Field, Serializable {
 			"Nome di fantasia attribuito all'evento",
 			false,
 			StringFieldValue.class
-			)
-	{
-		@Override
-		public FieldValue createBlankFieldValue() {
-			return new StringFieldValue();
-		}
-	},
+			),
 	
 	LUOGO (
 			"Luogo",
 			"Il luogo di svolgimento o di ritrovo dell'evento",
 			true,
 			StringFieldValue.class
-			)
-	{
-		@Override
-		public FieldValue createBlankFieldValue() {
-			return new StringFieldValue();
-		}
-	},
+			),
 	
 	DATA_E_ORA (
 			"Data e ora",
@@ -88,10 +76,6 @@ public enum CommonField implements Field, Serializable {
 			}
 		}
 		
-		@Override
-		public FieldValue createBlankFieldValue() {
-			return new DateFieldValue();
-		}
 	},
 	
 	DATA_E_ORA_CONCLUSIVE (
@@ -135,10 +119,6 @@ public enum CommonField implements Field, Serializable {
 			}
 		}
 		
-		@Override
-		public FieldValue createBlankFieldValue() {
-			return new DateFieldValue();
-		}
 	},
 	
 	DURATA (
@@ -162,10 +142,6 @@ public enum CommonField implements Field, Serializable {
 			}
 		}
 		
-		@Override
-		public FieldValue createBlankFieldValue() {
-			return new TimeAmountFieldValue();
-		}
 	},
 
 	TERMINE_ULTIMO_DI_ISCRIZIONE (
@@ -196,10 +172,6 @@ public enum CommonField implements Field, Serializable {
 			}
 		}
 		
-		@Override
-		public FieldValue createBlankFieldValue() {
-			return new DateFieldValue();
-		}
 	},
 	
 	TERMINE_ULTIMO_DI_RITIRO_ISCRIZIONE (
@@ -230,10 +202,6 @@ public enum CommonField implements Field, Serializable {
 			}
 		}
 		
-		@Override
-		public FieldValue createBlankFieldValue() {
-			return new DateFieldValue();
-		}
 	},
 	
 	NUMERO_DI_PARTECIPANTI (
@@ -251,11 +219,6 @@ public enum CommonField implements Field, Serializable {
 			if (integerValue.getValue() < 2) {
 				throw new FieldCompatibilityException("Il numero di partecipanti previsti deve essere almeno 2");
 			}
-		}
-		
-		@Override
-		public FieldValue createBlankFieldValue() {
-			return new IntegerFieldValue();
 		}
 		
 	},
@@ -277,11 +240,6 @@ public enum CommonField implements Field, Serializable {
 			}
 		}
 		
-		@Override
-		public FieldValue createBlankFieldValue() {
-			return new IntegerFieldValue();
-		}
-		
 	},
 	
 	QUOTA_INDIVIDUALE (
@@ -301,11 +259,6 @@ public enum CommonField implements Field, Serializable {
 			}
 		}
 		
-		@Override
-		public FieldValue createBlankFieldValue() {
-			return new MoneyAmountFieldValue();
-		}
-		
 	},
 	
 	COMPRESO_NELLA_QUOTA (
@@ -314,12 +267,7 @@ public enum CommonField implements Field, Serializable {
 			false,
 			StringFieldValue.class
 			)
-	{
-		@Override
-		public FieldValue createBlankFieldValue() {
-			return new StringFieldValue();
-		}
-	},
+	,
 	
 	NOTE (
 			"Note",
@@ -327,12 +275,6 @@ public enum CommonField implements Field, Serializable {
 			false,
 			StringFieldValue.class
 			)
-	{
-		@Override
-		public FieldValue createBlankFieldValue() {
-			return new StringFieldValue();
-		}
-	}
 	
 	;
 

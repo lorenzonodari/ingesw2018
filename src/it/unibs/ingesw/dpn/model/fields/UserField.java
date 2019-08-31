@@ -16,12 +16,7 @@ public enum UserField implements Field {
 			false,
 			StringFieldValue.class
 			)
-	{
-		@Override
-		public FieldValue createBlankFieldValue() {
-			return new StringFieldValue();
-		}
-	},
+	,
 	
 	DATA_DI_NASCITA (
 			"Data di nascita",
@@ -45,11 +40,8 @@ public enum UserField implements Field {
 			}
 		}
 		
-		@Override
-		public FieldValue createBlankFieldValue() {
-			return new LocalDateFieldValue();
-		}
-	},
+	}
+	,
 	
 	CATEGORIE_DI_INTERESSE (
 			"Categorie di interesse",
@@ -58,13 +50,7 @@ public enum UserField implements Field {
 			true,
 			CategoryListFieldValue.class
 			)
-	{
-		@Override
-		public FieldValue createBlankFieldValue() {
-			return new CategoryListFieldValue();
-		}
-	},
-	
+		
 	;
 	
 	/** Parametri */

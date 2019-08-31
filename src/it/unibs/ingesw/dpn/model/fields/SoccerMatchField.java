@@ -12,12 +12,7 @@ public enum SoccerMatchField implements Field {
 			true,
 			GenderFieldValue.class
 			)
-	{
-		@Override
-		public FieldValue createBlankFieldValue() {
-			return new GenderFieldValue();
-		}
-	},
+	,
 	
 	FASCIA_DI_ETA (
 			"Fascia di età",
@@ -38,10 +33,6 @@ public enum SoccerMatchField implements Field {
 			}
 		}
 		
-		@Override
-		public FieldValue createBlankFieldValue() {
-			return new IntegerIntervalFieldValue();
-		}
 	}
 	
 	;

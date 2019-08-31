@@ -69,9 +69,25 @@ public interface Field {
 	/**
 	 * Crea e restituisce un'istanza "vuota" di FieldValue. Con vuota si intende che tale 
 	 * istanza non contiene ancora alcun valore. Affinché tale istanza rappresenti un valore
-	 * effettivo, dovra' quindi essere inizializzata mediante il metodo initializeFieldValue()
+	 * effettivo, dovra' quindi essere inizializzata mediante il metodo initializeFieldValue().<br>
+	 * <br>
+	 * Di default, tale metodo richiama il costruttore vuoto del {@link FieldValue} associato.<br>
+	 * Per come è stato implementato il software, infatti, ogni FieldValue offre un costruttore
+	 * senza parametri.
 	 */
-	public FieldValue createBlankFieldValue();
+	public default FieldValue createBlankFieldValue() {
+		try {
+			return this.getType().newInstance();
+		} catch (InstantiationException e) {
+			// Per come è implementato il SW, questo caso non si verifica
+			e.printStackTrace();
+			return null;
+		} catch (IllegalAccessException e) {
+			// Per come è implementato il SW, questo caso non si verifica
+			e.printStackTrace();
+			return null;
+		}
+	}
 	
 
 	/**
