@@ -137,26 +137,6 @@ public class OptionalCostsFieldValue implements UserDependantFieldValue, Seriali
 	}
 	
 	/**
-	 * Rimuove l'utente da tutte le spese aggiuntive che sta sostenendo.
-	 * 
-	 * Precondizione: user != null
-	 * 
-	 * @param user L'utente da rimuovere da tutte le spese
-	 */
-	public void removeUserFromAllCosts(User user) {
-		// Verifica delle precondizioni
-		if (user == null) {
-			throw new IllegalArgumentException("Impossibile rimuovere un utente nullo");
-		}
-		
-		for (String cost : this.userChoices.keySet()) {
-			if (this.userChoices.get(cost).contains(user)) {
-				this.userChoices.get(cost).remove(user);
-			}
-		}
-	}
-	
-	/**
 	 * Restituisce true se l'utente dato ha deciso di sostenere la spesa data
 	 * 
 	 * Precondizione: user != null && cost != null
@@ -307,7 +287,9 @@ public class OptionalCostsFieldValue implements UserDependantFieldValue, Seriali
 	public void forgetUserCustomization(User user) {
 		
 		for (String cost : this.userChoices.keySet()) {
-			this.userChoices.get(cost).remove(user);
+			if (this.userChoices.get(cost).contains(user)) {
+				this.userChoices.get(cost).remove(user);
+			}
 		}
 		
 	}
