@@ -211,7 +211,9 @@ public class MenuAction implements Action {
 	/**
 	 * Restituisce una lista non modificabile delle voci del menu. L'immutabilita' di
 	 * tale lista, unita all'immutabilita' delle istanze di MenuEntry assicurano che
-	 * non sia possibile per classi esterne modificare i menu.
+	 * non sia possibile per classi esterne modificare i menu.<br>
+	 * <br>
+	 * <em>Nota:</em> L'entry di uscita NON è compresa in questa lista.<br>
 	 * 
 	 * @return Una view non modificabile della lista delle voci del menu
 	 */
