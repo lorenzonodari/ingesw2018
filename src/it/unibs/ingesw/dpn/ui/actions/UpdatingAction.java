@@ -19,8 +19,14 @@ import it.unibs.ingesw.dpn.ui.UserInterface;
  * modificate durante l'esecuzione del programma. In questo modo non viene passata come azione il menu contenente
  * la lista, ma il *processo* di creazione del menu contenente la lista.<br>
  * Essendo un processo qualcosa che può dipendere da parametri o dal contesto in cui è eseguito, è naturale che il risultato
- * ottenuto (ossia -per l'ennesima volta- l'azione da eseguire) può cambiare di volta in volta.
+ * ottenuto (ossia -per l'ennesima volta- l'azione da eseguire) può cambiare di volta in volta.<br>
  * <br>
+ * <em>Nota:</em> Questa interfaccia NON è indicata per l'aggiornamento automatico dei menu, poiché ricostruisce 
+ * l'azione solo quando l'esecuzione di tale azione termina. Per un menu, invece, l'azione non termina finché non viene selezionata
+ * l'opzione di uscita. <br>
+ * Per l'aggiornamento automatico dei menu si consiglia quindi di usare l'apposita interfaccia
+ * {@link UpdatingMenuAction}, che è implementata in modo da ricostruire l'azione menu ({@link MenuAction} ad ogni
+ * selezione dell'utente (senza aspettare l'uscita dal menu).
  * 
  * @author Michele Dusi
  *
