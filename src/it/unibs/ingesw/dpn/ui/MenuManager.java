@@ -8,7 +8,6 @@ import java.util.Set;
 
 import it.unibs.ingesw.dpn.Main;
 import it.unibs.ingesw.dpn.model.persistence.Model;
-import it.unibs.ingesw.dpn.model.users.UsersRepository;
 import it.unibs.ingesw.dpn.ui.actions.Action;
 import it.unibs.ingesw.dpn.ui.actions.CheckboxListMenuAction;
 import it.unibs.ingesw.dpn.ui.actions.ConfirmAction;
@@ -24,7 +23,6 @@ import it.unibs.ingesw.dpn.model.events.Event;
 import it.unibs.ingesw.dpn.model.events.EventState;
 import it.unibs.ingesw.dpn.model.events.Inviter;
 import it.unibs.ingesw.dpn.model.events.NewEventNotifier;
-import it.unibs.ingesw.dpn.model.fields.builder.UserBuilder;
 
 /**
  * Classe adibita alla gestione e alla creazione del sistema dei menu.
@@ -36,23 +34,11 @@ public class MenuManager {
 	/** Riferimento all'interfaccia utente */
 	private UserInterface userInterface;
 	
-	/** Riferimento agli oggetti del Model */
+	/** Riferimento agli oggetti del Model (EventBoard e UserRepository in particolare) */
 	private Model model;
-	
-	/** Riferimento al DB di utenti */
-	private UsersRepository users;
 	
 	/** Classe per la gestione dei login */
 	private LoginManager loginManager;
-	
-	/** Classe per la gestione dei processi di creazione/modifica di User e Event */
-	private BuilderUIAssistant builderAssistant;
-
-	/** Classe per la gestione a livello UI di un evento */
-	private EventManagementUIAssistant eventManagementAssistant;
-	
-	/** Classe per la gestione a livello UI di un evento */
-	private MailboxUIAssistant mailboxAssistant;
 		
 	/**
 	 * Crea un nuovo UIManager utilizzando il renderer dato per la creazione
@@ -73,13 +59,7 @@ public class MenuManager {
 		
 		this.userInterface = userInterface;
 		this.model = model;
-		this.users = model.getUsersRepository();
 		this.loginManager = loginManager;
-		
-		// Assistenti alla UI
-		this.builderAssistant = new BuilderUIAssistant(this.userInterface);
-		this.eventManagementAssistant = new EventManagementUIAssistant(this.model.getEventBoard());
-		this.mailboxAssistant = new MailboxUIAssistant(this.loginManager);
 		
 	}
 	
@@ -118,7 +98,7 @@ public class MenuManager {
 			userInterface.renderer().renderText("Nickname: ");
 			String username = userInterface.getter().getString();
 			// Provo a loggare
-			if (loginManager.login(users, username)) {
+			if (loginManager.login(this.model.getUsersRepository(), username)) {
 				userInterface.renderer().renderTextInFrame("Login effettuato con successo!");
 				getHomeMenuAction().execute(userInterface);
 			} else {
@@ -134,15 +114,18 @@ public class MenuManager {
 	 * Permette ad un utente di iscriversi al social network,
 	 * impostando le proprie informazioni personali tramite i metodi
 	 * della classe {@link BuilderUIAssistant} che si intefracciano con il pattern
-	 * Builder {@link UserBuilder} per la classe {@link User}.
+	 * Builder per la classe {@link User}.
 	 */
 	private Action getRegisterAction() {
 		// Callback Registrazione di un nuovo User
 		SimpleAction registerAction = (userInterface) -> {
+			
+			// Creo un nuovo assistente alla UI per la creazione dell'utente
+			BuilderUIAssistant builderAssistant = new BuilderUIAssistant(this.userInterface);
 			// Creo il nuovo utente
-			User newUser = this.builderAssistant.createUser(users);
+			User newUser = builderAssistant.createUser(this.model.getUsersRepository());
 			// Aggiungo l'utente alla lista di utenti
-			this.users.addUser(newUser);			
+			this.model.getUsersRepository().addUser(newUser);			
 			// Breve messaggio di conferma
 			this.userInterface.renderer().renderTextInFrame("Registrazione completata!");
 		};
@@ -210,12 +193,15 @@ public class MenuManager {
 	 * </ul>
 	 */
 	private Action getPersonalSpaceMenuAction() {
+		// Creo un nuovo assistente alla UI per la gestione della Mailbox (inviti e notifiche)
+		MailboxUIAssistant mailboxAssistant = new MailboxUIAssistant(loginManager);
+		
 		// Menu dello Spazio Personale
 		MenuAction personalSpaceMenuAction = new MenuAction("Spazio personale", null);
 
-		personalSpaceMenuAction.addEntry("Notifiche", this.mailboxAssistant.getNotificationsManagementMenuAction());
+		personalSpaceMenuAction.addEntry("Notifiche", mailboxAssistant.getNotificationsManagementMenuAction());
 
-		personalSpaceMenuAction.addEntry("Inviti", this.mailboxAssistant.getInvitationsManagementMenuAction());
+		personalSpaceMenuAction.addEntry("Inviti", mailboxAssistant.getInvitationsManagementMenuAction());
 
 		UpdatingMenuAction subscriptionMenuAction = () -> { return (MenuAction) getSubscriptionsMenuAction(); };
 		personalSpaceMenuAction.addEntry("Le mie iscrizioni", subscriptionMenuAction);
@@ -233,6 +219,10 @@ public class MenuManager {
 	 * Presenta un'opzione per ciascun evento aperto presente in bacheca.
 	 */
 	private Action getEventsViewMenuAction() {
+		//  Creo un nuovo assistente alla UI per la gestione dell'evento
+		EventManagementUIAssistant eventManagementAssistant = new EventManagementUIAssistant(this.model.getEventBoard());
+		
+		// Menu di visualizzazione
 		MenuAction eventsViewMenuAction = new MenuAction("Lista eventi aperti", null);
 		
 		// Callback per gli eventi
@@ -240,7 +230,7 @@ public class MenuManager {
 			// Associo al titolo dell'evento l'azione del menu relativo ad esso
 			eventsViewMenuAction.addEntry(
 					openEvent.getTitle(), 
-					this.eventManagementAssistant.getEventManagementMenuAction(openEvent, loginManager.getCurrentUser()));
+					eventManagementAssistant.getEventManagementMenuAction(openEvent, loginManager.getCurrentUser()));
 		}
 		
 		return eventsViewMenuAction;
@@ -271,9 +261,12 @@ public class MenuManager {
 	 * oggetti {@link Event}.
 	 */
 	private Action getEventCreationAction() {
+		// Creo un nuovo assistente alla UI per la creazione di un evento
+		BuilderUIAssistant builderAssistant = new BuilderUIAssistant(this.userInterface);
+		
 		// Callback per la proposta di un evento
 		SimpleAction eventCreationAction = (userInterface) -> {
-			Event newEvent = this.builderAssistant.createEvent(loginManager);
+			Event newEvent = builderAssistant.createEvent(loginManager);
 			
 			// Se l'acquisizione è stata annullata
 			if (newEvent == null) {
@@ -321,6 +314,9 @@ public class MenuManager {
 	 * Presenta la lista di eventi a cui un utente è iscritto.<br>
 	 */
 	private Action getSubscriptionsMenuAction() {
+		// Creo un nuovo assistente alla UI per la gestione dell'evento
+		EventManagementUIAssistant eventManagementAssistant = new EventManagementUIAssistant(this.model.getEventBoard());
+			
 		// Menu di gestione delle iscrizioni
 		MenuAction subscriptionsMenuAction = new MenuAction("Le mie iscrizioni", null);
 		
@@ -330,7 +326,7 @@ public class MenuManager {
 			// Per ciascuna iscrizione aggiungo un'opzione al menu
 			subscriptionsMenuAction.addEntry(
 					event.getTitle(), 
-					this.eventManagementAssistant.getEventManagementMenuAction(event, loginManager.getCurrentUser()));
+					eventManagementAssistant.getEventManagementMenuAction(event, loginManager.getCurrentUser()));
 		}
 		
 		return subscriptionsMenuAction;
@@ -341,6 +337,9 @@ public class MenuManager {
 	 * Si avvale dei metodi contenuti nella classe {@link EventManagementUIAssistant}.
 	 */
 	private Action getProposalsMenuAction() {
+		// Creo un nuovo assistente alla UI per la gestione dell'evento
+		EventManagementUIAssistant eventManagementAssistant = new EventManagementUIAssistant(this.model.getEventBoard());
+			
 		// Menu di gestione degli eventi proposti
 		MenuAction proposalsMenuAction = new MenuAction("Le mie proposte", null);
 
@@ -350,7 +349,7 @@ public class MenuManager {
 			// Per ciascuna proposta aggiungo un'opzione al menu
 			proposalsMenuAction.addEntry(
 					event.getTitle(), 
-					this.eventManagementAssistant.getEventManagementMenuAction(
+					eventManagementAssistant.getEventManagementMenuAction(
 							event, 
 							loginManager.getCurrentUser()));
 		}
@@ -363,9 +362,12 @@ public class MenuManager {
 	 * Si avvale dei metodi della classe {@link BuilderUIAssistant}.
 	 */
 	private Action getUserEditingAction() {
+		// Creo un nuovo assistente alla UI per la modifica dell'utente
+		BuilderUIAssistant builderAssistant = new BuilderUIAssistant(this.userInterface);
+		
 		// Callback per la modifica dell'utente
 		SimpleAction userEditingAction = (userInterface) -> {
-			this.builderAssistant.editUser(this.loginManager.getCurrentUser());
+			builderAssistant.editUser(this.loginManager.getCurrentUser());
 			};
 		
 		return userEditingAction;
