@@ -16,7 +16,6 @@ import it.unibs.ingesw.dpn.ui.actions.ConfirmAction.OptionStrings;
 import it.unibs.ingesw.dpn.ui.actions.DialogAction;
 import it.unibs.ingesw.dpn.ui.actions.MenuAction;
 import it.unibs.ingesw.dpn.ui.actions.SimpleAction;
-import it.unibs.ingesw.dpn.ui.actions.UpdatingAction;
 import it.unibs.ingesw.dpn.ui.actions.UpdatingMenuAction;
 import it.unibs.ingesw.dpn.model.users.LoginManager;
 import it.unibs.ingesw.dpn.model.users.User;
@@ -190,7 +189,7 @@ public class MenuManager {
 		// Menu per la bacheca
 		MenuAction boardMenuAction = new MenuAction("Bacheca", null);
 
-		UpdatingAction eventsViewMenuAction = () -> { return getEventsViewMenuAction();	};
+		UpdatingMenuAction eventsViewMenuAction = () -> { return (MenuAction) getEventsViewMenuAction(); };
 		
 		boardMenuAction.addEntry("Visualizza eventi aperti", eventsViewMenuAction);
 		boardMenuAction.addEntry("Visualizza categorie", getCategoriesViewMenuAction());
