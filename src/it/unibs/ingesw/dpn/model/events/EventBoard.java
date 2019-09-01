@@ -7,10 +7,8 @@ import java.util.stream.Collectors;
 import it.unibs.ingesw.dpn.model.users.User;
 
 /**
- * Classe bacheca, ha la funzione di tenere traccia degli eventi e degli utenti
- * che ad essi aderiscono
- * Offre la possibilità di modificare le iscrizioni e di fare ricerche tramite stato
- * sugli eventi
+ * Classe bacheca, ha la funzione di tenere traccia degli eventi attualmente presenti nel Social Network.<br>
+ * Offre la possibilità effettuare ricerche sugli eventi presenti in bacheca secondo differenti criteri.<br>
  * 
  * @author Michele Dusi, Emanuele Poggi, Lorenzo Nodari
  */
@@ -25,54 +23,89 @@ public class EventBoard implements Serializable {
 	
 	/**
 	 * Aggiunge un evento alla lista della bacheca, pubblicandolo e rendendolo visibile a tutti.
-	 * Inoltre, iscrive all'evento lo stesso creatore in maniera automatica.
-	 * 
-	 * Precondizione : L' evento non deve essere nullo. 
+	 * <br>
+	 * Precondizione : L'evento non deve essere nullo.<br>
+	 * Precondizione : L'evento non deve già essere contenuto in bacheca.<br>
+	 * In caso le precondizioni non siano rispettate, questo metodo genera un'eccezione.<br>
+	 * <br>
+	 * <strong>Nota:</strong> è opportuno essere certi che l'evento possa essere pubblicato, 
+	 * altrimenti viene restituito "false".<br>
+	 * Per farlo, è possibile utilizzare il metodo "canBePublished" di {@link Event}.<br>
 	 * 
 	 * @param event L'evento da aggiungere alla bacheca
-	 * @param creator Il creatore dell'evento
+	 * @return "True" se un evento che rispetta le precondizioni è stato aggiunto alla bacheca ed è stato pubblicato.
+	 * "False" se un evento che rispetta le precondizioni NON è stato aggiunto alla bacheca e NON è stato pubblicato
+	 * a causa del suo stato incompatibile.
 	 */
-	public void addEvent(Event event) {
+	public boolean addEvent(Event event) {
 		// verifica precondizione
 		if (event == null) {
-			throw new IllegalStateException();
+			throw new IllegalArgumentException("Impossibile aggiungere un evento nullo");
+		}
+		else if (this.events.contains(event)) {
+			throw new IllegalArgumentException("Impossibile aggiungere un evento già contenuto in bacheca");
+			// Nota: questo errore non dovrebbe potersi mai verificare per come funziona il programma
 		}
 
-		events.add(event);
-		
-		// Comunica all'evento che è stato pubblicato
-		event.publish();
-		
+		if (event.canBePublished()) {
+			
+			// Aggiungo l'evento alla bacheca
+			events.add(event);
+			// Procedo con l'operazione di pubblicazione
+			event.publish();
+			// Restituisco true perché l'operazione è andata a buon fine		
+			return true;
+		}
+		else {
+			return false;
+		}		
 	}
 	
 	/**
 	 * Metodo che rimuove un evento dalla bacheca. Si noti che un evento puo' essere
 	 * rimosso dalla bacheca solo se e' rispettato il valore del suo campo "Termine ultimo di 
-	 * ritiro iscrizione".
+	 * ritiro iscrizione".<br>
+	 * <br>
+	 * Precondizione : L'evento non deve essere nullo.<br>
+	 * Precondizione : L'evento deve già essere contenuto in bacheca.<br>
+	 * In caso le precondizioni non siano rispettate, questo metodo genera un'eccezione.<br>
+	 * <br>
+	 * <strong>Nota:</strong> è opportuno essere certi che l'evento possa essere ritirato, 
+	 * altrimenti viene restituito "false".<br>
+	 * Per farlo, è possibile utilizzare il metodo "canBeWithdrawn" di {@link Event}.<br>
 	 * 
-	 * Precondizione: l'evento deve essere già nella bacheca
-	 * 
-	 * @param evento da rimuovere dalla bacheca
+	 * @param event L'evento da rimuovere dalla bacheca
+	 * @return "True" se un evento che rispetta le precondizioni è stato rimosso dalla bacheca ed è stato ritirato.
+	 * "False" se un evento che rispetta le precondizioni NON è stato rimosso dalla bacheca e NON è stato ritirato
+	 * a causa del suo stato incompatibile.
 	 */
 	public boolean removeEvent(Event event) {
-
 		// Verifica precondizione
 		if (event == null) {
-			throw new IllegalStateException();
+			throw new IllegalArgumentException("Impossibile rimuovere un evento nullo");
+		}
+		else if (!this.events.contains(event)) {
+			throw new IllegalArgumentException("Impossibile rimuovere un evento non contenuto nella bacheca");
+			// Nota: questo errore non dovrebbe potersi mai verificare per come funziona il programma
 		}
 		
-		if (event.withdraw()) {
+		// Ritiro l'evento, se può essere ritirato
+		if (event.canBeWithdrawn()) {
+			
+			// Rimuovo l'evento dalla bacheca
 			events.remove(event);
+			// Procedo con l'operazione di ritiro
+			event.withdraw();
+			// Restituisco true perché l'operazione è andata a buon fine		
 			return true;
 		}
 		else {
 			return false;
 		}
-		
 	}
 	
 	/**
-	 * Resistuisce la lista degli eventi 
+	 * Restituisce la lista degli eventi 
 	 */
 	public List<Event> getEvents(){
 		return events
@@ -168,6 +201,9 @@ public class EventBoard implements Serializable {
 		}
 	}
 	
+	/**
+	 * @return "True" se non sono presenti eventi in bacheca.
+	 */
 	public boolean isEmpty() {
 		return this.events.isEmpty();
 	}

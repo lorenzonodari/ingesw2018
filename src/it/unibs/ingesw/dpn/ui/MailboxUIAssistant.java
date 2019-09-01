@@ -52,6 +52,11 @@ public class MailboxUIAssistant {
 		this.currentUser = loginManager.getCurrentUser();
 	}
 	
+	/**
+	 * Restituisce l'azione di gestione delle notifiche di un utente.
+	 * 
+	 * @return Il menu di gestione delle notifiche.
+	 */
 	public Action getNotificationsManagementMenuAction() {
 		// Aggiorno l'utente corrente
 		this.updateCurrentUser();
@@ -63,7 +68,12 @@ public class MailboxUIAssistant {
 		
 		return notificationsManagementMenuAction;
 	}
-	
+
+	/**
+	 * Restituisce l'azione di gestione degli inviti di un utente.
+	 * 
+	 * @return Il menu di gestione degli inviti.
+	 */
 	public Action getInvitationsManagementMenuAction() {
 		// Aggiorno l'utente corrente
 		this.updateCurrentUser();
@@ -104,7 +114,7 @@ public class MailboxUIAssistant {
 		
 		// Solo se ho notifiche aggiungo l'opzione per la cancellazione
 		if (currentUser.hasNotifications()) {
-			notificationsMenu.addEntry("Cancella notifiche", getDeleteNotificationsMenu());
+			notificationsMenu.addEntry("Cancella notifiche", prepareDeleteNotificationsMenu());
 		}
 		
 		return notificationsMenu;
@@ -115,7 +125,7 @@ public class MailboxUIAssistant {
 	 * Menu di eliminazione delle notifiche.<br>
 	 * L'eliminazione delle notifiche avviene selezionando quelle da cancellare e cliccando sul tasto per confermare.
 	 */
-	private Action getDeleteNotificationsMenu() {
+	private Action prepareDeleteNotificationsMenu() {
 		// Preparo la lista di notifiche e delle relative descrizioni da visualizzare
 		Map<Notification, String> notificationsDescriptions = new LinkedHashMap<>();
 		for (Notification notif : currentUser.getNotifications()) {
@@ -163,7 +173,7 @@ public class MailboxUIAssistant {
 		
 		for (Invite invite : userInvites) {
 			// Aggiunge l'opzione per il menu di gestione dell'invito
-			invitationsMenuAction.addEntry(invite.toString(), getInviteConfirmAction(invite));
+			invitationsMenuAction.addEntry(invite.toString(), prepareInviteConfirmAction(invite));
 		}
 		
 		return invitationsMenuAction;
@@ -174,15 +184,15 @@ public class MailboxUIAssistant {
 	 * 
 	 * @param invite L'invito in questione
 	 */
-	private Action getInviteConfirmAction(Invite invite) {
+	private Action prepareInviteConfirmAction(Invite invite) {
 		// Menu di accettazione		
 		ConfirmAction inviteMenuAction = new ConfirmAction(
 				"Sei stato/a invitato/a al seguente evento:\n\n" 
 						+ invite.getEvent().toString(currentUser)
 						+ "\n\nVuoi accettare l'invito ed iscriverti all'evento?",
-				getInviteAcceptationAction(invite));
+				prepareInviteAcceptationAction(invite));
 		// In caso di rifiuto
-		inviteMenuAction.setCancelAction(getInviteDeclinationAction(invite));
+		inviteMenuAction.setCancelAction(prepareInviteDeclinationAction(invite));
 		// Personalizzazione delle opzioni
 		inviteMenuAction.setOptionStrings(OptionStrings.YES_NO_OPTIONS);
 		
@@ -194,11 +204,11 @@ public class MailboxUIAssistant {
 	 * 
 	 * @param invite L'invito che viene accettato
 	 */
-	private Action getInviteAcceptationAction(Invite invite) {
+	private Action prepareInviteAcceptationAction(Invite invite) {
 		// Azione per l'accettazione dell'invito
 		SimpleAction inviteAcceptationAction = (userInterface) -> {
 			// Eseguo la procedura di iscrizione
-			getSubscriptionAction(invite.getEvent()).execute(userInterface);
+			prepareSubscriptionAction(invite.getEvent(), currentUser).execute(userInterface);
 			// Elimino l'invito
 			currentUser.delete(invite);		
 		};
@@ -211,7 +221,7 @@ public class MailboxUIAssistant {
 	 * 
 	 * @param invite L'invito che viene declinato
 	 */
-	private Action getInviteDeclinationAction(Invite invite) {
+	private Action prepareInviteDeclinationAction(Invite invite) {
 		// Azione di cancellazione e declinazione dell'invito
 		SimpleAction inviteDeclinationAction = (userInterface) -> {
 			currentUser.delete(invite); // Cancella l'invito dalla MailBox dell'utente
@@ -224,34 +234,34 @@ public class MailboxUIAssistant {
 		return inviteDeclinationAction;
 	}
 
-	
+
 	/**
 	 * Azione di iscrizione dell'utente corrente all'evento.
 	 * 
 	 * @param targetEvent L'evento in questione
+	 * @param currentUser L'utente corrente
 	 * @return L'azione di iscrizione all'evento come oggetto {@link Action}
 	 */
-	private Action getSubscriptionAction(Event targetEvent) {
+	private Action prepareSubscriptionAction(Event targetEvent, User currentUser) {
 		// Azione di iscrizione ad un evento
 		SimpleAction subscriptionAction = (userInterface) -> {
-			boolean success = targetEvent.subscribe(currentUser);
-			// Mostro all'utente il risultato dell'iscrizione
-			DialogAction dialogResult = new DialogAction(
-					success ?
-					"Iscrizione effettuata correttamente." :
-					"Non e' stato possibile registrare correttamente l'iscrizione.\nE' possibile iscriversi solamente entro il \"Termine ultimo di iscrizione\".", 
-					null);
-			dialogResult.execute(userInterface);
 			
-			// Se l'iscrizione non ha avuto successo, termino qui l'azione
-			if (!success) {
-				return;
+			// Verifico che l'iscrizione sia ancora possibile
+			if (targetEvent.canSubscribe(currentUser)) {
+
+				targetEvent.subscribe(currentUser);
+				// Mostro all'utente il risultato dell'iscrizione
+				(new DialogAction("Iscrizione effettuata correttamente", null)).execute(userInterface);
+			
+				// Se l'iscrizione ha avuto successo, imposto i valori dipendenti dall'utente
+				for (Field f : targetEvent.getUserDependantFields()) {
+					UserDependantFieldValue fieldValue = (UserDependantFieldValue) targetEvent.getFieldValue(f);
+					fieldValue.userCustomization(currentUser, userInterface);
+				}
 			}
-			
-			// Se l'iscrizione ha avuto successo, imposto i valori dipendenti dall'utente
-			for (Field f : targetEvent.getUserDependantFields()) {
-				UserDependantFieldValue fieldValue = (UserDependantFieldValue) targetEvent.getFieldValue(f);
-				fieldValue.userCustomization(currentUser, userInterface);
+			else {
+				(new DialogAction("Non è stato possibile completare l'iscrizione.\n"
+						+ "Controllare il termine ultimo di iscrizione o il numero massimo di partecipanti.", null)).execute(userInterface);
 			}
 
 		};

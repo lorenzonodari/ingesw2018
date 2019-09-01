@@ -2,7 +2,6 @@ package it.unibs.ingesw.dpn.ui;
 
 import it.unibs.ingesw.dpn.model.events.Event;
 import it.unibs.ingesw.dpn.model.events.EventBoard;
-import it.unibs.ingesw.dpn.model.events.EventState;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fieldvalues.UserDependantFieldValue;
 import it.unibs.ingesw.dpn.model.users.User;
@@ -107,27 +106,23 @@ public class EventManagementUIAssistant {
 		MenuAction eventMenuAction = new MenuAction(
 				"Visualizzazione evento", 
 				targetEvent.toString(currentUser));
+
+		// Verifico che l'evento si possa ritirare
+		if (targetEvent.canBeWithdrawn() && targetEvent.getCreator().equals(currentUser)) {
+			// Aggiungo l'opzione di ritiro
+			eventMenuAction.addEntry("Ritira proposta", prepareWithdrawnAction(targetEvent));
+		}
+
+		// Verifico che l'utente si possa iscrivere all'evento
+		if (targetEvent.canSubscribe(currentUser)) {
+			// Aggiungo l'opzione di iscrizione
+			eventMenuAction.addEntry("Iscriviti", prepareSubscriptionAction(targetEvent, currentUser));
+		}
 		
-		// Se l'evento è creato dall'utente corrente
-		if (currentUser.equals(targetEvent.getCreator())) {
-			
-			// Verifico anche che l'evento si possa ritirare
-			if (targetEvent.getState().equals(EventState.OPEN)) {
-				// Aggiungo l'opzione di ritiro
-				eventMenuAction.addEntry("Ritira proposta", prepareWithdrawnAction(targetEvent));
-			}
-			
-		} 
-		// Altrimenti, se l'evento NON è creato dall'utente corrente
-		else {
-			// Se l'utente corrente è iscritto
-			if (targetEvent.hasSubscriber(currentUser)) {
-				eventMenuAction.addEntry("Disiscriviti", prepareUnsubscriptionAction(targetEvent, currentUser));
-			
-			} // Altrimenti, se l'utente corrente NON è iscritto
-			else {
-				eventMenuAction.addEntry("Iscriviti", prepareSubscriptionAction(targetEvent, currentUser));
-			}
+		// Verifico che l'utente si possa disiscrivere dall'evento
+		if (targetEvent.canUnsubscribe(currentUser)) {
+			// Aggiungo l'opzione di disiscrizione
+			eventMenuAction.addEntry("Disiscriviti", prepareUnsubscriptionAction(targetEvent, currentUser));
 		}
 		
 		return eventMenuAction;
@@ -143,25 +138,23 @@ public class EventManagementUIAssistant {
 	private Action prepareSubscriptionAction(Event targetEvent, User currentUser) {
 		// Azione di iscrizione ad un evento
 		SimpleAction subscriptionAction = (userInterface) -> {
-			boolean success = targetEvent.subscribe(currentUser);
-			// Mostro all'utente il risultato dell'iscrizione
-			DialogAction dialogResult = new DialogAction(
-					success ?
-					"Iscrizione effettuata correttamente." :
-					"Non e' stato possibile registrare correttamente l'iscrizione.\nE' possibile iscriversi solamente entro il \"Termine ultimo di iscrizione\".", 
-					null);
-			dialogResult.execute(userInterface);
 			
-			// Se l'iscrizione non ha avuto successo, termino qui l'azione
-			if (!success) {
-				return;
-			}
-			
-			// Se l'iscrizione ha avuto successo, imposto i valori dipendenti dall'utente
+			// Verifico che l'iscrizione sia ancora possibile
+			if (targetEvent.canSubscribe(currentUser)) {
 
-			for (Field f : targetEvent.getUserDependantFields()) {
-				UserDependantFieldValue fieldValue = (UserDependantFieldValue) targetEvent.getFieldValue(f);
-				fieldValue.userCustomization(currentUser, userInterface);
+				targetEvent.subscribe(currentUser);
+				// Mostro all'utente il risultato dell'iscrizione
+				(new DialogAction("Iscrizione effettuata correttamente", null)).execute(userInterface);
+			
+				// Se l'iscrizione ha avuto successo, imposto i valori dipendenti dall'utente
+				for (Field f : targetEvent.getUserDependantFields()) {
+					UserDependantFieldValue fieldValue = (UserDependantFieldValue) targetEvent.getFieldValue(f);
+					fieldValue.userCustomization(currentUser, userInterface);
+				}
+			}
+			else {
+				(new DialogAction("Non è stato possibile completare l'iscrizione.\n"
+						+ "Controllare il termine ultimo di iscrizione o il numero massimo di partecipanti.", null)).execute(userInterface);
 			}
 
 		};
@@ -178,16 +171,22 @@ public class EventManagementUIAssistant {
 	private Action prepareUnsubscriptionAction(Event targetEvent, User currentUser) {
 		// Azione di disiscrizione da un evento
 		SimpleAction unsubscribeAction = (userInterface) -> {
-			boolean success = targetEvent.unsubscribe(currentUser);
-			// Mostro all'utente il risultato della disiscrizione
-			DialogAction dialogResult = new DialogAction(
-					success ?
-					"Iscrizione rimossa correttamente.\nPuoi iscriverti nuovamente entro il \"Termine ultimo di iscrizione\"." :
-					"Non è stato possibile annullare correttamente l'iscrizione.\nE' possibile disiscriversi solamente entro il \"Termine ultimo di ritiro iscrizione\".", 
-					null);
-			dialogResult.execute(userInterface);		
+			
+			// Verifico che la disiscrizione sia ancora possibile
+			if (targetEvent.canUnsubscribe(currentUser)) {
+
+				targetEvent.unsubscribe(currentUser);
+				// Mostro all'utente il risultato della disiscrizione
+				(new DialogAction("Iscrizione rimossa correttamente.\n"
+						+ "Puoi iscriverti nuovamente entro il \"Termine ultimo di iscrizione\".", null)).execute(userInterface);
+			
+			}
+			else {
+				(new DialogAction("Non è stato possibile annullare correttamente l'iscrizione.\n"
+						+ "È possibile disiscriversi solamente entro il \"Termine ultimo di ritiro iscrizione\".", null)).execute(userInterface);
+			}
+				
 		};
-		
 		return unsubscribeAction;
 	}
 	
@@ -202,16 +201,21 @@ public class EventManagementUIAssistant {
 	private Action prepareWithdrawnAction(Event targetEvent) {
 		// Azione di ritiro di una proposta di evento
 		SimpleAction withdrawAction = (userInterface) -> {
-			boolean success = this.eventBoard.removeEvent(targetEvent);
-			// Mostro all'utente il risultato del ritiro
-			DialogAction dialogResult = new DialogAction(
-					success ?
-					"L'evento è stato annullato correttamente." :
-					"Non è stato possibile ritirare l'evento.\nRiprovare dopo la data \"Termine ultimo di ritiro iscrizione\".",
-					null);
-			dialogResult.execute(userInterface);
+
+			// Verifico che il ritiro dell'evento sia ancora possibile
+			if (targetEvent.canBeWithdrawn()) {
+
+				this.eventBoard.removeEvent(targetEvent);
+				// Mostro all'utente il risultato della rimozione
+				(new DialogAction("L'evento è stato annullato correttamente.", null)).execute(userInterface);
+			
+			}
+			else {
+				(new DialogAction("Non è stato possibile ritirare l'evento.\n"
+						+ "Verificare che non sia già stato ritirato o che non sia fallito.", null)).execute(userInterface);
+			}
+			
 		};
-		
 		return withdrawAction;
 	}
 
