@@ -86,7 +86,6 @@ public class MenuAction implements Action {
 	 * 
 	 * Precondizione: title != null
 	 * Precondizione: action != null
-	 * Precondizione: Il testo dell'entry NON deve essere già presente nel menu
 	 * 
 	 * Postcondizione: this.entries.contains(entry) == true
 	 * 
@@ -99,13 +98,6 @@ public class MenuAction implements Action {
 		// Verifica delle precondizioni
 		if (entryText == null || entryAction == null) {
 			throw new IllegalArgumentException("Impossibile aggiungere una entry con componenti nulle");
-		} else {
-			// Verifico che non esista già una entry con testo uguale
-			for (MenuEntry me : this.entries) {
-				if (me.getName().equals(entryText)) {
-					throw new IllegalArgumentException("Impossibile aggiungere una entry con testo duplicato");
-				}
-			}
 		}
 		
 		MenuEntry entry = new MenuEntry(entryText, entryAction, isTerminatingEntry);
@@ -141,7 +133,6 @@ public class MenuAction implements Action {
 	 * utilizzabile solo all'interno di questo package.
 	 * 
 	 * Precondizione: entry != null<br>
-	 * Precondizione: Non esistono altre entry con lo stesso testo<br>
 	 * 
 	 * Postcondizione: Questo menu contiene la entry passata come parametro<br>
 	 * 
@@ -152,13 +143,6 @@ public class MenuAction implements Action {
 		// Verifica delle precondizioni
 		if (entry == null) {
 			throw new IllegalArgumentException("Impossibile aggiungere una entry nulla");
-		} else {
-			// Verifico che non esista già una entry con testo uguale
-			for (MenuEntry me : this.entries) {
-				if (me.getName().equals(entry.getName())) {
-					throw new IllegalArgumentException("Impossibile aggiungere una entry con testo duplicato");
-				}
-			}
 		}
 		
 		// Aggiungo la entry
