@@ -2,7 +2,6 @@ package it.unibs.ingesw.dpn.model.users;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -19,14 +18,14 @@ public class UsersRepository implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 5696141226031129287L;
-	private LinkedList<User> users; 		// Lista degli utenti registrati
+	private List<User> users; 		// Lista degli utenti registrati
 	
 	/**
 	 * Istanzia un nuovo gestore degli utenti. Alla creazione, tale gestore non avra' alcun utente associato.
 	 */
 	public UsersRepository() {
 		
-		this.users = new LinkedList<>();
+		this.users = new ArrayList<>();
 		
 	}
 	
