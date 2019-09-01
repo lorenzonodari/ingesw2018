@@ -28,9 +28,8 @@ public class Main {
 	public static final File DEFAULT_DATABASE = new File(System.getProperty("user.home"), "socialnetwork.db");
 
 	private static PersistenceManager persistenceManager = null;
-	private static UserInterface userInterface = null;
 	private static MenuManager menuManager = null;
-
+	private static UserInterface userInterface = null;
 	/**
 	 * Metodo di avvio del programma, è il primo ad essere chiamato.
 	 * 
