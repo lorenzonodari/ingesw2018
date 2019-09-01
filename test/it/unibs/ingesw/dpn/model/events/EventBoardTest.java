@@ -43,7 +43,7 @@ public class EventBoardTest {
 		
 		// Mock configuration
 		Event event = mock(Event.class);
-		when(event.withdraw()).thenReturn(true);
+		when(event.canBeWithdrawn()).thenReturn(true);
 		
 		// Test code
 		EventBoard board = new EventBoard();
@@ -59,7 +59,7 @@ public class EventBoardTest {
 		
 		// Mock configuration
 		Event event = mock(Event.class);
-		when(event.withdraw()).thenReturn(false);
+		when(event.canBeWithdrawn()).thenReturn(false);
 		
 		// Test code
 		EventBoard board = new EventBoard();
