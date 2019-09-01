@@ -2,6 +2,7 @@ package it.unibs.ingesw.dpn.ui;
 
 import it.unibs.ingesw.dpn.model.events.Event;
 import it.unibs.ingesw.dpn.model.events.EventBoard;
+import it.unibs.ingesw.dpn.model.events.EventState;
 import it.unibs.ingesw.dpn.model.fields.Field;
 import it.unibs.ingesw.dpn.model.fieldvalues.UserDependantFieldValue;
 import it.unibs.ingesw.dpn.model.users.User;
@@ -109,10 +110,15 @@ public class EventManagementUIAssistant {
 		
 		// Se l'evento è creato dall'utente corrente
 		if (currentUser.equals(targetEvent.getCreator())) {
-			// Aggiungo l'opzione di ritiro
-			eventMenuAction.addEntry("Ritira proposta", prepareWithdrawnAction(targetEvent));
 			
-		} // Altrimenti, se l'evento NON è creato dall'utente corrente
+			// Verifico anche che l'evento si possa ritirare
+			if (targetEvent.getState().equals(EventState.OPEN)) {
+				// Aggiungo l'opzione di ritiro
+				eventMenuAction.addEntry("Ritira proposta", prepareWithdrawnAction(targetEvent));
+			}
+			
+		} 
+		// Altrimenti, se l'evento NON è creato dall'utente corrente
 		else {
 			// Se l'utente corrente è iscritto
 			if (targetEvent.hasSubscriber(currentUser)) {
