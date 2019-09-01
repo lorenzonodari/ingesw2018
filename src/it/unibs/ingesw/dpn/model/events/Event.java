@@ -53,7 +53,7 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 	private static final String STATE_CHANGE_LOG = "Cambio di stato in: %s";
 	private static final String EVENT_SUBSCRIPTION_MESSAGE = "Ti sei iscritto/a correttamente all'evento \"%s\"";
 	private static final String EVENT_UNSUBSCRIPTION_MESSAGE = "Ti sei disiscritto/a correttamente dall'evento \"%s\"";
-	private static final String EVENT_CREATION_MESSAGE = "Hai creato l'evento \"%s\"";
+	private static final String EVENT_CREATION_AND_PUBLICATION_MESSAGE = "L'evento \"%s\" da te creato è stato pubblicato correttamente";
 	
 	/** Stringhe di formattazione */
 	private static final String FIELD_DESCRIPTION_STRING = " | %-50s : %s\n";
@@ -275,7 +275,7 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 	 * Reimposta lo stato corretto dell'evento. Questo metodo DEVE essere invocato su ogni evento
 	 * quando questi sono caricati da disco mediante serializzazione.
 	 */
-	 void resetState() {
+	void resetState() {
 		this.state.resetState(this);
 	}
 	
@@ -289,14 +289,27 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 	}
 	
 	/**
+	 * Indica se l'evento può essere pubblicato nell'istante in cui tale
+	 * metodo viene chiamato ed eseguito.<br>
+	 * Un evento pubblicato può accettare iscrizioni e può poi essere ritirato in futuro.
+	 * 
+	 * @return "True" se l'evento è pronto per essere pubblicato
+	 */
+	public boolean canBePublished() {
+		return this.state.canDoPublication();
+	}
+	
+	/**
 	 * Su decisione dell'utente, questo metodo permette di "pubblicare l'evento".
 	 * La bacheca si occuperà di mostrare l'evento agli altri utenti, mentre l'esecuzione di questo metodo
-	 * comporta il passaggio di stato da VALID a OPEN, se ci si trova nello stato corretto.
-	 * 
+	 * comporta il passaggio di stato da VALID a OPEN, se ci si trova nello stato corretto.<br>
+	 * <br>
 	 * Precondizione: l'evento deve essere nello stato VALID. Se questa non è soddisfatta, il metodo 
-	 * non esegue il passaggio di stato e restituisce false. La verifica della condizione è effettuata
-	 * mediante il pattern "state" e l'utilizzo di metodi di default nell'interfaccia {@link EventState}.
-	 * 
+	 * non esegue il passaggio di stato e restituisce un'eccezione. La verifica della condizione è effettuata
+	 * mediante il pattern "state".<br>
+	 * Per essere certi che questo metodo non generi un'eccezione, è importante verificare che l'evento può subire
+	 * l'operazione di pubblicazione mediante la chiamata di "canBePublished".<br>
+	 * <br>
 	 * Postcondizione: l'evento sarà nello stato OPEN. Questa postcondizione non può essere garantita se l'evento,
 	 * al momento della chiamata del metodo, non si trova nello stato VALID.
 	 * Si noti che, in caso venga chiamato il metodo quando si è già nello stato OPEN, lo stato non verrà modificato
@@ -304,157 +317,214 @@ public abstract class Event extends AbstractFieldable implements Comparable<Even
 	 * 
 	 * @return true se l'evento viene pubblicato, false altrimenti.
 	 */
-	public boolean publish() {
+	public void publish() {
+		// Verifico che sia possibile effettuare la pubblicazione dell'evento
+		if (this.canBePublished()) {
+			this.state.onPublication(this);
+			// Una volta che è stato pubblicato, iscrivo direttamente il creatore all'evento
+			this.subscribe(this.creator);
+		} else {
+			throw new IllegalStateException("Impossibile pubblicare questo evento");
+		}
 		
 		// Comunico all'utente che ha creato l'evento
-		notifyCreator(String.format(EVENT_CREATION_MESSAGE, this.getTitle()));
+		notifyCreator(String.format(EVENT_CREATION_AND_PUBLICATION_MESSAGE, this.getTitle()));
 				
-		try {
-			this.state.onPublication(this);
-			this.subscribe(this.creator);
-			return true;
-		}
-		catch (IllegalStateException e) {
-			return false;
-		}
+	}
+	
+	/**
+	 * Indica se l'evento può essere ritirato ("withdrawn") nell'istante in cui tale
+	 * metodo viene chiamato ed eseguito.<br>
+	 * Un evento ritirato non può più accettare iscrizioni e non verrà svolto.<br>
+	 * Un evento può essere ritirato solamente se è stato già pubblicato e non è ancora
+	 * scaduta la data di svolgimento dello stesso.<br>
+	 * 
+	 * @return "True" se l'evento può essere ritirato
+	 */
+	public boolean canBeWithdrawn() {
+		return this.state.canDoWithdrawal();
 	}
 
 	/**
-	 * Su decisione dell'utente, questo metodo permette di "ritirare l'evento".
+	 * Su decisione dell'utente, questo metodo permette di "ritirare l'evento".<br>
 	 * La bacheca si occuperà di revocare agli utenti la possibilità di visionare l'evento,
 	 * mentre l'esecuzione di questo metodo comporta il passaggio di stato da OPEN a WITHDRAWN,
-	 * se ci si trova nello stato corretto.
-	 * 
+	 * se ci si trova nello stato corretto.<br>
+	 * <br>
 	 * Precondizione: l'evento deve essere nello stato OPEN. Se questa non è soddisfatta, il metodo 
-	 * non esegue il passaggio di stato e restituisce false. La verifica della condizione è effettuata
-	 * mediante il pattern "state" e l'utilizzo di metodi di default nell'interfaccia {@link EventState}.
-	 * 
+	 * non esegue il passaggio di stato e restituisce un'eccezione. La verifica della condizione è effettuata
+	 * mediante il pattern "state".<br>
+	 * <strong>NOTA:</strong> Per essere certi che questo metodo non generi un'eccezione, è importante verificare che l'evento può subire
+	 * l'operazione di ritiro mediante la chiamata di "canBeWithdrawn".<br>
+	 * <br>
 	 * Postcondizione: l'evento sarà nello stato WITHDRAWN. Questa postcondizione non può essere garantita se l'evento,
-	 * al momento della chiamata del metodo, non si trova nello stato OPEN.
+	 * al momento della chiamata del metodo, non si trova nello stato OPEN.<br>
 	 * Si noti che, in caso venga chiamato il metodo quando si è già nello stato WITHDRAWN, lo stato non verrà modificato
-	 * e sarà restituito il valore false. Questo metodo è pertanto idempotente per eventi nello stato WITHDRAWN.
-	 * 
-	 * @return true se l'evento viene ritirato, false altrimenti.
+	 * e sarà restituita un'eccezione.<br>
 	 */
-	public boolean withdraw() {
-		// Qui andranno eventuali azioni aggiuntive al ritiro di un evento
-		try {
+	public void withdraw() {
+		if (this.canBeWithdrawn()) {
 			this.state.onWithdrawal(this);
-			return true;
-		}
-		catch (IllegalStateException e) {
-			return false;
+		} else {
+			throw new IllegalStateException("Impossibile ritirare questo evento");
 		}
 	}
 
 	/**
-	 * Metodo che aggiunge la partecipazione di un utente all'evento.
-	 * La sua funzione non è memorizzare gli utenti iscritti (compito della bacheca), ma tenere traccia
-	 * delle {@link Mailbox} a cui inviare i messaggi di cambiamento di stato dell'evento stesso.
-	 * Questo metodo può scatenare il cambiamento di stato da OPEN a CLOSED se viene raggiunto il numero massimo di
-	 * partecipanti consentito all'evento entro il tempo ultimo di iscrizione.
+	 * Indica se l'evento può accettare l'iscrizione di uno specifico {@link User} nell'istante in cui tale
+	 * metodo viene chiamato ed eseguito.<br>
+	 * Un utente può iscriversi a questo evento solamente se:
+	 * <ul>
+	 * 	<li> Non è già iscritto </li>
+	 * 	<li> L'evento è aperto, cioè se accetta iscrizioni, e non si è ancora svolto </li>
+	 * </ul>
 	 * 
-	 * Precondizione: l'evento deve essere nello stato OPEN. Non è possibile accettare iscrizioni se non si è in
-	 * tale stato. In questo caso il metodo restituirà false.
-	 * 
-	 * Precondizione: l'utente non è ancora iscritto all'evento. In caso si cerchi di iscrivere un utente
-	 * già iscritto, il metodo restituisce false.
-	 * 
-	 * Postcondizione: l'evento sarà nello stato CLOSED in due casi:
-	 * - l'aggiunta del partecipante permette di raggiungere il numero massimo di partecipanti (dato dal numero
-	 *   minimo di partecipanti + la tolleranza).
-	 * - l'aggiunta del partecipante permette di raggiungere il numero minimo di partecipanti e SUCCESSIVAMENTE
-	 *   scade la data "Termine ultimo di iscrizione", anche se non si è raggiunto il numero massimo.
-	 * Questa postcondizione non può essere garantita se l'evento, al momento della chiamata del metodo, 
-	 * non si trova nello stato OPEN.
-	 * 
-	 * @return true se il partecipante viene aggiunto, false altrimenti.
+	 * @param potentialSubscriber L'utente che si vuole verificare se sia iscrivibile
+	 * @return "True" se l'utente può essere iscritto all'evento
 	 */
-	public boolean subscribe(User subscriber) {
-		// Verifica che l'utente non sia già iscritto
-		if (this.partecipants.contains(subscriber)) {
+	public boolean canSubscribe(User potentialSubscriber) {
+		// Verifico che l'utente NON sia già iscritto/a
+		if (this.partecipants.contains(potentialSubscriber)) {
 			return false;
+		} 
+		// Verifico che l'evento accetti iscrizioni
+		else if (!this.state.canDoSubscription()) {
+			return false;
+		}
+		// Se tutto va bene, comunico che l'utente può iscriversi
+		else {
+			return true;
+		}
+	}
+
+	/**
+	 * Metodo che aggiunge la partecipazione di un utente all'evento.<br>
+	 * Questo metodo può scatenare il cambiamento di stato da OPEN a CLOSED se viene raggiunto il numero massimo di
+	 * partecipanti consentito all'evento entro il tempo ultimo di iscrizione.<br>
+	 * <br>
+	 * Precondizione: l'evento deve essere nello stato OPEN. Non è possibile accettare iscrizioni se non si è in
+	 * tale stato. In questo caso il metodo restituirà un'eccezione. <br>
+	 * <br>
+	 * Precondizione: l'utente non è ancora iscritto all'evento. In caso si cerchi di iscrivere un utente
+	 * già iscritto, il metodo restituirò un'eccezione.<br>
+	 * <br>
+	 * <strong>NOTA:</strong> Per essere certi che questo metodo non generi un'eccezione, è importante verificare
+	 * che l'utente può essere iscritto mediante la chiamata di "canSubscribe(User)".<br>
+	 * <br>
+	 * Postcondizione: l'evento sarà nello stato CLOSED in due casi:<br>
+	 * <ul>
+	 * 	<li> l'aggiunta del partecipante permette di raggiungere il numero massimo di partecipanti (dato dal numero
+	 *   minimo di partecipanti + la tolleranza). </li>
+	 * 	<li> l'aggiunta del partecipante permette di raggiungere il numero minimo di partecipanti e SUCCESSIVAMENTE
+	 *   scade la data "Termine ultimo di iscrizione", anche se non si è raggiunto il numero massimo. </li>
+	 * </ul>
+	 * Questa postcondizione non può essere garantita se l'evento, al momento della chiamata del metodo, 
+	 * non si trova nello stato OPEN.<br>
+	 */
+	public synchronized void subscribe(User subscriber) {
+		// Verifica che l'utente possa iscriversi
+		if (!this.canSubscribe(subscriber)) {
+			throw new IllegalStateException("Impossibile iscriversi a questo evento");
 		}
 		
 		// Aggiungo l'iscritto
-			/* Questa operazione va fatta preventivamente, poiché il cambio di stato poco sotto potrebbe provocare 
-			 * l'invio di alcune notifiche. Tali notifiche verrebbero perse se aggiungessi l'utente alla
-			 * mailing list troppo tardi.
-			 */ 
 		this.partecipants.add(subscriber);
-		
-		// Provo ad aggiungere un iscritto, demandando allo stato dell'evento il comportamento adeguato
-		try {
-			this.state.onSubscription(this);
-		}
-		catch (IllegalStateException e) {
-			// In caso di eccezioni, l'iscrizione non può essere effettuata
-			this.partecipants.remove(subscriber);
-			return false;
-		}
 
 		// Se l'utente non e' il creatore, notifica l'utente che l'iscrizione è andata a buon fine
 		if (subscriber != this.creator) {
-			
+			// Notifico l'iscrizione
 			StringBuffer message = new StringBuffer(
 					String.format(
 							EVENT_SUBSCRIPTION_MESSAGE, 
 							this.getTitle()));
+			// Notifico il costo
 			message.append(String.format("; Importo dovuto: %.2f €", this.getExpensesForUser(subscriber)));
-		
+			// Invio il messaggio
 			subscriber.receive(new Notification(message.toString()));
-			
 		}
-		return true;
+		
+		// Notifico lo stato che c'è stata un'iscrizione
+		/*
+		 * NOTA: Quest'istruzione potrebbe generare a sua volta
+		 * un cambio di stato (e quindi un'invio di notifiche).
+		 */
+		this.state.onSubscription(this);
+	}
+
+	/**
+	 * Indica se l'evento può accettare la disiscrizione di uno specifico {@link User} nell'istante in cui tale
+	 * metodo viene chiamato ed eseguito.<br>
+	 * Un utente può disiscriversi a questo evento solamente se:
+	 * <ul>
+	 * 	<li> E' già iscritto </li>
+	 * 	<li> L'evento è aperto, cioè accetta disiscrizioni </li>
+	 * 	<li> Non è scaduto il termine ultimo di disiscrizione </li>
+	 * </ul>
+	 * 
+	 * @param potentialSubscriber L'utente che si vuole verificare se sia disiscrivibile
+	 * @return "True" se l'utente può essere disiscritto dall'evento
+	 */
+	public boolean canUnsubscribe(User potentialUnsubscriber) {
+		// Verifico che l'utente sia già iscritto
+		if (!this.partecipants.contains(potentialUnsubscriber)) {
+			return false;
+		}
+		// Verifico che l'utente NON sia il creatore
+		else if (potentialUnsubscriber.equals(this.creator)) {
+			return false;
+		}
+		// Verifico che lo stato accetti disiscrizioni
+		else if (!this.state.canDoUnsubscription()) {
+			return false;
+		}
+		// Altrimenti, la disiscrizione può essere effettuata
+		else {
+			return true;
+		}
 	}
 	
 	/**
-	 * Metodo che revoca la partecipazione di un utente all'evento.
-	 * L'esecuzione di questo metodo rimuove la mailbox dell'utente che intende disiscriversi dalla lista
-	 * delle mailbox degli iscritti. In questo modo l'utente non riceverà più notifiche di aggiornamento sull'evento.
+	 * Metodo che revoca la partecipazione di un utente all'evento.<br>
+	 * L'utente disiscritto non riceverà più notifiche di aggiornamento sull'evento.<br>
 	 * La disiscrizione di un utente non scatena alcun cambiamento di stato all'interno dell'evento. Tuttavia, se
 	 * si dovesse retrocedere dalla soglia del numero minimo di partecipanti e SUCCESSIVAMENTE scadesse la data del
-	 * "Termine ultimo di iscrizione", allora l'evento passerà nello stato FAILED.
-	 * 
+	 * "Termine ultimo di iscrizione", allora l'evento passerà nello stato FAILED.<br>
+	 * <br>
 	 * Precondizione: l'evento deve essere nello stato OPEN. Non è possibile revocare iscrizioni se non si è in
-	 * tale stato. In questo caso il metodo restituirà false.
-	 * 
+	 * tale stato. In questo caso il metodo restituirà un'eccezione.<br>
+	 * <br>
 	 * Precondizione: l'utente deve essere già iscritto all'evento. In caso si cerchi di revocare l'iscrizione
-	 * di un utente NON iscritto, il metodo restituisce false.
+	 * di un utente NON iscritto, il metodo restituisce un'eccezione.<br>
+	 * <br>
+	 * <strong>NOTA:</strong> Per essere certi che questo metodo non generi un'eccezione, è importante verificare
+	 * che l'utente può essere disiscritto mediante la chiamata di "canUnsubscribe(User)".<br>
+	 * <br>
 	 * 
 	 * @return true se il partecipante viene rimosso dalle iscrizioni, false altrimenti.
 	 */
-	public boolean unsubscribe(User unsubscriber) {
+	public void unsubscribe(User unsubscriber) {
 		// Verifico che l'utente sia già iscritto
-		if (!this.partecipants.contains(unsubscriber) || (this.creator == unsubscriber)) {
-			return false;
-		}
-		
-		// Comunica allo stato che c'è stata una disiscrizione
-		try {
-			this.state.onUnsubscription(this);
-		}
-		catch (IllegalStateException e) {
-			// In caso si verifichino eccezioni, la disiscrizione non può essere effettuata
-			// Esempio: è scaduta la data "Termine ultimo di ritiro iscrizione"
-			return false;
+		if (!this.canUnsubscribe(unsubscriber)) {
+			throw new IllegalStateException("Impossibile disiscriversi da questo evento");
 		}
 
 		// Rimuove l'iscritto dalla mailing list
 		this.partecipants.remove(unsubscriber);
-		
+
+		// Rimuovo le tracce dell'utente dai campi passibili di personalizzazione
 		for (Field field : this.getUserDependantFields()) {
-			
+			// Estraggo da ciascuno il valore FieldValue
 			UserDependantFieldValue fieldValue = (UserDependantFieldValue) this.getFieldValue(field);
 			fieldValue.forgetUserCustomization(unsubscriber);
-			
 		}
-		
+
 		// Notifica l'utente che la disiscrizione è andata a buon fine
 		unsubscriber.receive(new Notification(
 				String.format(EVENT_UNSUBSCRIPTION_MESSAGE, this.getTitle())
 				));
-		return true;
+		
+		// Comunica allo stato che c'è stata una disiscrizione
+		this.state.onUnsubscription(this);
 	}
 	
 	/**

@@ -45,6 +45,62 @@ public interface EventState {
 	 * @param e L'evento a cui si fa riferimento
 	 */
 	public default void onEntry(Event e) {};
+
+	/**
+	 * Informa il metodo chiamante se lo stato corrente accetta o meno l'azione 
+	 * di pubblicazione dell'evento.<br>
+	 * È opportuno chiamare questo metodo prima di "onPublication", poiché in caso 
+	 * l'azione non fosse possibile verrebbe generata un'eccezione.<br>
+	 * <br>
+	 * Di default, questo metodo restituisce "false".
+	 * 
+	 * @return "TRUE" se è possibile completare senza eccezioni l'azione prevista.
+	 */
+	public default boolean canDoPublication() {
+		return false;
+	}
+
+	/**
+	 * Informa il metodo chiamante se lo stato corrente accetta o meno l'azione 
+	 * di ritiro dell'evento.<br>
+	 * È opportuno chiamare questo metodo prima di "onWithdrawal", poiché in caso 
+	 * l'azione non fosse possibile verrebbe generata un'eccezione.<br>
+	 * <br>
+	 * Di default, questo metodo restituisce "false".
+	 * 
+	 * @return "TRUE" se è possibile completare senza eccezioni l'azione prevista.
+	 */
+	public default boolean canDoWithdrawal() {
+		return false;
+	}
+
+	/**
+	 * Informa il metodo chiamante se lo stato corrente accetta o meno l'azione 
+	 * di iscrizione all'evento.<br>
+	 * È opportuno chiamare questo metodo prima di "onSubscription", poiché in caso 
+	 * l'azione non fosse possibile verrebbe generata un'eccezione.<br>
+	 * <br>
+	 * Di default, questo metodo restituisce "false".
+	 * 
+	 * @return "TRUE" se è possibile completare senza eccezioni l'azione prevista.
+	 */
+	public default boolean canDoSubscription() {
+		return false;
+	}
+
+	/**
+	 * Informa il metodo chiamante se lo stato corrente accetta o meno l'azione 
+	 * di disiscrizione dall'evento.<br>
+	 * È opportuno chiamare questo metodo prima di "onUnsubscription", poiché in caso 
+	 * l'azione non fosse possibile verrebbe generata un'eccezione.<br>
+	 * <br>
+	 * Di default, questo metodo restituisce "false".
+	 * 
+	 * @return "TRUE" se è possibile completare senza eccezioni l'azione prevista.
+	 */
+	public default boolean canDoUnsubscription() {
+		return false;
+	}
 	
 	/**
 	 * Metodo di default.
@@ -98,7 +154,7 @@ public interface EventState {
 	 * @param e L'evento al quale si riferisce lo stato
 	 */
 	public default void resetState(Event e) {
-		
+		// DO NOTHING BY DEFAULT
 	}
 
 	/**

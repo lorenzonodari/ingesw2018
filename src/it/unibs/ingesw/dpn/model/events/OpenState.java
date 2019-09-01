@@ -64,6 +64,18 @@ public class OpenState implements EventState, Serializable {
 		this.setTimers(e);
 		
 	}
+
+	/**
+	 * Informa il metodo chiamante se lo stato corrente {@link OpenState} accetta o meno l'azione 
+	 * di ritiro dell'evento.<br>
+	 * È opportuno chiamare questo metodo prima di "onWithdrawal", poiché in caso 
+	 * l'azione non fosse possibile verrebbe generata un'eccezione.<br>
+	 * 
+	 * @return "TRUE" se è possibile completare senza eccezioni l'azione prevista.
+	 */
+	public boolean canDoWithdrawal() {
+		return true;
+	}
 	
 	/**
 	 * Questo metodo modifica lo stato dell'evento in "ritirato".
@@ -74,9 +86,22 @@ public class OpenState implements EventState, Serializable {
 	 */
 	@Override
 	public void onWithdrawal(Event e) {
-		
+		// Cambio lo stato dell'evento
 		e.setState(new WithdrawnState());
-		
+	}
+
+	/**
+	 * Informa il metodo chiamante se lo stato corrente {@link OpenState} accetta o meno l'azione 
+	 * di iscrizione all'evento.<br>
+	 * È opportuno chiamare questo metodo prima di "onSubscription", poiché in caso 
+	 * l'azione non fosse possibile verrebbe generata un'eccezione.<br>
+	 * 
+	 * @return "TRUE" se è possibile completare senza eccezioni l'azione prevista.
+	 */
+	public boolean canDoSubscription() {
+		// Verifico se il numero di partecipanti ha raggiunto il massimo
+		// Se ho ancora posto, restituisco "true"
+		return (this.currentSubscribers < this.maxSubscribers);
 	}
 	
 	/**
@@ -114,6 +139,20 @@ public class OpenState implements EventState, Serializable {
 		}
 		
 	}
+
+	/**
+	 * Informa il metodo chiamante se lo stato corrente {@link OpenState} accetta o meno l'azione 
+	 * di disiscrizione dall'evento.<br>
+	 * È opportuno chiamare questo metodo prima di "onUnsubscription", poiché in caso 
+	 * l'azione non fosse possibile verrebbe generata un'eccezione.<br>
+	 * Nel caso di {@link OpenState}, le disiscrizioni vengono accettate solamente se la data di
+	 * ritiro iscrizione non è ancora scaduta e se (banalmente) esiste almeno un iscritto.
+	 * 
+	 * @return "TRUE" se è possibile completare senza eccezioni l'azione prevista.
+	 */
+	public boolean canDoUnsubscription() {
+		return (this.acceptUnsubscription && this.currentSubscribers > 0);
+	}
 	
 	/**
 	 * Quando si verifica una disiscrizione in un evento OPEN, viene invocato questo metodo.
@@ -130,7 +169,7 @@ public class OpenState implements EventState, Serializable {
 	@Override
 	public void onUnsubscription(Event e) {
 		// Verifico di poter accettare disiscrizioni
-		if (this.acceptUnsubscription) {
+		if (this.canDoUnsubscription()) {
 			this.currentSubscribers--;
 		} else {
 			throw new IllegalStateException("Non è possibile ritirare un'iscrizione in una data successiva a quella del \"Termine ultimo di ritiro iscrizione\"");
