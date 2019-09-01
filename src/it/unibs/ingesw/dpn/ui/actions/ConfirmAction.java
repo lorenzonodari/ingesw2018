@@ -80,6 +80,33 @@ public class ConfirmAction implements Action {
 	}
 	
 	/**
+	 * Restituisce il messaggio da presentare prima delle opzioni.
+	 * 
+	 * @return Il messaggio di questa azione di conferma
+	 */
+	public String getMessage() {
+		return this.message;
+	}
+
+	/**
+	 * Restituisce la stringa di conferma.
+	 * 
+	 * @return La stringa di conferma
+	 */
+	public String getConfirmString() {
+		return this.options.getConfirmString();
+	}
+
+	/**
+	 * Restituisce la stringa di cancella.
+	 * 
+	 * @return La stringa di cancella
+	 */
+	public String getCancelString() {
+		return this.options.getCancelString();
+	}
+
+	/**
 	 * Permette di impostare un'azione da eseguire quando viene selezionata l'opzione di "uscita".<br>
 	 * Anche in questo caso, come nel caso dell'azione di conferma, l'esecuzione provoca la terminazione; 
 	 * in altre parole -a differenza della classe {@link MenuAction}- non viene eseguito alcun ciclo che ripropone
@@ -114,33 +141,6 @@ public class ConfirmAction implements Action {
 		this.options = options;
 	}
 	
-	/**
-	 * Restituisce il messaggio da presentare prima delle opzioni.
-	 * 
-	 * @return Il messaggio di questa azione di conferma
-	 */
-	public String getMessage() {
-		return this.message;
-	}
-
-	/**
-	 * Restituisce la stringa di conferma.
-	 * 
-	 * @return La stringa di conferma
-	 */
-	public String getConfirmString() {
-		return this.options.getConfirmString();
-	}
-
-	/**
-	 * Restituisce la stringa di cancella.
-	 * 
-	 * @return La stringa di cancella
-	 */
-	public String getCancelString() {
-		return this.options.getCancelString();
-	}
-
 	/**
 	 * Esegue l'azione associata a questa {@link ConfirmAction}.
 	 * Questo comprende:

@@ -11,27 +11,6 @@ import it.unibs.ingesw.dpn.ui.actions.MenuAction;
 public interface UIRenderer {
 
 	/**
-	 * Metodo adibito al rendering dell'intero menu.
-	 * 
-	 * @param menu Il menu da renderizzare
-	 */
-	void renderMenu(MenuAction menu);
-
-	/**
-	 * Metodo adibito al rendering di un prompt di conferma.
-	 * 
-	 * @param confirm Il prompt di conferma da renderizzare
-	 */
-	void renderConfirm(ConfirmAction confirm);
-	
-	/**
-	 * Metodo adibito al rendering di una finestra di dialogo.
-	 *
-	 * @param dialog Il prompt di dialogo da renderizzare
-	 */
-	void renderDialog(DialogAction dialog);
-
-	/**
 	 * Renderizza un basilare prompt per indicare all'utente l'acquisizione di un dato.
 	 */
 	void renderEmptyPrompt();
@@ -95,5 +74,26 @@ public interface UIRenderer {
 	 * @param errorText Il messaggio d'errore da visualizzare
 	 */
 	public void renderError(String errorText);
+
+	/**
+	 * Metodo adibito al rendering dell'intero menu.
+	 * 
+	 * @param menu Il menu da renderizzare
+	 */
+	void renderMenu(MenuAction menu);
+
+	/**
+	 * Metodo adibito al rendering di un prompt di conferma.
+	 * 
+	 * @param confirm Il prompt di conferma da renderizzare
+	 */
+	void renderConfirm(ConfirmAction confirm);
+
+	/**
+	 * Metodo adibito al rendering di una finestra di dialogo.
+	 *
+	 * @param dialog Il prompt di dialogo da renderizzare
+	 */
+	void renderDialog(DialogAction dialog);
 
 }

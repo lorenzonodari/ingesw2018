@@ -60,6 +60,31 @@ public class MenuAction implements Action {
 		this.backEntry = new MenuEntry(BACK_ENTRY_TITLE, SimpleAction.EMPTY_ACTION, true);
 	}
 	
+	public String getTitle() {
+		return this.title;
+	}
+
+	public String getDescription() {
+		return this.text;
+	}
+
+	/**
+	 * Restituisce una lista non modificabile delle voci del menu. L'immutabilita' di
+	 * tale lista, unita all'immutabilita' delle istanze di MenuEntry assicurano che
+	 * non sia possibile per classi esterne modificare i menu.<br>
+	 * <br>
+	 * <em>Nota:</em> L'entry di uscita NON è compresa in questa lista.<br>
+	 * 
+	 * @return Una view non modificabile della lista delle voci del menu
+	 */
+	public List<MenuEntry> getEntries() {
+		return Collections.unmodifiableList(this.entries);
+	}
+
+	public MenuEntry getBackEntry() {
+		return this.backEntry;
+	}
+
 	/**
 	 * Imposta l'opzione di uscita del menu in maniera differente da quella standard.
 	 * 
@@ -178,31 +203,6 @@ public class MenuAction implements Action {
 			assert this.entries.contains(entry);
 		}
 		
-	}
-	
-	public String getTitle() {
-		return this.title;
-	}
-	
-	public String getDescription() {
-		return this.text;
-	}
-	
-	public MenuEntry getBackEntry() {
-		return this.backEntry;
-	}
-	
-	/**
-	 * Restituisce una lista non modificabile delle voci del menu. L'immutabilita' di
-	 * tale lista, unita all'immutabilita' delle istanze di MenuEntry assicurano che
-	 * non sia possibile per classi esterne modificare i menu.<br>
-	 * <br>
-	 * <em>Nota:</em> L'entry di uscita NON è compresa in questa lista.<br>
-	 * 
-	 * @return Una view non modificabile della lista delle voci del menu
-	 */
-	public List<MenuEntry> getEntries() {
-		return Collections.unmodifiableList(this.entries);
 	}
 	
 	/**
