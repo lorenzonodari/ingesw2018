@@ -31,9 +31,6 @@ import it.unibs.ingesw.dpn.model.events.NewEventNotifier;
  */
 public class MenuManager {
 	
-	/** Riferimento all'interfaccia utente */
-	private UserInterface userInterface;
-	
 	/** Riferimento agli oggetti del Model (EventBoard e UserRepository in particolare) */
 	private Model model;
 	
@@ -48,16 +45,14 @@ public class MenuManager {
 	 * Precondizione: userInterface != null
 	 * 
 	 * @param model Il gestore dei dati di dominio da utilizzare
-	 * @param userInterface L'interfaccia utente da utilizzare per i menu
 	 */
-	public MenuManager(Model model, UserInterface userInterface, LoginManager loginManager) {
+	public MenuManager(Model model, LoginManager loginManager) {
 		
 		// Verifica della precondizione
-		if (model == null || userInterface == null || loginManager == null) {
+		if (model == null || loginManager == null) {
 			throw new IllegalArgumentException("Impossibile istanziare un nuovo MenuManager con parametri nulli");
 		}
 		
-		this.userInterface = userInterface;
 		this.model = model;
 		this.loginManager = loginManager;
 		
@@ -121,13 +116,13 @@ public class MenuManager {
 		SimpleAction registerAction = (userInterface) -> {
 			
 			// Creo un nuovo assistente alla UI per la creazione dell'utente
-			BuilderUIAssistant builderAssistant = new BuilderUIAssistant(this.userInterface);
+			BuilderUIAssistant builderAssistant = new BuilderUIAssistant(userInterface);
 			// Creo il nuovo utente
 			User newUser = builderAssistant.createUser(this.model.getUsersRepository());
 			// Aggiungo l'utente alla lista di utenti
 			this.model.getUsersRepository().addUser(newUser);			
 			// Breve messaggio di conferma
-			this.userInterface.renderer().renderTextInFrame("Registrazione completata!");
+			userInterface.renderer().renderTextInFrame("Registrazione completata!");
 		};
 		
 		return registerAction;
@@ -260,12 +255,14 @@ public class MenuManager {
 	 * un'interfaccia utente comoda per utilizzare la classe {@link Builder} per creare
 	 * oggetti {@link Event}.
 	 */
-	private Action getEventCreationAction() {
-		// Creo un nuovo assistente alla UI per la creazione di un evento
-		BuilderUIAssistant builderAssistant = new BuilderUIAssistant(this.userInterface);
-		
+	private Action getEventCreationAction() {		
 		// Callback per la proposta di un evento
 		SimpleAction eventCreationAction = (userInterface) -> {
+
+			// Creo un nuovo assistente alla UI per la creazione di un evento
+			BuilderUIAssistant builderAssistant = new BuilderUIAssistant(userInterface);
+			
+			// Eseguo il processo di creazione
 			Event newEvent = builderAssistant.createEvent(loginManager);
 			
 			// Se l'acquisizione è stata annullata
@@ -362,11 +359,12 @@ public class MenuManager {
 	 * Si avvale dei metodi della classe {@link BuilderUIAssistant}.
 	 */
 	private Action getUserEditingAction() {
-		// Creo un nuovo assistente alla UI per la modifica dell'utente
-		BuilderUIAssistant builderAssistant = new BuilderUIAssistant(this.userInterface);
-		
 		// Callback per la modifica dell'utente
 		SimpleAction userEditingAction = (userInterface) -> {
+			// Creo un nuovo assistente alla UI per la modifica dell'utente
+			BuilderUIAssistant builderAssistant = new BuilderUIAssistant(userInterface);
+			
+			// Eseguo il processo di modifica
 			builderAssistant.editUser(this.loginManager.getCurrentUser());
 			};
 		

@@ -50,14 +50,10 @@ public class Main {
 		}
 
 		LoginManager loginManager = new LoginManager();
-				/*
-				 * Attualmente il loginManager viene inizializzato qui, ma potrebbe anche avere senso metterlo
-				 * nel model (che però si prende dal persistenceManager). TODO decidere
-				 */
-		userInterface = new TextUI();
-		menuManager = new MenuManager(persistenceManager.getModel(), userInterface, loginManager);
+		menuManager = new MenuManager(persistenceManager.getModel(), loginManager);
 		
-		// Avvio del menu
+		// Avvio del menu e dell'interfaccia utente
+		userInterface = new TextUI();
 		menuManager.getStartMenuAction().execute(userInterface);
 
 	}
