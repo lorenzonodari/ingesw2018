@@ -9,7 +9,7 @@ import it.unibs.ingesw.dpn.model.users.Invite;
 import it.unibs.ingesw.dpn.model.users.User;
 
 /**
- * Classe controller GRASP adibita alla gestione del processo di invio di inviti agli utenti
+ * Classe adibita alla gestione del processo di invio di inviti agli utenti
  * 
  * @author Emanuele Poggi
  *
