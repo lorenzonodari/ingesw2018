@@ -53,9 +53,6 @@ public interface FieldableBuilder {
 	 * Annulla il processo di creazione o modifica in corso. 
 	 */
 	public void cancel();
-	// TODO: Bisogna decidere se, nel caso del processo di modifica, l'annullamento comporti la cancellazione
-	// di tutto quello fatto o ormai quel che è fatto è fatto.
-	// AKA: Devo sciogliere la transazione??
 	
 	/**
 	 * In qualunque momento durante il processo di creazione o modifica, restituisce la
