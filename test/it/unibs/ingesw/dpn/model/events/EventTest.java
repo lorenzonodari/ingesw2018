@@ -72,26 +72,18 @@ public class EventTest {
 	@Test
 	public void publishTest_whenInCorrectState() {
 		
-		/*
-		 * Ho provato un po' a modificare ma sto solo combinando casini.
-		 * Come faccio??
-		 */
-		
 		// Mocks configuration
-		Event event = this.testEvent;
-		when(event.canBePublished()).thenReturn(true);
-		when(event.canSubscribe(null)).thenReturn(true);
 		EventState initialState = mock(EventState.class);
 		when(initialState.canDoPublication()).thenReturn(true);
 		when(initialState.getStateName()).thenReturn("TEST STATE");
-		event.setState(initialState);
+		when(initialState.canDoSubscription()).thenReturn(true);
 		
-		// Pubblico
+		// Test code
+		Event event = this.testEvent;
+		event.setState(initialState);
 		event.publish();
 		
 		assertTrue(event.hasSubscriber(TestEvent.CREATOR));
-		assertFalse(event.canBePublished());
-		assertEquals(event.getState(), EventState.OPEN);
 		
 	}
 	
@@ -184,134 +176,120 @@ public class EventTest {
 	}
 	
 	@Test
-	public void subscribeTest_firstReturn() throws Exception {
+	public void subscribeTest_whenCanNotDo() throws Exception {
 		
 		// Mocks configuration
 		User user = mock(User.class);
-		
-		// Test code
-		Event event = this.testEvent;
-		Field partecipantsField = Event.class.getDeclaredField("partecipants");
-		partecipantsField.setAccessible(true);
-		
-		@SuppressWarnings("unchecked")
-		List<User> partecipants = (List<User>) partecipantsField.get(event);
-		partecipants.add(user);
-		
-		event.subscribe(user);
-		
-//		assertFalse(success);
-		assertTrue(event.hasSubscriber(user));
-		
-	}
-	
-	@Test
-	public void subscribeTest_secondReturn() {
-		
-		// Mock configurations
-		User user = mock(User.class);
 		EventState state = mock(EventState.class);
 		when(state.getStateName()).thenReturn("TEST STATE");
-		doThrow(new IllegalStateException()).when(state).onSubscription(this.testEvent);
+		when(state.canDoSubscription()).thenReturn(false);
 		
 		// Test code
 		Event event = this.testEvent;
 		event.setState(state);
-		event.subscribe(user);
+
+		try {
+			
+			event.subscribe(user);
 		
-//		assertFalse(success);
-		assertFalse(event.hasSubscriber(user));
+		}
+		catch (IllegalStateException ex) {
+			
+			return;
+		}
+		
+		fail("Questo test dovrebbe generare un'eccezione");
 		
 	}
 	
 	@Test
-	public void subscribeTest_thirdReturn() {
+	public void subscribeTest_whenCanDoAndCreator() {
 		
-		// Mocks configuration
-		User user = mock(User.class);
+		// Mock configurations
+		EventState state = mock(EventState.class);
+		when(state.getStateName()).thenReturn("TEST STATE");
+		when(state.canDoSubscription()).thenReturn(true);
 		
 		// Test code
 		Event event = this.testEvent;
-		event.setFieldValue(CommonField.QUOTA_INDIVIDUALE, new MoneyAmountFieldValue(5.0f));
-//		boolean success = event.subscribe(user);
+		event.setState(state);
+		event.subscribe(TestEvent.CREATOR);
 		
-//		assertTrue(success);
+		verify(TestEvent.CREATOR, never()).receive(isA(Notification.class));
+		assertTrue(event.hasSubscriber(TestEvent.CREATOR));
+		
+	}
+	
+	@Test
+	public void subscribeTest_whenCanDo() {
+		
+		// Mocks configuration
+		User user = mock(User.class);
+		EventState state = mock(EventState.class);
+		when(state.getStateName()).thenReturn("TEST STATE");
+		when(state.canDoSubscription()).thenReturn(true);
+		
+		// Test code
+		Event event = this.testEvent;
+		event.setState(state);
+		event.setFieldValue(CommonField.QUOTA_INDIVIDUALE, new MoneyAmountFieldValue(5.0f));
+		event.subscribe(user);
+		
+		verify(user, times(1)).receive(isA(Notification.class));
 		assertTrue(event.hasSubscriber(user));
 		
 	}
 	
 	@Test
-	public void unsubscribeTest_firstReturn() {
+	public void unsubscribeTest_whenCanDo() throws Exception {
 		
 		// Mocks configuration
-		User notSubscriber = mock(User.class);
-		
-		
-		// Test code
-		Event event = this.testEvent;
-		event.unsubscribe(notSubscriber);
-//		boolean success = event.unsubscribe(notSubscriber);
-		
-//		assertFalse(success);
-//		
-	}
-	
-	@Test
-	public void unsubscribeTest_secondReturn() throws Exception {
-		
-		// Mock configuration
-		User aSubscriber = mock(User.class);
-		EventState wrongState = mock(EventState.class);
-		doThrow(new IllegalStateException()).when(wrongState).onUnsubscription(this.testEvent);
-		when(wrongState.getStateName()).thenReturn("TEST STATE");
-		
-		// Test code
-		Event event = this.testEvent;
-		event.setState(wrongState);
-		
-		Field partecipantsField = Event.class.getDeclaredField("partecipants");
-		partecipantsField.setAccessible(true);
-		@SuppressWarnings("unchecked")
-		List<User> partecipants = (List<User>) partecipantsField.get(event);
-		partecipants.add(aSubscriber);
-		
-//		boolean success = event.unsubscribe(aSubscriber);
-		
-//		assertFalse(success);
-		assertTrue(partecipants.contains(aSubscriber));
-		
-	}
-	
-	@Test
-	public void unsubscribeTest_thirdReturn() throws Exception {
-		
-		// Mock configuration
-		User aSubscriber = mock(User.class);
+		User user = mock(User.class);
 		OptionalCostsFieldValue userDependantField = mock(OptionalCostsFieldValue.class);
-		EventState correctState = mock(EventState.class);
-		when(correctState.getStateName()).thenReturn("TEST STATE");
+		EventState state = mock(EventState.class);
+		when(state.getStateName()).thenReturn("TEST STATE");
+		when(state.canDoUnsubscription()).thenReturn(true);
 		
 		// Test code
-		
-		// Abbiamo bisogno di un evento che contenga userDependantFields per testare
-		// completamente il metodo
 		Event event = new ConferenceEvent(TestEvent.CREATOR);
-		event.setState(correctState);
-		event.setFieldValue(ConferenceField.SPESE_OPZIONALI, userDependantField);
 		event.setFieldValue(CommonField.TITOLO, new StringFieldValue("TEST EVENT"));
+		event.setFieldValue(ConferenceField.SPESE_OPZIONALI, userDependantField);
+		event.setState(state);
 		
-		Field partecipantsField = Event.class.getDeclaredField("partecipants");
+		java.lang.reflect.Field partecipantsField = Event.class.getDeclaredField("partecipants");
 		partecipantsField.setAccessible(true);
-		@SuppressWarnings("unchecked")
 		List<User> partecipants = (List<User>) partecipantsField.get(event);
-		partecipants.add(aSubscriber);
+		partecipants.add(user);
 		
-//		boolean success = event.unsubscribe(aSubscriber);
+		event.unsubscribe(user);
 		
-		verify(aSubscriber, times(1)).receive(isA(Notification.class));
-		verify(userDependantField, times(1)).forgetUserCustomization(aSubscriber);
-		assertFalse(partecipants.contains(aSubscriber));
-//		assertTrue(success);
+		verify(userDependantField, times(1)).forgetUserCustomization(user);
+		verify(user, times(1)).receive(isA(Notification.class));
+		assertFalse(event.hasSubscriber(user));		
+		
+	}
+	
+	@Test
+	public void unsubscribeTest_whenCanNotDo() throws Exception {
+		
+		// Mock configuration
+		User user = mock(User.class);
+		
+		// Test code
+		Event event = this.testEvent;
+		
+		try {
+			
+			event.unsubscribe(user);
+			
+		}
+		catch (IllegalStateException ex) {
+			
+			return;
+			
+		}
+		
+		fail("Questo test dovrebbe sollevare un'eccezione");
 		
 	}
 
