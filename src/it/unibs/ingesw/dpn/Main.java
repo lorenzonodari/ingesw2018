@@ -25,7 +25,7 @@ public class Main {
 	public static final int DB_LOAD_ERROR_EXIT_CODE = 1;
 	public static final int DB_SAVE_ERROR_EXIT_CODE = 2;
 	
-	public static final File DEFAULT_DATABASE = new File(System.getProperty("user.home"), "socialnetwork.db");
+	public static final File DEFAULT_DATABASE = new File(System.getProperty("user.dir"), "socialnetwork_v6.db");
 
 	private static PersistenceManager persistenceManager = null;
 	private static MenuManager menuManager = null;
