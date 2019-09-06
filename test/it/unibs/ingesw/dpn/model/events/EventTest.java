@@ -258,6 +258,7 @@ public class EventTest {
 		
 		java.lang.reflect.Field partecipantsField = Event.class.getDeclaredField("partecipants");
 		partecipantsField.setAccessible(true);
+		@SuppressWarnings("unchecked")
 		List<User> partecipants = (List<User>) partecipantsField.get(event);
 		partecipants.add(user);
 		

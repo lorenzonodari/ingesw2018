@@ -6,7 +6,6 @@ import static org.mockito.Mockito.*;
 import org.junit.Test;
 
 import java.util.Arrays;
-import java.util.Map;
 
 import it.unibs.ingesw.dpn.model.fieldvalues.DateFieldValue;
 import it.unibs.ingesw.dpn.model.fieldvalues.FieldValue;
@@ -18,6 +17,11 @@ public class AbstractFieldableTest {
 	
 	private static class TestFieldable extends AbstractFieldable {
 		
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 138273172L;
+
 		TestFieldable() {
 			super(Arrays.asList(CommonField.values()));
 		}
