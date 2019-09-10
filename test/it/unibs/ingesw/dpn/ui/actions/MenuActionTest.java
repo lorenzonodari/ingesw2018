@@ -171,21 +171,6 @@ public class MenuActionTest {
 		}
 		assertTrue(found);
 	}
-	
-	@Test
-	public void addEntry_withSameName() {
-		MenuAction menu = newMenu();
-		// Creo la nuova entry
-		String entryTitle = randomString();
-		Action entryAction1 = mock(Action.class);
-		Action entryAction2 = mock(Action.class);
-		// Aggiungo l'entry al menu
-		menu.addEntry(entryTitle, entryAction1);
-		// verifico che la seconda aggiunta provochi un'eccezione
-		assertThrows(IllegalArgumentException.class, () -> {
-			menu.addEntry(entryTitle, entryAction2);
-		});
-	}
 
 	@Test
 	public void addEntry_withNullArguments() {
